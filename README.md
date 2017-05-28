@@ -1,24 +1,23 @@
-## VUT FIT Brno
-### Projekty
+## VUT FIT Brno - Projekty
 
-#### **1BIT**
+### **1BIT**
 - IEL
 - IZP
 
-#### **2BIT**
+### **2BIT**
 - INC
 - IOS
 - IVH
 - ITW
 - ITY
 
-#### **3BIT**
+### **3BIT**
 - IAL
 - IFJ
 - INP
 - ISS
 
-#### **4BIT**
+### **4BIT**
 - IDS
 - IJA
 - IPK
