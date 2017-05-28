@@ -1,0 +1,378 @@
+/*============================* GLOBÁLNÍ DEFINICE *=============================*/
+*		{
+		margin: 0;
+		padding: 0;
+		font-family: Verdana, Serif;
+		}
+body	{
+		background: url("images/background.jpg") no-repeat fixed;
+		background-size: cover;
+		height: 100%;
+		}
+.body	{
+		width: 996px;
+		min-height: 940px;
+		padding: 0px 10px;
+		margin: auto;
+		}
+/*==============================* SOCIÁLNÍ SÍTÌ *===============================*/
+#social {    
+		position: absolute; left: 5px; top: 5px;
+		width:215px;
+		height:30px;
+		background: url("images/menu2bg.png") repeat;
+		background-size: 50px 70px; 
+		border-radius: 15px;
+		}
+#social span {
+		display: none;
+		}
+#social p{
+		float: left;
+		color: white;
+		margin: 5px 12px 0px 11px;
+		}
+.twitter, .fb, .linkedin{
+		display: inline-block;
+		width: 22px;
+		height: 22px;
+		border-radius: 13px;
+		margin: 5px 0px 5px 3px;
+		}
+.twitter{
+		background: url("images/twitter.png") no-repeat;
+		}
+.fb		{
+		background: url("images/fb.png") no-repeat;
+		}
+.linkedin{
+		background: url("images/linkedin.png") no-repeat;
+		}	
+/*================================* HORNÍ MENU *================================*/		
+h1 a	{
+		float: left;
+		margin: 10pt 0pt 10pt 160pt;
+		display: inline-block;
+		background-color: white;
+		background: url("images/logo.png") no-repeat;
+		background-size: 100%;
+		width: 500px;
+		height: 150px;
+		}
+h1 span {
+		display:none;
+		}
+#topmenu {
+		clear: both;
+		margin: auto;
+		font-size: 15pt;
+		text-transform: uppercase;
+		}
+#topmenu ul {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+		overflow: hidden;
+		background: url("images/menubg.png") repeat;
+		background-size: 10px 70px;
+		border: solid 1px #0088ff;
+		border-radius: 10px;
+		}
+#topmenu li {
+		float: left;
+		border-right: 1px solid #65c5fc;
+		}
+#topmenu li:last-child {
+		border-right: none;
+		}
+#topmenu li a {
+		display: inline-block;
+		color: white;
+		width: 166px;
+		height: 30px;
+		text-align: center;
+		padding: 14px 16px;
+		padding-top: 22px;
+		text-decoration: none;
+		transition-duration: 0.5s;
+		}
+#topmenu li a:hover{
+		background-color: #65c5fc;
+		font-size: 16pt;
+		}
+#selected{
+		background-color: #65c5fc;
+		font-size: 16pt;
+		}		
+/*================================* BOÈNÍ MENU *================================*/
+#sidemenu{
+		float: right;
+		margin: 0;
+		font-size: 12pt;
+		}
+#sidemenu ul {
+		list-style-type: none;
+		margin: 20px 30px 0px 0px;
+		padding: 0;
+		overflow: hidden;
+		}
+#sidemenu li {
+		float: left;
+		}
+#sidemenu li a {
+		display: inline-block;
+		color: white;
+		width: 150px;
+		height: 35px;
+		background: url("images/menu2bg.png") repeat;
+		background-size: 50px 48px; 
+		border: solid 1px #595959;
+		border-radius: 5px;
+		text-align: center;
+		margin: 0px 0px 0px 10px;
+		padding-top: 12px;
+		text-decoration: none;
+		transition-duration: 0.5s;
+		}
+#sidemenu li a:hover, #sidemenu li a:active{
+		background-color: #595959;
+		background-size: 1px 40px;
+		}
+/*===================================* MAPA *===================================*/	
+#googleMap{
+		width: 520px;
+		height: 500px;
+		border-radius: 5px;
+		margin: 10px 0px;
+		}
+.mainbox a,.mainbox a:visited{
+		font-size: 12pt;
+		color: #ff7b00;
+		}
+/*================================* HLAVNÍ BOX *================================*/
+.mainbox{
+		float: left;
+		width: 600px;
+		min-height: 500px;
+		background-color: white;
+		border-radius: 10px;
+		margin: 20px 0px;
+		border: solid 1px #333;
+		box-shadow: 0 8px 16px 0 rgba(0,0,0,0.3), 0 6px 20px 0 rgba(0,0,0,0.3);
+		}
+.mainbox div, .sidebox div{
+		padding: 20px;
+		}
+.mainbox p, .sidebox p{
+		padding: 10px 0px;
+		}
+.mainbox ul{
+		margin: 10px 0px 5px 50px;
+		}
+.mainbox p{
+		margin-left: 10px;
+		}
+.mainbox h4{
+		margin: 30px 0px 0px 10px;
+		}
+#web	{
+		margin: 20px;
+		}
+.web2	{
+		margin-left: 20px;
+		margin-top: 20px;
+		}
+.webmap	{
+		background-color: #cccbc6;
+		}
+.box1	{
+		float: left;
+		margin: 0px 0px 0px 70px;
+		width: 150px;
+		}
+.box2	{
+		width: 180px;
+		float: right;
+		margin: 0px 90px 0px 0px;
+		}
+.box2 li, .box1 li{
+		margin: 10px 0px 10px 0px;
+		}
+.box1 li a:link, .box2 li a:link{
+		font-size: 15pt;
+		font-style: italic;
+		}
+.seznam	{
+		padding: 5px 0px 0px 25px;
+		}
+.seznam	li{
+		padding-bottom: 5px;
+		}
+.hlavni{
+		font-weight: bold;
+		}
+.hlavni a:link, .hlavni a:visited{
+		text-decoration: none;
+		}
+#foto	{
+		margin-top: 20px;
+		border: solid 2px #333;
+		width: 520px;
+		height: 320px;
+		background-color: #cccbc6;
+		border-radius: 10px;
+		}
+#foto img{
+		width: 500px;
+		height: 300px;
+		border-radius: 10px;
+		margin: 10px 0 0 8px;
+		}
+#arrows	{
+		margin: 0px 0px 0px 150px;
+		}
+#arrows img{
+		width: 43px;
+		height: 33px;
+		margin-right: 120px;
+		}
+#second	{
+		display: none;
+		}
+.mainbox table {
+		margin-top: 20px;
+		width: 100%;
+		border-collapse: collapse;
+		}
+#lazne	{
+		width: 70%;
+		margin: auto;
+		margin-top: 20px;
+		}
+.lazne	{
+		margin-top: 20px;
+		}
+.mainbox table, .mainbox th, .mainbox td {
+		border: 1px solid black;
+		}
+.mainbox th{
+		padding: 10px;
+		text-align: center;
+		background: url("images/menu2bg.png") repeat;
+		background-size: 50px 48px;
+		color: white;
+		} 
+.vrchtab{
+		background-color: #cccbc6;
+		font-weight: bold;
+		font-size: 11pt;
+		}
+.mainbox tr:nth-child(even){
+		background-color: #f2f2f2
+		}
+.mainbox td{
+		padding: 10px;
+		text-align: center;
+		}
+/*===============================* VEDLEJŠÍ BOX *===============================*/		
+.sidebox{
+		float: right;
+		width: 372px;
+		background-color: #cccbc6;
+		border-radius: 10px;
+		border: solid 1px #333;
+		box-shadow: 0 8px 16px 0 rgba(0,0,0,0.3), 0 6px 20px 0 rgba(0,0,0,0.3);
+		margin-top: 20px;
+		font-size: 12pt;
+		}
+.sidebox p{
+		font-size: 11pt;
+		font-style: italic;
+		}
+.sidebox a:link, .sidebox a:visited{
+		color: #ff7b00;
+		}
+.sidebox img{
+		float: right;
+		width: 100px;
+		height: 100px;
+		border-radius: 10px;
+		}
+.udalosti ul{
+		margin: 10px 0px 0px 20px;
+		font-weight: bold;
+		font-size: 11pt;
+		}
+.udalosti p{
+		font-weight: normal;
+		margin: -7px 0px -2px 20px;
+		font-style: italic;
+		}
+.zajimavosti h3{
+		margin: auto;
+		}
+.script	{
+		visibility: hidden;
+		}
+.nadpis {
+		cursor: pointer;
+		visibility: visible;
+		display: block;
+		}
+/*==================================* ZÁPATÍ *==================================*/
+footer 	{
+		position: relative;
+		min-width: 1016px;
+		height: 30px;
+		border-top: solid 1px #333;
+		clear: both;
+		background: url("images/menu2bg.png") repeat;
+		background-size: 50px 70px; 
+		overflow: auto;
+		font-size: 10pt;
+		}
+#copy	{
+		float:left;
+		color: white;
+		margin: 5pt 0pt 0pt 20pt;
+		}
+#autor a, #autor a:visited{
+		color: #ff7b00;
+		}
+#botmenu {
+		float: right;
+		margin: 5pt 20pt 0pt 0pt;
+		color: white;
+		}
+#botmenu li {
+		display: inline-block;
+		text-decoration: none;
+		padding: 0px 10px;
+		}
+#botmenu a:link, #botmenu a:visited {
+		color: white;
+		}
+#WebMap a:link, #WebMap a:visited{
+		color: #ff7b00;
+		text-decoration: none;
+		}
+#pristupnost{
+		font-size: 7pt;
+		color: white;
+		width: 250px;
+		float: left;
+		margin: 4px 0px 0px 15px;
+		}
+#pristupnost span{
+		color: #ff7b00;
+		}
+#seo	{
+		float: right;
+		text-decoration: none;
+		margin: 7px 6px 0px 0px;
+		}
+#seo a, #seo a:visited{
+		color: #ff7b00;
+		text-decoration: none;
+		}
+/*==============================================================================*/		

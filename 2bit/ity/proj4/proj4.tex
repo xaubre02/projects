@@ -1,0 +1,51 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[left=2cm,text={17cm, 24cm},top=3cm]{geometry}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+
+% Česká verze stylu plain upravená tak, aby odpovídala normám.
+% Autor: Ing. Radek Pyšný
+\bibliographystyle{czplain}
+
+\providecommand{\uv}[1]{\quotedblbase #1\textquotedblleft}
+
+\begin{document}
+	\begin{titlepage}
+	\begin{center}
+			{\Huge\textsc{Vysoké učení technické v~Brně}}\\
+			\medskip
+			{\huge\textsc{Fakulta informačních technologií}}\\
+			\vspace{\stretch{0.382}}
+			{\LARGE
+			Typografie a publikování -- 4. projekt}\\
+			\medskip
+			{\Huge Bibliografické citace}\\
+			\vspace{\stretch{0.618}}
+	\end{center}
+	{\Large \today \hfill Tomáš Aubrecht}
+	\pagestyle{plain}
+	\pagenumbering{arabic}
+	\end{titlepage}
+
+	\section*{Typografie}
+	
+	\subsection*{Historie}
+	Typografie je obor zabývající se písmem, který se dělí na dvě části. První, mikrotypografie, se zabývá uměleckou stránkou písma, zatímco druhá část, makrotypografie, se zabývá rozložením textu na stránce a jeho celkovou grafickou úpravou~\cite{Bringhurst:The_Elements_of_Typographic_Style}. Historie typografie sahá do poloviny 15. století, kdy Johannes Gutenberg zprovoznil první knihtisk a díky tomu vznikly první dva druhy písma, a to novogotické a humanistické~\cite{Wiki:Typography}. Více o historii písma se můžete dočíst v diplomové práci Ing. Milana Jiříčka viz~\cite{Jiricek:Font}.
+	
+	I~přesto, že dnes jsou knihy spíše na ústupu, zůstává typografie důležitou a nedílnou součástí našich životů. V~dnešní době získáváme a předáváme informace převážně v~elektronické podobě a i zde nás zajímá, jak výsledný text vypadá~\cite{Rihosek:Webova_grafika}. Například tvůrci webů by se bez ní neobešli. Typografie představuje podstatnou část jejich práce~\cite{Rutter:WebTypography}.
+	
+	\subsection*{Typografie v praxi}
+	Typografie hraje podstatnou roli i na poli značek různých firem. Jsou to jména, návrhy, symboly, písma a barvy, které dohromady vytváří image dané společnosti. Tyto značky by měly být přitažlivé pro lidské oko. Jejich účelem je upoutat pozornost. Pro tvorbu kvalitního loga je zapotřebí kreativního návrháře~\cite{CA:Typography_in_Branding}. O tom, kam se bude tento vývoj ubírat se mužete dočíst například v tomto sborníku viz~\cite{Navratilova:Strojova_civilizace}.
+	
+	\subsection*{Nástroje pro práci s textem}
+	Grafičtí návrháři mají v~současné době luxus v~podobě nezčetného množství nástrojů pro vývoj různých typografických stylů a nových druhů písma. Tento vývoj se ubírá téměř výhradně k~počítačovým technologiím a k~vývoji software pro kvalitní počítačovou sazbu~\cite{CA:Future_of_typography}. Jedním z~těchto nástrojů je \LaTeX. Jedná se o~systém pro profesionální zpracování dokumentů, kdy je pro laika daná syntaxe poněkud složitá, ale po se seznámení se s~makry a šablonami \LaTeX u jde práce od ruky~\cite{Martinek:LaTeX}. Uživatel si je pak může upravovat dle potřeb. Například pro správnou českou citaci vznikl bibliografický styl \emph{czplain} viz~\cite{Pysny:BiBTeX}. Tento styl je založen na stylu \emph{plain} a odpovídá českým normám \emph{ČSN ISO 690}. a \emph{ČSN ISO 690--2}
+	
+	
+	
+	
+	\newpage
+	\bibliography{literatura}
+
+\end{document}

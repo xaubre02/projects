@@ -1,0 +1,176 @@
+#!/bin/sh
+
+###################################### TESTY a PODMINKY ######################################
+export LC_ALL=POSIX
+#nastaveni vyjimky
+EXCEPTION=0xfffffKtoPolak10110111000101110
+#bez parametru
+if [ $# -eq 0 ]; then
+	ROOT=$(pwd)
+fi
+#parametrem je adresar nebo pouze prepinac -i
+if [ $# -eq 1 ]; then
+	if [ $1 = '-i' ]; then
+		ROOT=$(pwd)
+	else
+		ROOT=$1
+	fi
+fi
+#parametrem je prepinac -i a nazev
+if [ $# -eq 2 ]; then
+	if [ $1 = '-i' ]; then
+		EXCEPTION=$2
+		ROOT=$(pwd)
+	else
+		echo Invalid arguments! >&2
+		exit 1
+	fi
+fi
+#parametrem je prepinac -i nazev a adresar
+if [ $# -eq 3 ]; then
+	if [ $1 = '-i' ]; then
+		EXCEPTION=$2
+		ROOT=$3
+	else
+		echo Invalid arguments! >&2
+		exit 1
+	fi
+fi
+#prilis mnoho paramteru
+if [ $# -gt 3 ]; then
+	echo Too many arguments! >&2
+	exit 1
+fi
+#test findu - pristupu apod.
+help=0
+error=0
+find $ROOT -type f 2>$error 1>$help
+if [ $? != 0 ]; then
+	echo An error has occurred! >&2
+	exit 1
+fi
+
+#korenovy adresar v ignoru
+if [ $EXCEPTION = $ROOT ]; then
+	echo "You can't ignore root directory!" >&2
+	exit 1
+fi
+####################################### VYPOCTY A TISK #######################################
+
+#vychozi adresar
+ROOT_DEPTH=$(echo $ROOT | sed 's/\//\\\//g')
+#hloubka adresaru
+DEPTH=$(($(find $ROOT -type d | sed 's/'$ROOT_DEPTH'//g' | sed 's/[^/]//g' | awk '{ print length }'| sort | tail -1)+ 1))
+FILES=$(find $ROOT -type f | egrep -v $EXCEPTION | wc -l | sed 's/ //g')
+DIRECTORIES=$(find $ROOT -type d | egrep -v $EXCEPTION | wc -l | sed 's/ //g')
+AVERAGE_FILE_NUM=$(($FILES / $DIRECTORIES))
+
+if [ $FILES -eq 0 ]; then
+	LARGEST_FILE=N/A
+	AVERAGE_FILE_SIZE=N/A
+	MEDIAN=N/A
+else
+	LARGEST_FILE=$(find $ROOT -type f -ls | egrep -v $EXCEPTION | awk '{print $7}' | sort -n | tail -n 1)
+	
+	# Vypocet celkove velikosti a nasledne prumerne velikosti
+	TOTAL_SIZE=0
+	ALL_SIZES=$(find $ROOT -type f -ls | egrep -v $EXCEPTION | awk '{print $7}' | sort -n)
+
+	for i in $(seq 1 $FILES)
+	do
+		TOTAL_SIZE=$(($TOTAL_SIZE + $(echo $ALL_SIZES | awk '{print $'$i'}')))		
+	done
+	AVERAGE_FILE_SIZE=$(($TOTAL_SIZE / $FILES))
+
+	# Vypocet medianu velikosti
+	if [ $(expr $FILES % 2) -eq 0 ]; then
+		#Sudy pocet souboru
+		a=$(($FILES / 2))
+		a=$(find $ROOT -type f -ls | egrep -v $EXCEPTION | awk '{print $7}' | sort -n|head -$a | tail -1)
+		b=$(($FILES / 2 + 1))
+		b=$(find $ROOT -type f -ls | egrep -v $EXCEPTION | awk '{print $7}' | sort -n|head -$b | tail -1)
+		MEDIAN=$((($a + $b) / 2))
+	else
+		#Lichy pocet souboru
+		a=$(($FILES / 2 + 1))
+		MEDIAN=$(find $ROOT -type f -ls | egrep -v $EXCEPTION | awk '{print $7}' | sort -n|head -$a | tail -1)
+	fi
+fi
+
+#"Pole" s priponami souboru
+EXTENSIONS=$(find $ROOT -type f -ls | egrep -v $EXCEPTION | awk '{print $(NF)}' | sed 's/.*\///g' | cut -c 2- | grep '\.' | sed 's/.*\.//g' | grep "^[-0-9a-zA-Z]*$" | sort | uniq)
+#oddeleni jednotlivych pripon carkami
+EX_SORTED=$(echo $EXTENSIONS | sed 's/ /,/g')
+#odstraneni mezer
+DIRECTORIES=$(echo $DIRECTORIES | sed 's/ //g')
+DEPTH=$(echo $DEPTH | sed 's/ //g')
+AVERAGE_FILE_NUM=$(echo $AVERAGE_FILE_NUM | sed 's/ //g')
+FILES=$(echo $FILES | sed 's/ //g')
+LARGEST_FILE=$(echo $LARGEST_FILE | sed 's/ //g')
+AVERAGE_FILE_SIZE=$(echo $AVERAGE_FILE_SIZE | sed 's/ //g')
+MEDIAN=$(echo $MEDIAN | sed 's/ //g')
+
+	
+#Textovy report
+echo "Root directory: "$ROOT
+echo "Directories: "$DIRECTORIES
+echo "Max depth: "$DEPTH
+echo "Average no. of files: "$AVERAGE_FILE_NUM
+echo "All files: "$FILES
+echo "  Largest file: "$LARGEST_FILE
+echo "  Average file size: "$AVERAGE_FILE_SIZE
+echo "  File size median: "$MEDIAN
+echo "File extensions:" $EX_SORTED
+	
+#pocet ruznych koncovek
+EXTENSIONS_NUM=$(find $ROOT -type f -ls | egrep -v $EXCEPTION | awk '{print $(NF)}' | sed 's/.*\///g' | cut -c 2- | grep '\.' | sed 's/.*\.//g' | grep "^[-0-9a-zA-Z]*$" | sort | uniq | wc -l)
+
+if [ $EXTENSIONS_NUM -ne 0 ]; then
+	for i in $(seq 1 $EXTENSIONS_NUM)
+	do
+		#pocet koncovek stejneho typu
+		EXTENSION_TYPE_NUM=$(find $ROOT -type f -name *.$(echo $EXTENSIONS | awk '{print $'$i'}') | egrep -v $EXCEPTION  | wc -l)
+
+		#nejvetsi velikost koncovky daneho typu
+		LARGEST_EXTENSION_SIZE=$(find $ROOT -type f -name *.$(echo $EXTENSIONS| awk '{print $'$i'}') -ls  | egrep -v $EXCEPTION | awk '{print $7}' | sort -n | tail -n 1)
+		
+		#velikosti koncovek daneho typu
+		EXTENSIONS_SIZES=$(find $ROOT -type f -name *.$(echo $EXTENSIONS | awk '{print $'$i'}') -ls | egrep -v $EXCEPTION  | awk '{print $7}' | sort -n)
+		
+		#soucet velikosti dane koncovky
+		TOTAL_EXTENSIONS_SIZE=0
+		
+		for a in $(seq 1 $EXTENSION_TYPE_NUM)
+		do
+			TOTAL_EXTENSIONS_SIZE=$(($TOTAL_EXTENSIONS_SIZE + $(echo $EXTENSIONS_SIZES | awk '{print $'$a'}')))
+		done
+		
+		#prumerna velikost koncovky
+		AVERAGE_EXTENSIONS_SIZE=$(($TOTAL_EXTENSIONS_SIZE / $EXTENSION_TYPE_NUM))
+
+		if [ $(expr $EXTENSION_TYPE_NUM % 2) -eq 0 ]; then
+			#Sudy pocet souboru
+			a=$(($EXTENSION_TYPE_NUM / 2))
+			a=$(find $ROOT -type f -name *.$(echo $EXTENSIONS | awk '{print $'$i'}') -ls | egrep -v $EXCEPTION  | awk '{print $7}' | sort -n|head -$a | tail -1)
+			b=$(($EXTENSION_TYPE_NUM / 2 + 1))
+			b=$(find $ROOT -type f -name *.$(echo $EXTENSIONS | awk '{print $'$i'}') -ls | egrep -v $EXCEPTION | awk '{print $7}' | sort -n|head -$b | tail -1)
+			EXTENSIONS_MEDIAN=$((($a + $b) / 2))
+
+		else
+			#Lichy pocet souboru
+			a=$(($EXTENSION_TYPE_NUM / 2 + 1))
+			EXTENSIONS_MEDIAN=$(find $ROOT -type f -name *.$(echo $EXTENSIONS | awk '{print $'$i'}') -ls | egrep -v $EXCEPTION | awk '{print $7}' | sort -n|head -$a | tail -1)
+		fi
+				
+		#odstraneni mezer
+		EXTENSION_TYPE_NUM=$(echo $EXTENSION_TYPE_NUM | sed 's/ //g')
+		LARGEST_EXTENSION_SIZE=$(echo $LARGEST_EXTENSION_SIZE | sed 's/ //g')
+		AVERAGE_EXTENSIONS_SIZE=$(echo $AVERAGE_EXTENSIONS_SIZE | sed 's/ //g')
+		EXTENSIONS_MEDIAN=$(echo $EXTENSIONS_MEDIAN | sed 's/ //g')
+				
+		echo "Files .$(echo $EXTENSIONS | awk '{print $'$i'}'): "$EXTENSION_TYPE_NUM
+		echo "  Largest file .$(echo $EXTENSIONS | awk '{print $'$i'}'): "$LARGEST_EXTENSION_SIZE
+		echo "  Average file size .$(echo $EXTENSIONS | awk '{print $'$i'}'): "$AVERAGE_EXTENSIONS_SIZE
+		echo "  File size median .$(echo $EXTENSIONS | awk '{print $'$i'}'): "$EXTENSIONS_MEDIAN	
+	done
+fi

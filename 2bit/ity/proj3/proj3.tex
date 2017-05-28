@@ -1,0 +1,231 @@
+\documentclass[a4paper, 11pt]{article}
+\usepackage[left=2cm,text={17cm, 24cm},top=3cm]{geometry}
+\usepackage[czech]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{picture}
+\usepackage{pict2e}
+\usepackage{multirow}
+\usepackage[linesnumbered,czech,longend,ruled,noline]{algorithm2e}
+\usepackage{algorithmic}
+\usepackage{pdflscape}
+
+\providecommand{\uv}[1]{\quotedblbase #1\textquotedblleft}
+
+\begin{document}
+	\begin{titlepage}
+	\begin{center}
+			{\Huge\textsc{Vysoké učení technické v~Brně}}\\
+			\medskip
+			{\huge\textsc{Fakulta informačních technologií}}\\
+			\vspace{\stretch{0.382}}
+			{\LARGE
+			Typografie a publikování -- 3. projekt}\\
+			\medskip
+			{\Huge Tabulky a obrázky}\\
+			\vspace{\stretch{0.618}}
+	\end{center}
+	{\Large \today \hfill Tomáš Aubrecht}
+	\pagestyle{plain}
+	\pagenumbering{arabic}
+	\end{titlepage}
+
+
+
+	\section{Úvodní strana}
+	Název práce umístěte do zlatého řezu a nezapomeňte uvést dnešní datum a vaše jméno a příjmení.
+	
+	\section{Tabulky}
+	Pro sázení tabulek můžeme použít buď prostředí\texttt{ tabbing }nebo prostředí\texttt{ tabular}.
+	
+	\subsection{Prostředí\texttt{ tabbing}}
+	Při použití\texttt{ tabbing }vypadá tabulka následovně:
+	
+		\begin{tabbing}
+			Vodní melouny \quad\= \textbf{Cena} \quad\= \textbf{Množství} \kill
+			\textbf{Ovoce} \> \textbf{Cena} \> \textbf{Množství}\\
+			Jablka \> 25,90 \> 3 kg\\
+			Hrušky \> 27,40 \> 2,5 kg\\
+			Vodní melouny \> 35,-- \> 1 kus\\
+		\end{tabbing}
+	Toto prostředí se dá také použít pro sázení algoritmů, ovšem vhodnější je použít 
+	prostředí\texttt{ algorithm }nebo\texttt{ algorithm2e }(viz sekce \ref{sec:Algoritmy}).
+
+	\subsection{Prostředí\texttt{ tabular}}
+	Další možností, jak vytvořit tabulku, je použít prostředí\texttt{ tabular}. Tabulky pak 
+	budou vypadat takto\footnote{Kdyby byl problem s\texttt{ cline,} zkuste se podívat třeba sem: http://www.abclinuxu.cz/tex/poradna/show/325037}: \\
+		
+		\begin{table}[ht]
+		\begin{center}	
+			\begin{tabular}{|l|r|r|}
+			\hline
+					 &\multicolumn{2}{c|}{ \textbf{Cena}} \\
+			\cline{2-3}
+			\textbf{Měna} & \textbf{nákup} & \textbf{prodej}\\
+			\hline
+				EUR	 & 27,34 & 27,42\\
+				GBP	 & 33,09 & 33,21\\
+				USD	 & 19,87 & 19,95\\
+			\hline
+			\end{tabular}
+		\caption{Tabulka kurzů k dnešnímu dni}
+		\label{tab:ExRate}
+		\end{center}
+		\end{table}
+
+		\begin{table}[ht]
+		\begin{center}	
+			\begin{tabular}{|c|c|}
+				\hline
+				$A$ & $\neg A$ \\ \hline
+				\textbf{P} & N \\ \hline
+				\textbf{O} & O \\ \hline
+				\textbf{X} & X \\ \hline
+				\textbf{N} & P \\ \hline
+			\end{tabular}
+			\begin{tabular}{|c|c|c|c|c|c|} \hline
+				\multicolumn{2}{|c|}{\multirow{2}{*}{$A \land B$}} & \multicolumn{4}{c|}{$B$}\\ \cline{3-6}
+				\multicolumn{2}{|c|}{} & \textbf{P} & \textbf{O} & \textbf{X} & \textbf{N} \\ \hline
+				\multirow{4}{*}{$A$} & \textbf{P} & P & O & X & N \\ \cline{2-6}
+				& \textbf{O} & O & O & N & N \\ \cline{2-6}
+				& \textbf{X} & X & N & X & N \\ \cline{2-6}
+				& \textbf{N} & N & N & N & N \\ \hline
+			\end{tabular}
+			\begin{tabular}{|c|c|c|c|c|c|} \hline
+				\multicolumn{2}{|c|}{\multirow{2}{*}{$A \lor B$}} & \multicolumn{4}{c|}{$B$}\\ \cline{3-6}
+				\multicolumn{2}{|c|}{} & \textbf{P} & \textbf{O} & \textbf{X} & \textbf{N} \\ \hline
+				\multirow{4}{*}{$A$} & \textbf{P} & P & P & P & P \\ \cline{2-6}
+				& \textbf{O} & P & O & P & O \\ \cline{2-6}
+				& \textbf{X} & P & P & X & X \\ \cline{2-6}
+				& \textbf{N} & P & O & X & N \\ \hline
+			\end{tabular}
+			\begin{tabular}{|c|c|c|c|c|c|} \hline
+				\multicolumn{2}{|c|}{\multirow{2}{*}{$A \rightarrow B$}} & \multicolumn{4}{c|}{$B$}\\ \cline{3-6}
+				\multicolumn{2}{|c|}{} & \textbf{P} & \textbf{O} & \textbf{X} & \textbf{N} \\ \hline
+				\multirow{4}{*}{$A$} & \textbf{P} & P & O & X & N \\ \cline{2-6}
+				& \textbf{O} & P & O & P & O \\ \cline{2-6}
+				& \textbf{X} & P & P & X & X \\ \cline{2-6}
+				& \textbf{N} & P & P & P & P \\ \hline
+			\end{tabular}
+		\caption{Protože Kleeneho trojhodnotová logika už je \uv{zastaralá}, uvádíme si zde příklad čtyřhodnotové logiky}
+		\label{tab:Logic}
+		\end{center}
+		\end{table}
+
+	
+	\section{Algoritmy}
+	\label{sec:Algoritmy}
+	Pokud budeme chtít vysázet algoritmus, můžeme použít prostředí\texttt{ algorithm\footnote{Pro nápovědu, jak zacházet s prostředím\texttt{ algorithm,} můžeme zkusit tuhle stránku:\\ http://ftp.cstug.cz/pub/tex/CTAN/macros/latex/contrib/algorithms/algorithms.pdf.} }nebo\texttt{ algorithm2e}\footnote{Pro\texttt{ algorithm2e }zase tuhle: http://ftp.cstug.cz/pub/tex/CTAN/macros/latex/contrib/algorithm2e/doc/algorithm2e.pdf.}.\\
+	Příklad použití prostředí\texttt{ algorithm2e }viz Algoritmus \ref{alg:FastSlam}.
+	
+	\begin{algorithm}[h]
+		\label{alg:FastSlam}
+		\SetKwInput{Input}{Input}
+		\SetKwInOut{Output}{Output}
+		\SetNlSty{}{}{:  }
+		\SetInd{1em}{0.8em}
+		\SetNlSkip{-1.3em}
+		\Input{$(X_{t-1},u_t,z_t)$}
+		\Output{$X_t$}
+		\BlankLine
+		\Indp \Indp
+			$\overline{X_t} = X_t = 0$\\
+			\For{$k=1$ \textnormal{to} $M$}
+			{$x_t^{[k]} =$ \emph{sample\_motion\_model}$(u_t,x_{t-1}^{[k]})$\\
+			$\omega_t^{[k]} =$ \emph{measurement\_model}$(z_t,x_t^{[k]},m_{t-1})$\\
+			$m_t^{[k]} = updated\_occupancy\_grid(z_t,x_t^{[k]},m_{t-1}^{[k]})$\\
+			$\overline{X_t} = \overline{X_t} + \langle x_x^{[m]},\omega_t^{[m]}\rangle$}
+			\For{$k=1$ \textnormal{to} $M$}
+			{draw $i$ with probability $\approx \omega_t^{[i]}$\\
+			add $\langle x_x^{[k]},m_t^{[k]}\rangle$ to $X_t$\\}
+			\Return{$X_t$}
+		\caption{\textsc{Fast}SLAM}
+	\end{algorithm}
+
+	\section{Obrázky}
+	Do našich článků můžeme samozřejmě vkládat obrázky. Pokud je obrázkem fotografie,
+	můžeme klidně použít bitmapový soubor. Pokud by to ale mělo být nějaké schéma nebo
+	něco podobného, je dobrým zvykem takovýto obrázek vytvořit vektorově.
+	
+	\begin{figure}[ht]
+	\begin{center}
+			\scalebox{0.4}{\includegraphics{Pictures/etiopan.eps} \reflectbox{\includegraphics{Pictures/etiopan.eps}} }
+			\caption{Malý Etiopánek a jeho bratříček}
+			\label{pic:Etiopan}
+	\end{center}
+	\end{figure}
+	
+	\newpage
+
+	Rozdíl mezi vektorovým\,\dots
+	\begin{figure}[h]
+	\begin{center}
+		\scalebox{0.4}{\includegraphics{Pictures/oniisan.eps}}
+		\caption{Vektorový obrázek}
+		\label{pic:Vector}
+	\end{center}
+	\end{figure}
+	
+	\noindent \dots\,a~bitmapovým obrázkem
+	\begin{figure}[h]
+	\begin{center}
+		\scalebox{0.6}{\includegraphics{Pictures/oniisan2.eps}}
+		\caption{Bitmapový obrázek}
+		\label{pic:Bitmap}
+	\end{center}
+	\end{figure} 
+
+\noindent se projeví například při zvětšení.
+
+Odkazy (nejen ty) na obrázky \ref{pic:Etiopan}, \ref{pic:Vector} a \ref{pic:Bitmap}, na tabulky \ref{tab:ExRate} a~\ref{tab:Logic} a~také na algoritmus \ref{alg:FastSlam} jsou udělány pomocí křížových odkazů. Pak je ovšem potřeba zdrojový soubor přeložit dvakrát.
+
+Vektorové obrázky lze vytvořit i přímo v \LaTeX u, například pomocí prostředí\texttt{ picture}.
+
+
+\begin{landscape}
+  \begin{figure}
+	\begin{center}
+            \setlength{\unitlength}{1.35mm}
+                \begin{picture}(148,48)
+            	    \put(0,0){\linethickness{1.2pt}\framebox(148,74)}
+                	\put(126,59){\circle{11}}
+                	%levy spodni roh
+                	\put(3,10){\linethickness{4.5pt}\line(1,0){142}}
+	                \put(18,10){\linethickness{1.4pt}\line(0,1){27}}
+	                \put(26,10){\linethickness{1.4pt}\line(0,1){11}}
+	                \put(26,21){\linethickness{1.2pt}\line(1,0){27}}
+	                \put(18,37){\linethickness{1.2pt}\line(1,0){32}}
+                    
+                    %obdelniky
+                    \put(135,29){\linethickness{1.2pt}\line(0,1){4}}
+                    \put(32,29){\linethickness{1.4pt}\line(0,1){4}}
+                    \put(135,29){\linethickness{1.2pt}\line(-1,0){103}}
+                    \put(135,33){\linethickness{1.2pt}\line(-1,0){103}}
+                    
+                    \put(50,33){\linethickness{1.4pt}\line(0,1){8}}
+                    \put(92,33){\linethickness{1.2pt}\line(0,1){8}}
+                    \put(50,41){\linethickness{1.2pt}\line(1,0){42}}
+                    
+                    \put(92,35){\linethickness{1.2pt}\line(1,0){36}}
+                    \put(128,33){\linethickness{1.2pt}\line(0,1){2}}
+                    
+                    %sikme lajny
+                    \put(53,21){\linethickness{1.2pt}\line(3,-1){32}}
+                    \put(32,29){\linethickness{1.2pt}\line(1,-1){8}}
+                    
+                    %pravy spodni roh
+                    \put(135,10){\linethickness{1.2pt}\line(0,1){7}}
+                    \put(135,17){\linethickness{1.2pt}\line(-1,0){70}}
+                    \put(133,17){\linethickness{1.2pt}\line(0,1){10}}
+                    \put(133,27){\linethickness{1.2pt}\line(-1,0){77}}
+                    \put(56,27){\linethickness{1.4pt}\line(0,-1){7}}
+
+                \end{picture}
+                \caption{Vektorový obrázek v~prostředí \texttt{picture}}
+            \end{center}
+        \end{figure}
+\end{landscape}
+\end{document}

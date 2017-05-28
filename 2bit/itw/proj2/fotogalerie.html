@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="cs" lang="cs">
+<head>
+	<title>Lachtanov - Foto hotelu</title>
+	<meta charset="UTF-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="author" content="Tomáš Aubrecht">
+	<meta name="keywords" content="lachtanov, ski, xaubre02, zima, fotogalerie, foto, fotky">
+	<meta name="description" content="Fotogalerie hotelu">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link href="style-print.css" rel="stylesheet" type="text/css" media="print" />
+	<script type="text/javascript" src="jquery-1.9.1.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+			$("#goright").click(function(){
+				$("#first").hide(500);
+				$("#second").show(500);
+			});
+			$("#goleft").click(function(){
+				$("#second").hide(500);
+				$("#first").show(500);
+			});
+        });
+	</script>
+</head>
+
+<body>
+	<div class="body">
+
+		<header id="header">
+			
+			<div id="social">
+				<p>Sociální sítě</p>
+				<a href="http://twitter.com/" class="twitter"><span>Twitter</span></a>
+				<a href="http://www.facebook.com/" class="fb"><span>Facebook</span></a>
+				<a href="http://www.linkedin.com/" class="linkedin"><span>Linked In</span></a>
+			</div>
+			
+			<h1><a href="http://www.stud.fit.vutbr.cz/~xaubre02/index.html"><span>Lachtanov</span></a></h1>
+			
+			<div id="topmenu">
+			<ul>
+				<li><a href="index.html">Úvod</a></li>
+				<li><a href="sluzby.html">Služby</a></li>
+				<li id="selected"><a href="fotogalerie.html">Fotogalerie</a></li>
+				<li><a href="cenik.html">Ceník</a></li>
+				<li><a href="kontakt.html">Kontakt</a></li>
+			</ul>
+			</div>
+			
+			<div id="sidemenu">
+			<ul>
+				<li><a href="fotogalerie.html">Hotel</a></li>
+				<li><a href="fotogalerie2.html">Okolí</a></li>
+			</ul>
+			</div>
+		</header>
+		
+		<section class="mainbox">
+			<div>
+				<h3>Hotel</h3>
+				<div id="foto">
+					<img id="first" alt="Pokoje" src="images/hotel1.jpg"/>
+					<img id="second" alt="Vstupní sál" src="images/hotel2.jpg"/>
+				</div>
+				<div id="arrows">	
+					<img id="goleft" alt="Vlevo" src="images/leftarrow.jpg"/>
+					<img id="goright" alt="Vpravo" src="images/rightarrow.jpg"/>
+				</div>
+			</div>
+		</section>
+		
+		<section class="sidebox udalosti">
+			<div>
+				<h3>Události</h3>
+				<ul>
+					<li>31. prosince 2016<p>Největší silvestrovská oslava v Evropě!</p></li>
+					<li>17. ledna 2017<p>Slavnostní otevření nové sjezdovky, která je v Alpách nejdelší.</p></li>
+					<li>28. února 2017<p>Otevření nové černé sjezdovky</p></li>
+				</ul>
+			</div>
+		</section>
+		
+		<section class="sidebox">
+		<div>
+				<h3>Počasí</h3>
+				<img id="blue" alt="Počasí" src="images/pocasi.png"/>
+				<p>Máte rádi krásně zasněžené sjezdovky a skoro pořád svítící slunce bez mraků s úchvatným výhledem na Alpy? Tak to neváhejte a přijďte nás navštívit!</p>
+				<p>Aktuální předpověď počasí najdete <a href="https://meteobox.cz/francie/chamonix-mont-blanc/">zde</a>.</p>
+			</div>
+		</section>
+		
+	</div>
+
+	<footer>
+		<ul id="botmenu">
+				<li id="WebMap"><a href="webmap.html">Mapa Webu</a></li>
+				<li>Design: <a href="mailto:ThomasAubrecht@seznam.cz">Tomáš Aubrecht</a></li>
+				<li><a href="kontakt.html">Kontakt</a></li>
+		</ul>
+		<div id="copy">Copyright © 1990-2016 Lachtanov.</div>
+		<div id="pristupnost"><span>Prohlášení o přístupnosti:</span> veškeré informace zde poskytnuté jsou v souladu s touto vyhláškou.</div>
+		<div id="seo"><a href="seo.html">SEO</a></div>
+	</footer>
+
+</body>
+</html>
