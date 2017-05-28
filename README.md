@@ -1,23 +1,23 @@
 ## VUT FIT Brno - Projekty
 
-### **1BIT**
+### **1BIT** - První semestr
 - IEL
 - IZP
 
-### **2BIT**
+### **2BIT** - Druhý semestr
 - INC
 - IOS
 - IVH
 - ITW
 - ITY
 
-### **3BIT**
+### **3BIT** - Třetí semestr
 - IAL
 - IFJ
 - INP
 - ISS
 
-### **4BIT**
+### **4BIT** - Čtvrtý semestr
 - IDS
 - IJA
 - IPK
