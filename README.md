@@ -1,5 +1,7 @@
 ## VUT FIT Brno - Projekty
 
+### Autor: Tomáš Aubrecht
+
 ### **1BIT** - První semestr
 - IEL
 - IZP
