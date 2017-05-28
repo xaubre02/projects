@@ -1,0 +1,84 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH IPK 2 "APRIL 2017" Linux "Project Manual"
+
+.SH NAME
+ipk-client \- a mathematical client application
+
+.SH SYNOPSIS
+.B ipk-client 
+.I hostname
+
+.SH DESCRIPTION
+Ipk-client is a client based application using BSD sockets and solving basic mathematical problems. The communication protocol uses messages HELLO, SOLVE, RESULT and BYE.
+.PP
+Its lifetime begins with parsing of arguments and their evaluation. If everything is all right, it tries to connect to server by provided IP address. If the connection is not established, ipk-client exits with error, otherwise their communication begins. First of all, the client sends a welcome message HELLO and then waits for server's requests. Server requests may be a BYE or SOLVE, to which client answers with RESULT message. Ignores any message that is not in strict format mentioned below. Communication is ongoing until the server sends BYE message, then ipk-client successfully exits with return code 0.
+
+.SH OPTIONS
+.TP 
+.B hostname
+IPv4 or IPV6 address of the server.
+
+.SH MESSAGES
+.BR HELLO
+.RS
+Welcome message sent by client to server containing md5 hash of student's login.
+.RE
+
+.B SOLVE
+.RS
+Server's request for client to solve. Format: SOLVE[space]NUMBER[space]OPERATOR[space]NUMBER, where operator is one of +, -, * or /.
+.RE
+
+.B RESULT
+.RS
+Client's answer to SOLVE message. Format: RESULT[space]ANSWER, where answer could be any number or ERROR.
+.RE
+
+.B BYE
+.RS
+This message is sent by server in format: BYE[space]SECRET, where client prints SECRET on stdout and exits.
+.RE
+
+.SH DIAGNOSTICS
+The program may end up with an error written to stderr:
+
+.B Error: Invalid parameters!
+.RS
+When an invalid argument is present or invalid number/combination of arguments.
+.RE
+
+.B Error: No such host with this IP!
+.RS
+When the client is unable to find a server with provided IP address.
+.RE
+
+.B Connect Error!
+.RS
+Connect operation has failed.
+.RE
+
+.B Socket Error!
+.RS
+Socket creation has failed.
+.RE
+
+.B Send Error!
+.RS
+Send operation has failed.
+.RE
+
+.B Receive Error!
+.RS
+Receive operation has failed.
+.RE
+
+.SH BUGS
+
+Incorrect computation when the numbers are close to numeric data type limit.
+.PP
+Client will not recover when the server is shut down during communication.
+
+.SH AUTHOR
+Tomas Aubrecht (xaubre02)
