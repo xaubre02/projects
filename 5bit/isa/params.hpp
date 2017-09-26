@@ -35,7 +35,13 @@ public:
 	
 private:
 
-	std::string err;	// Error message
+	std::string em;		// Error message
 	std::string fn;		// File name
 	std::string pn;		// Port number
+	
+	// Zpracuje zadane vstupni parametry
+	bool parseParams(int argc, char *argv[]);
+	
+	// Zkontroluje hodnoty prepinacu
+	void validateParams(void);
 };
