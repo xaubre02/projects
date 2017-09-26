@@ -13,11 +13,11 @@ CFLAGS=-Wall -Wextra -Werror -pedantic
 
 all: projekt
 
-main.o: main.cpp
-	$(CC) $(CFLAGS) main.cpp -c
+main.o: src/main.cpp
+	$(CC) $(CFLAGS) src/main.cpp -c
 	
-params.o: params.cpp params.hpp
-	$(CC) $(CFLAGS) params.cpp -c
+params.o: src/params.cpp src/params.hpp
+	$(CC) $(CFLAGS) src/params.cpp -c
 
 #server.o:
 
