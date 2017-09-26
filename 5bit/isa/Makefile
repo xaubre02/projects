@@ -19,10 +19,11 @@ main.o: src/main.cpp
 params.o: src/params.cpp src/params.hpp
 	$(CC) $(CFLAGS) src/params.cpp -c
 
-#server.o:
+myldap.o: src/myldap.cpp src/myldap.hpp
+	$(CC) $(CFLAGS) src/myldap.cpp -c
 
-projekt: main.o params.o
-	$(CC) $(CFLAGS) params.o main.o -o myldap
+projekt: main.o params.o myldap.o
+	$(CC) $(CFLAGS) main.o params.o myldap.o -o myldap
 	rm *.o
 
 clear:

@@ -4,7 +4,7 @@
 * -+-+-+-+-+-+-+-+-+-+-+-+-
 * - Predmet: ISA
 * - Projekt: LDAP Server
-* - Modul: main
+* - Modul: Zpracovani parametru
 * - Datum: 2017-09-26
 * - Autor: Tomas Aubrecht
 * - Login: xaubre02
