@@ -13,13 +13,13 @@
 #include "myldap.hpp"
 #include <signal.h>
 
+
 bool live;
 
 void forceExit(int sig)
 {
 	(void)sig;
 	live = false;
-	exit(EXIT_SUCCESS);
 }
 
 int main(int argc, char *argv[])

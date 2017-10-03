@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <thread>
 #include <iostream>
 #include <string.h>
 #include <netdb.h>
@@ -48,12 +49,13 @@ bool sendData(const char *data)
     return true;
 }
 
-int main(void)
+int sendPayload(int number)
 {
-    for(int c = 0; c < 10; c++)
+    for(int c = 0; c < number; c++)
     {
         if (connectTo(DEST_ADDR, DEST_PORT))
         {
+            std::cout << "Connected!\n";
             if(!sendData("Just testing..."))
             {
                 close(conn);
@@ -61,8 +63,41 @@ int main(void)
                 return EXIT_FAILURE;
             }
         }
+        else
+        {
+            close(conn);
+            std::cerr << "Can't connect to server...\n";
+            return EXIT_FAILURE;
+        }
     }
     
     close(conn);
     return EXIT_SUCCESS;
+}
+
+void printFlag(bool *flag)
+{
+    for (int c = 0; c < 20; c++)
+    {
+        std::cout << std::boolalpha << *flag << std::endl;
+        sleep(1);
+    }
+}
+
+int main(void)
+{
+    /*
+    bool flag = false;
+    std::thread t(printFlag, &flag);
+    
+    for (int c = 0; c < 5; c++)
+    {
+        flag = !flag;
+        sleep(1);
+    }
+    t.join();
+    return EXIT_SUCCESS;
+    */
+    
+    return sendPayload(100);
 }

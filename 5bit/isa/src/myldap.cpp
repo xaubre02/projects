@@ -115,17 +115,22 @@ void MyLDAP::serve(void)
     struct sockaddr_in addr_in;
     socklen_t addrlen = sizeof(addr_in);
     
-    while(live)
+    while(*live)
     {
-        SOCKET in_con = accept(listen_socket, (struct sockaddr *)&addr_in, &addrlen); // prichozi propojeni
-        if (in_con == SOCKET_ERROR)
-        {    
-            std::cerr << "Chyba pri navazovani spojeni s klientem!\n";
+        if (pending())
+        {
+            SOCKET in_con = accept(listen_socket, (struct sockaddr *)&addr_in, &addrlen); // prichozi propojeni
+            if (in_con == SOCKET_ERROR)
+            {    
+                std::cerr << "Chyba pri navazovani spojeni s klientem!\n";
+            }
+            
+            // vytvoreni noveho vlakna a jeho ulozeni do seznamu
+            new_t = new std::thread([=] { process(in_con); });
+            list.push_back(new_t);
         }
-        
-        // vytvoreni noveho vlakna a jeho ulozeni do seznamu
-        new_t = new std::thread([=] { process(in_con); });
-        list.push_back(new_t);
+        else
+            sleep(.1);
     }
 }
 
@@ -138,4 +143,20 @@ void MyLDAP::process(SOCKET socket)
         std::cout << buff << std::endl;
     
     close(socket);
+}
+
+// -------------------------------------- DEBUG --------------------------------------
+
+#include <sys/types.h>
+#include <sys/socket.h>
+
+bool MyLDAP::pending(void)
+{
+    fd_set rfds;
+    struct timeval tv { 0, 100 };
+    
+    FD_ZERO(&rfds);
+    FD_SET(listen_socket, &rfds);
+    
+    return (select(listen_socket + 1, &rfds, NULL, NULL, &tv) > 0) ? true : false;
 }

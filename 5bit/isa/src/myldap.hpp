@@ -62,4 +62,6 @@ public:
     // Zpracuje prichozi pripojeni a obslouzi je
     void serve(void);
     
+    // debug
+    bool pending(void);
 };

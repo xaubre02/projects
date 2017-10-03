@@ -29,5 +29,9 @@ projekt: main.o params.o myldap.o
 clear:
 	rm *.o
 
-test: test/test.cxx
-	$(CC) $(CFLAGS) test/test.cxx -o test/test
+test.o: test/test.cxx
+	$(CC) $(CFLAGS) test/test.cxx -c -lpthread
+
+test: test.o
+	$(CC) $(CFLAGS) test.o -o test/test -lpthread
+	rm test.o
