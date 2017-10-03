@@ -12,7 +12,9 @@
 ***************************************/
 
 #include <cstdlib>
+#include <iostream>
 #include <string>
+
 
 class Params
 {	

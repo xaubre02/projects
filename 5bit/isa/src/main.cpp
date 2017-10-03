@@ -11,23 +11,38 @@
 
 #include "params.hpp"
 #include "myldap.hpp"
-#include <iostream> // DEBUG
+#include <signal.h>
+
+bool live;
+
+void forceExit(int sig)
+{
+	(void)sig;
+	live = false;
+	exit(EXIT_SUCCESS);
+}
 
 int main(int argc, char *argv[])
 {
-	Params params(argc, argv);
-	if (!params.valid())
-	{
-		params.printError();
-		return EXIT_FAILURE;
-	}
-	else
-	{
-		std::cout << "File: " << params.file() << std::endl;
-		std::cout << "Port: " << params.port() << std::endl;
-		
-		//MyLDAP myldap(params.port(), params.file());
-	}
+	live = true;
+	signal(SIGINT, &forceExit);
 	
-	return EXIT_SUCCESS;
+    Params params(argc, argv);
+    if (!params.valid())
+    {
+        params.printError();
+        return EXIT_FAILURE;
+    }
+    else
+    {
+        MyLDAP myldap(&live, params.file());
+        if(!myldap.listenTo(params.port()))
+        {
+            return EXIT_FAILURE;
+        }
+        
+        myldap.serve();
+    }
+    
+    return EXIT_SUCCESS;
 }

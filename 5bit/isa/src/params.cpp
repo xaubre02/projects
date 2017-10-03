@@ -11,7 +11,6 @@
 
 #include "params.hpp"
 #include <sys/stat.h>
-#include <iostream>
 #include <string.h>
 #include <fstream>
 
