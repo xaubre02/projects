@@ -109,6 +109,17 @@ bool MyLDAP::listenTo(std::string port)
     return true;
 }
 
+bool MyLDAP::pending(void)
+{
+    fd_set rfds;
+    struct timeval tv { 0, 100 };
+    
+    FD_ZERO(&rfds);
+    FD_SET(listen_socket, &rfds);
+    
+    return (select(listen_socket + 1, &rfds, NULL, NULL, &tv) > 0) ? true : false;
+}
+
 void MyLDAP::serve(void)
 {
     std::thread *new_t;
@@ -137,26 +148,36 @@ void MyLDAP::serve(void)
 // TODO ...
 void MyLDAP::process(SOCKET socket)
 {
-    char buff[BUFF_SIZE];
-    
-    if(recvData(socket, buff, BUFF_SIZE))
-        std::cout << buff << std::endl;
+    unsigned char buff[BUFF_SIZE];
+    while(*live)
+    {
+        memset(buff, 0, BUFF_SIZE);
+        int ret = recv(socket, buff, BUFF_SIZE, 0);
+        if(ret != SOCKET_ERROR)
+        {    
+           for (int c = 0; c < ret; c++)
+            printf("%02x", buff[c]);
+            //if(answer(decode(buff)))
+              //  continue;
+        }
+        
+        break;
+    }
     
     close(socket);
 }
 
-// -------------------------------------- DEBUG --------------------------------------
-
-#include <sys/types.h>
-#include <sys/socket.h>
-
-bool MyLDAP::pending(void)
+int MyLDAP::decode(const char *msg)
 {
-    fd_set rfds;
-    struct timeval tv { 0, 100 };
-    
-    FD_ZERO(&rfds);
-    FD_SET(listen_socket, &rfds);
-    
-    return (select(listen_socket + 1, &rfds, NULL, NULL, &tv) > 0) ? true : false;
+    std::cout << msg << std::endl;
+    return -1;
+}
+
+bool MyLDAP::answer(int type)
+{
+    switch(type)
+    {
+        default:
+            return false;
+    }
 }
