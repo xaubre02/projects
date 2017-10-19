@@ -18,7 +18,7 @@
 
 MyLDAP::MyLDAP(bool *flag, std::string path)
 {
-	live = flag;
+    live = flag;
     listen_socket = SOCKET_ERROR;
     file.open(path.c_str(),    std::ios::in | std::ios::out | std::ios::app); // otevreni souboru pro cteni/zapis
 }
@@ -137,11 +137,16 @@ void MyLDAP::serve(void)
 // TODO ...
 void MyLDAP::process(SOCKET socket)
 {
-    char buff[BUFF_SIZE];
+     unsigned char buff[BUFF_SIZE];
     
-    if(recvData(socket, buff, BUFF_SIZE))
-        std::cout << buff << std::endl;
-    
+    int r = recvData(socket, buff, BUFF_SIZE);
+    if(r > 0)
+    {
+        std::cout << buff << std::endl << "**************\n";
+        for(int c = 0; c < r; c++)
+            //std::cout << std::hex << int(buff[c]) << std::endl;
+            printf("%02x", buff[c]);
+    }
     close(socket);
 }
 
