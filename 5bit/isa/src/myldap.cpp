@@ -151,17 +151,50 @@ void MyLDAP::process(SOCKET socket)
     unsigned char buff[BUFF_SIZE];
     while(*live)
     {
-        std::cout << "I am in..." << std::endl;
         memset(buff, 0, BUFF_SIZE);
         int ret = recv(socket, buff, BUFF_SIZE, 0);
         if(ret != SOCKET_ERROR)
         {
-            std::cout << "Ret: " << ret << std::endl;
             for (int c = 0; c < ret; c++)
             {
                 printf("0x%02x ", buff[c]);
             }
             std::cout << std::endl;
+            // BindResponse
+            // LDAPMessage  Len   INT   Len   Val   [APPLICATION 1] SEQUENCE  Len   Enum  Len   Val   matchedDN   diagnosticMessage
+            // 0x30         0x0c  0x02  0x01  0x01  0x61                      0x07  0x0a  0x01  0x00  0x04  0x00  0x04  0x00
+            unsigned char answer[14];
+            answer[0]  = 0x30;
+            answer[1]  = 0x0c;
+            answer[2]  = 0x02;
+            answer[3]  = 0x01;
+            answer[4]  = 0x01;
+            answer[5]  = 0x61;
+            answer[6]  = 0x07;
+            answer[7]  = 0x0a;
+            answer[8]  = 0x01;
+            answer[9]  = 0x00;
+            answer[10] = 0x04;
+            answer[11] = 0x00;
+            answer[12] = 0x04;
+            answer[13] = 0x00;
+            
+            if (send(socket, answer, 14, 0) == SOCKET_ERROR)
+            {
+                std::cerr << "Failed to send a message...\n";
+                *live = false;
+                close(socket);
+                return;
+            }
+            ret = recv(socket, buff, BUFF_SIZE, 0);
+            if(ret != SOCKET_ERROR)
+            {
+                for (int c = 0; c < ret; c++)
+                {
+                    printf("0x%02x ", buff[c]);
+                }
+                std::cout << std::endl;
+            }
         }
         
         *live = false;
