@@ -39,6 +39,10 @@ class MyLDAP
     std::mutex mtx;                  // zamek pro pristup k souboru
     std::fstream file;               // CSV soubor - kriticka sekce
     
+    
+    // Zkontroluje, zdali je zde cekajici prichozi pripojeni
+    bool pending(void);
+    
     // kazde vlakno vykona tuto funkci pro zpracovani pozadavku klienta
     void process(SOCKET socket);
     
@@ -47,6 +51,12 @@ class MyLDAP
     
     // Vynuluje buffer a prijme data o delce length.
     bool recvData(SOCKET &socket, char* buffer, int length);
+    
+    // Dekoduje prichozi zpravu.
+    int decode(const char *msg);
+    
+    // Odpovi na klientuv pozadavek.
+    bool answer(int type);
     
 public:
     
@@ -61,7 +71,4 @@ public:
     
     // Zpracuje prichozi pripojeni a obslouzi je
     void serve(void);
-    
-    // debug
-    bool pending(void);
 };
