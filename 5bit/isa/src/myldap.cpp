@@ -158,12 +158,13 @@ void MyLDAP::process(SOCKET socket)
         {
             std::cout << "Ret: " << ret << std::endl;
             for (int c = 0; c < ret; c++)
-                printf("%02x", buff[c]);
-            //if(answer(decode(buff)))
-              //  continue;
+            {
+                printf("0x%02x ", buff[c]);
+            }
+            std::cout << std::endl;
         }
         
-        break;
+        *live = false;
     }
     
     close(socket);
