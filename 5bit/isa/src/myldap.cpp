@@ -151,12 +151,14 @@ void MyLDAP::process(SOCKET socket)
     unsigned char buff[BUFF_SIZE];
     while(*live)
     {
+        std::cout << "I am in..." << std::endl;
         memset(buff, 0, BUFF_SIZE);
         int ret = recv(socket, buff, BUFF_SIZE, 0);
         if(ret != SOCKET_ERROR)
-        {    
-           for (int c = 0; c < ret; c++)
-            printf("%02x", buff[c]);
+        {
+            std::cout << "Ret: " << ret << std::endl;
+            for (int c = 0; c < ret; c++)
+                printf("%02x", buff[c]);
             //if(answer(decode(buff)))
               //  continue;
         }
