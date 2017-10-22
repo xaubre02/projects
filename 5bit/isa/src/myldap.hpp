@@ -24,7 +24,7 @@
  */
 #define LOCK_SECTION    std::lock_guard<std::mutex> lock(mtx);
 #define SOCKET_ERROR    (-1)
-#define BUFF_SIZE         (2048)
+#define BUFF_SIZE       (2048)
 
 typedef int SOCKET;
 
@@ -35,7 +35,7 @@ class MyLDAP
 {
 	bool *live;
     SOCKET listen_socket;            // socket pro prichozi pripojeni
-    std::vector<std::thread*> list;   // seznam vlaken zpracovavajici jednotlive klienty
+    std::vector<std::thread*> list;  // seznam vlaken zpracovavajici jednotlive klienty
     std::mutex mtx;                  // zamek pro pristup k souboru
     std::fstream file;               // CSV soubor - kriticka sekce
     
@@ -47,16 +47,8 @@ class MyLDAP
     void process(SOCKET socket);
     
     // Odesle data.
-    bool sendData(SOCKET &socket, std::string data);
+    bool sendMsg(SOCKET &socket, std::string data);
     
-    // Vynuluje buffer a prijme data o delce length.
-    bool recvData(SOCKET &socket, char* buffer, int length);
-    
-    // Dekoduje prichozi zpravu.
-    int decode(const char *msg);
-    
-    // Odpovi na klientuv pozadavek.
-    bool answer(int type);
     
 public:
     
@@ -71,4 +63,59 @@ public:
     
     // Zpracuje prichozi pripojeni a obslouzi je
     void serve(void);
+};
+
+// vycet podporovanych zprav od klienta
+enum MessageType : int
+{
+    ldap_bind = 0x60,
+    ldap_search = 0x61,
+    ldap_unbind = 0x82
+};
+
+/**
+ *  Trida pro dekodovani LDAP zprav.
+ */
+class MyLDAPMsgDecoder
+{
+    // Priznak chyby
+    bool err;
+    
+    // id zpravy
+    int id;
+    
+    // typ zpravy
+    int type;
+    
+public:
+
+    // Dekoduje obsah bufferu
+    MyLDAPMsgDecoder(unsigned const char *buff, int len);
+    
+    // Reinicializuje objekt
+    void clear(void);
+    
+    // Dekoduje obsah bufferu
+    void decode(unsigned const char *buff, int len);
+    
+    // Vrati "true", pokud se jedna o platnou podporovanou zpravu, jinak "false"
+	bool valid(void);
+    
+    // Vrati typ dane zpravy
+    int getType(void);
+    
+    // Vrati ID zpravy
+    int getID(void);
+};
+
+/**
+ *  Trida pro vytvareni LDAP zprav.
+ */
+class MyLDAPMsgConstructor
+{
+public:
+
+    static std::string createBindResponse(int msg_id);
+    static std::string createSearchResultDone(int msg_id, int resultCode);
+    static std::string createNoticeOfDisconnection(int resultCode);
 };

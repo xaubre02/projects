@@ -11,6 +11,7 @@
 
 #include "myldap.hpp"
 #include <iostream>
+#include <sstream>
 #include <string.h>
 #include <netdb.h>
 #include <unistd.h>
@@ -37,21 +38,10 @@ MyLDAP::~MyLDAP(void)
     list.clear();
 }
 
-bool MyLDAP::sendData(SOCKET &socket, std::string data)
+bool MyLDAP::sendMsg(SOCKET &socket, std::string data)
 {
     // odeslani dat
     if (send(socket, data.c_str(), int(data.size()), 0) == SOCKET_ERROR)
-        return false;
-
-    return true;
-}
-
-bool MyLDAP::recvData(SOCKET &socket, char *buffer, int length)
-{
-    // vynulovani buffer
-    memset(buffer, 0, length);
-    // prijmuti dat od klienta
-    if (recv(socket, buffer, length, 0) == SOCKET_ERROR)
         return false;
 
     return true;
@@ -111,25 +101,33 @@ bool MyLDAP::listenTo(std::string port)
 
 bool MyLDAP::pending(void)
 {
+    // struktura pro cteni
     fd_set rfds;
     struct timeval tv { 0, 100 };
     
+    // inicializace struktury
     FD_ZERO(&rfds);
     FD_SET(listen_socket, &rfds);
     
+    // vrati hodnotu, zdali nekdo ceka
     return (select(listen_socket + 1, &rfds, NULL, NULL, &tv) > 0) ? true : false;
 }
 
 void MyLDAP::serve(void)
 {
+    // ukazatel na vlakno
     std::thread *new_t;
+    // pomocne promenne pro prijem klientu
     struct sockaddr_in addr_in;
     socklen_t addrlen = sizeof(addr_in);
     
+    // hlavni smycka serveru
     while(*live)
     {
+        // pokud je zde cekajici klient
         if (pending())
         {
+            // prijmuti klienta
             SOCKET in_con = accept(listen_socket, (struct sockaddr *)&addr_in, &addrlen); // prichozi propojeni
             if (in_con == SOCKET_ERROR)
             {    
@@ -148,72 +146,267 @@ void MyLDAP::serve(void)
 // TODO ...
 void MyLDAP::process(SOCKET socket)
 {
+    // vytvoreni a vynulovani bufferu pro prijem zprav
     unsigned char buff[BUFF_SIZE];
-    while(*live)
+    memset(buff, 0, BUFF_SIZE);
+    
+    // -------------------------------------------------------------------------
+    // -------------------------- BIND REQUEST ---------------------------------
+    // prijeti zpravy od klienta
+    int ret = recv(socket, buff, BUFF_SIZE, 0);
+    if (ret == SOCKET_ERROR)
     {
-        memset(buff, 0, BUFF_SIZE);
-        int ret = recv(socket, buff, BUFF_SIZE, 0);
-        if(ret != SOCKET_ERROR)
+        close(socket);
+        return;
+    }
+    // dekodovani zpravy
+    MyLDAPMsgDecoder msg(buff, ret);
+    // pokud se jedna o platnou zpravu bindRequest
+    if (msg.valid() && msg.getType() == ldap_bind)
+    {
+        std::cout << "Valid\n";
+        // odeslat bindResponse s danym ID zpravy
+        if (!sendMsg(socket, MyLDAPMsgConstructor::createBindResponse(msg.getID())))
         {
-            for (int c = 0; c < ret; c++)
-            {
-                printf("0x%02x ", buff[c]);
-            }
-            std::cout << std::endl;
-            // BindResponse
-            // LDAPMessage  Len   INT   Len   Val   [APPLICATION 1] SEQUENCE  Len   Enum  Len   Val   matchedDN   diagnosticMessage
-            // 0x30         0x0c  0x02  0x01  0x01  0x61                      0x07  0x0a  0x01  0x00  0x04  0x00  0x04  0x00
-            unsigned char answer[14];
-            answer[0]  = 0x30;
-            answer[1]  = 0x0c;
-            answer[2]  = 0x02;
-            answer[3]  = 0x01;
-            answer[4]  = 0x01;
-            answer[5]  = 0x61;
-            answer[6]  = 0x07;
-            answer[7]  = 0x0a;
-            answer[8]  = 0x01;
-            answer[9]  = 0x00;
-            answer[10] = 0x04;
-            answer[11] = 0x00;
-            answer[12] = 0x04;
-            answer[13] = 0x00;
-            
-            if (send(socket, answer, 14, 0) == SOCKET_ERROR)
-            {
-                std::cerr << "Failed to send a message...\n";
-                *live = false;
-                close(socket);
-                return;
-            }
-            ret = recv(socket, buff, BUFF_SIZE, 0);
-            if(ret != SOCKET_ERROR)
-            {
-                for (int c = 0; c < ret; c++)
-                {
-                    printf("0x%02x ", buff[c]);
-                }
-                std::cout << std::endl;
-            }
+            close(socket);
+            return;
         }
+        for (int c = 0; c < )
+	std::cout << std::hex << 
+    }
+    else
+    {
+        // TODO - send NoticeOfDisconnection
+        close(socket);
+        return;
+    }
+    // -------------------------------------------------------------------------
+    // ------------------------- SEARCH REQUEST --------------------------------
+    // prijeti zpravy od klienta
+    ret = recv(socket, buff, BUFF_SIZE, 0);
+    if(ret == SOCKET_ERROR)
+    {
+        close(socket);
+        return;
+    }
+    // dekodovani zpravy
+    msg.clear();
+    msg.decode(buff, ret);
+    // pokud se jedna o platnou zpravu searchRequest
+    if(msg.valid() && msg.getType() == ldap_search)
+    {
+        // odeslat searchResDone s danym ID zpravy
+        if (!sendMsg(socket, MyLDAPMsgConstructor::createSearchResultDone(msg.getID(), 0x00)))
+        {
+            close(socket);
+            return;
+        }
+    }
+    else
+    {
+        // TODO - send NoticeOfDisconnection
+        close(socket);
+        return;
+    }
+    // -------------------------------------------------------------------------
+    // ------------------------- UNBIND REQUEST --------------------------------
+    // prijeti zpravy od klienta
+    ret = recv(socket, buff, BUFF_SIZE, 0);
+    if(ret == SOCKET_ERROR)
+    {
+        close(socket);
+        return;
+    }
+    // dekodovani zpravy
+    msg.clear();
+    msg.decode(buff, ret);
+    // pokud se jedna o platnou zpravu unbindRequest
+    if(msg.valid() && msg.getType() == ldap_unbind)
+    {
+        close(socket);
+        return;
+    }
+    else
+    {
+        // TODO - send NoticeOfDisconnection
+        close(socket);
+        return;
+    }
+}
+
+MyLDAPMsgDecoder::MyLDAPMsgDecoder(unsigned const char *buff, int len)
+{
+    clear();
+    decode(buff, len);
+}
+
+void MyLDAPMsgDecoder::clear(void)
+{
+    // inicializace promennych
+    err = true;
+    id = -1;
+    type = -1;
+}
+    
+void MyLDAPMsgDecoder::decode(unsigned const char *buff, int len)
+{
+    // -----------------------------
+    // ------- DEBUG - tisk --------
+    std::cout << "Received: ";
+    for (int c = 0; c < len; c++)
+    {
+       std::cout << "0x" << std::hex << int(buff[c]) << " ";
+    }
+    std::cout << std::endl;
+    // -----------------------------
+    
+    
+    // LDAPMessage musi mit alespon 7 bytu (LDAPMsg Len MsgID Len Val protocolOp Len)
+    if (len < 7)
+        return;
+    
+    // Musi se jednat o LDAPMessage a musi mit spravnou delku
+    if (buff[0] != 0x30 || buff[1] != (len - 2))
+        return;
+    
+    // MessageID musi mit typ INTEGER a nesmi mit nulovou delku, zaroven kontrola delky
+    if (buff[2] != 0x02 || buff[3] == 0x00 || buff[3] > (len - 4))
+        return;
+    
+    // kontrola delky daneho typu
+    if (buff[6] != (len - 7))
+        return;
         
-        *live = false;
+    // ulozeni id
+    id = buff[4];
+    
+    // ulozeni typu
+    type = buff[5];
+
+    switch (type)
+    {
+        case ldap_bind:
+            // version musi byt typu INTEGER o delce 1 v rozsahu 0...127, ale podpora je pouze po verzi 3
+            if (buff[7] != 0x02 || buff[8] != 0x01 || buff[9] > 0x03 || buff[9] < 0x01)
+                return;
+
+            // name musi byt typu OCTET STRING s nulovou délkou
+            if (buff[10] != 0x04 || buff[11] != 0x00)
+                return;
+                
+            // authentication simple - [0] OCTET STRING o nulové delce
+            if (buff[12] != 0x80 || buff[13] != 0x00)
+                return;
+                
+            break;
+        
+        case ldap_search:
+            break;
+        
+        case ldap_unbind:
+            break;
+        
+        default:
+            return;
     }
     
-    close(socket);
+    // zprava byla uspesne dekodovana
+    err = false;
 }
 
-int MyLDAP::decode(const char *msg)
+bool MyLDAPMsgDecoder::valid(void)
 {
-    std::cout << msg << std::endl;
-    return -1;
+    return !err;
 }
 
-bool MyLDAP::answer(int type)
+int MyLDAPMsgDecoder::getType(void)
 {
-    switch(type)
-    {
-        default:
-            return false;
-    }
+    return type;
+}
+
+int MyLDAPMsgDecoder::getID(void)
+{
+    return id;
+}
+
+std::string MyLDAPMsgConstructor::createBindResponse(int msg_id)
+{
+    std::stringstream msg;
+    
+    msg << 0x30;   // ---------- LDAPMessage
+    msg << 0x0c;   // ---------- LENGTH
+    msg << 0x02;   // ----- MessageID
+    msg << 0x01;   // ----- LENGTH
+    msg << msg_id; // ----- VALUE
+    msg << 0x61;   // ----- bindResponse - [APPLICATION 1] SEQUENCE
+    msg << 0x07;   // ----- LENGTH
+    msg << 0x0a;   // ENUMERATE
+    msg << 0x01;   // LENGTH
+    msg << 0x00;   // VALUE
+    msg << 0x04;   // matchedDN
+    msg << 0x00;   // LENGTH
+    msg << 0x04;   // diagnosticMessage
+    msg << 0x00;   // LENGTH
+    
+    return msg.str();
+}
+
+std::string MyLDAPMsgConstructor::createSearchResultDone(int msg_id, int resultCode)
+{
+    std::stringstream msg;
+    
+    msg << 0x30;   // ---------- LDAPMessage
+    msg << 0x00;   // ---------- LENGTH
+    msg << 0x02;   // ----- MessageID
+    msg << 0x01;   // ----- LENGTH
+    msg << msg_id; // ----- VALUE
+    msg << 0x65;   // ----- searchResDone - [APPLICATION 5] SEQUENCE
+    msg << 0x07;   // ----- LENGTH
+    msg << 0x0a;   // ENUMERATE
+    msg << 0x01;   // LENGTH
+    msg << resultCode;   // VALUE
+    msg << 0x04;   // matchedDN
+    msg << 0x00;   // LENGTH
+    msg << 0x04;   // diagnosticMessage
+    msg << 0x00;   // LENGTH
+    
+    return msg.str();
+}
+
+std::string MyLDAPMsgConstructor::createNoticeOfDisconnection(int resultCode)
+{/*
+    unsigned char msg[31];
+    msg[0] = 0x30; // LDAPMessage
+    msg[1] = 0x1d; // LENGTH
+    msg[2] = 0x02; // INTEGER
+    msg[3] = 0x01; // LENGTH
+    msg[4] = 0x00; // VALUE
+    msg[5] = 0x78; // extendedResp
+    msg[6] = 0x18; // LENGTH
+    msg[7] = 0x0a; // LDAPResult
+    msg[8] = 0x01; // LENGTH
+    msg[9] = resultCode; // VALUE 
+    msg[10] = 0x04; // matchedDN
+    msg[11] = 0x00; // LENGTH
+    msg[12] = 0x04; // diagnosticMessage
+    msg[13] = 0x00; // LENGTH
+    msg[14] = 0x8a; // [10] LDAPOID
+    msg[15] = 0x0f; // LENGTH
+    msg[16] = 0x01; // 1
+    msg[17] = 0x2e; // .
+    msg[18] = 0x03; // 3
+    msg[19] = 0x2e; // .
+    msg[20] = 0x06; // 6
+    msg[21] = 0x2e; // .
+    msg[22] = 0x01; // 1
+    msg[23] = 0x2e; // .
+    msg[24] = 0x04; // 4
+    msg[25] = 0x2e; // .
+    msg[26] = 0x01; // 1
+    msg[27] = 0x2e; // .
+    msg[28] = 0x0; // 1466
+    msg[29] = 0x2e; // .
+    msg[30] = 0x0; // 20036*/
+    resultCode++;
+    return std::string("faaail");
 }
