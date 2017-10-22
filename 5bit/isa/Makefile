@@ -24,7 +24,7 @@ myldap.o: src/myldap.cpp src/myldap.hpp
 
 projekt: main.o params.o myldap.o
 	$(CC) $(CFLAGS) main.o params.o myldap.o -o myldap -lpthread
-	rm *.o
+	rm myldap.o
 
 clear:
 	rm *.o
