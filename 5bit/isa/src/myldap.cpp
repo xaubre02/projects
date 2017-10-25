@@ -164,15 +164,12 @@ void MyLDAP::process(SOCKET socket)
     // pokud se jedna o platnou zpravu bindRequest
     if (msg.valid() && msg.getType() == ldap_bind)
     {
-        std::cout << "Valid\n";
         // odeslat bindResponse s danym ID zpravy
         if (!sendMsg(socket, MyLDAPMsgConstructor::createBindResponse(msg.getID())))
         {
             close(socket);
             return;
         }
-        for (int c = 0; c < )
-	std::cout << std::hex << 
     }
     else
     {
@@ -223,7 +220,9 @@ void MyLDAP::process(SOCKET socket)
     // pokud se jedna o platnou zpravu unbindRequest
     if(msg.valid() && msg.getType() == ldap_unbind)
     {
+        std::cout << "Successfully ended\n";
         close(socket);
+        *live = false;
         return;
     }
     else
@@ -264,19 +263,19 @@ void MyLDAPMsgDecoder::decode(unsigned const char *buff, int len)
     // LDAPMessage musi mit alespon 7 bytu (LDAPMsg Len MsgID Len Val protocolOp Len)
     if (len < 7)
         return;
-    
+
     // Musi se jednat o LDAPMessage a musi mit spravnou delku
     if (buff[0] != 0x30 || buff[1] != (len - 2))
         return;
-    
+
     // MessageID musi mit typ INTEGER a nesmi mit nulovou delku, zaroven kontrola delky
     if (buff[2] != 0x02 || buff[3] == 0x00 || buff[3] > (len - 4))
         return;
-    
+
     // kontrola delky daneho typu
     if (buff[6] != (len - 7))
         return;
-        
+
     // ulozeni id
     id = buff[4];
     
@@ -304,6 +303,9 @@ void MyLDAPMsgDecoder::decode(unsigned const char *buff, int len)
             break;
         
         case ldap_unbind:
+            if (buff[6] != 0x00)
+                return;
+                
             break;
         
         default:
@@ -333,42 +335,42 @@ std::string MyLDAPMsgConstructor::createBindResponse(int msg_id)
 {
     std::stringstream msg;
     
-    msg << 0x30;   // ---------- LDAPMessage
-    msg << 0x0c;   // ---------- LENGTH
-    msg << 0x02;   // ----- MessageID
-    msg << 0x01;   // ----- LENGTH
-    msg << msg_id; // ----- VALUE
-    msg << 0x61;   // ----- bindResponse - [APPLICATION 1] SEQUENCE
-    msg << 0x07;   // ----- LENGTH
-    msg << 0x0a;   // ENUMERATE
-    msg << 0x01;   // LENGTH
-    msg << 0x00;   // VALUE
-    msg << 0x04;   // matchedDN
-    msg << 0x00;   // LENGTH
-    msg << 0x04;   // diagnosticMessage
-    msg << 0x00;   // LENGTH
+    msg << (unsigned char)(0x30);    // ---------- LDAPMessage
+    msg << (unsigned char)(0x0c);    // ---------- LENGTH
+    msg << (unsigned char)(0x02);    // ----- MessageID
+    msg << (unsigned char)(0x01);    // ----- LENGTH
+    msg << (unsigned char)(msg_id);  // ----- VALUE
+    msg << (unsigned char)(0x61);    // ----- bindResponse - [APPLICATION 1] SEQUENCE
+    msg << (unsigned char)(0x07);    // ----- LENGTH
+    msg << (unsigned char)(0x0a);    // ENUMERATE
+    msg << (unsigned char)(0x01);    // LENGTH
+    msg << (unsigned char)(0x00);    // VALUE
+    msg << (unsigned char)(0x04);    // matchedDN
+    msg << (unsigned char)(0x00);    // LENGTH
+    msg << (unsigned char)(0x04);    // diagnosticMessage
+    msg << (unsigned char)(0x00);    // LENGTH
     
     return msg.str();
 }
 
-std::string MyLDAPMsgConstructor::createSearchResultDone(int msg_id, int resultCode)
+std::string MyLDAPMsgConstructor::createSearchResultDone(int msg_id, int resCode)
 {
     std::stringstream msg;
     
-    msg << 0x30;   // ---------- LDAPMessage
-    msg << 0x00;   // ---------- LENGTH
-    msg << 0x02;   // ----- MessageID
-    msg << 0x01;   // ----- LENGTH
-    msg << msg_id; // ----- VALUE
-    msg << 0x65;   // ----- searchResDone - [APPLICATION 5] SEQUENCE
-    msg << 0x07;   // ----- LENGTH
-    msg << 0x0a;   // ENUMERATE
-    msg << 0x01;   // LENGTH
-    msg << resultCode;   // VALUE
-    msg << 0x04;   // matchedDN
-    msg << 0x00;   // LENGTH
-    msg << 0x04;   // diagnosticMessage
-    msg << 0x00;   // LENGTH
+    msg << (unsigned char)(0x30);    // ---------- LDAPMessage
+    msg << (unsigned char)(0x0c);    // ---------- LENGTH
+    msg << (unsigned char)(0x02);    // ----- MessageID
+    msg << (unsigned char)(0x01);    // ----- LENGTH
+    msg << (unsigned char)(msg_id);  // ----- VALUE
+    msg << (unsigned char)(0x65);    // ----- searchResDone - [APPLICATION 5] SEQUENCE
+    msg << (unsigned char)(0x07);    // ----- LENGTH
+    msg << (unsigned char)(0x0a);    // ENUMERATE
+    msg << (unsigned char)(0x01);    // LENGTH
+    msg << (unsigned char)(resCode); // VALUE
+    msg << (unsigned char)(0x04);    // matchedDN
+    msg << (unsigned char)(0x00);    // LENGTH
+    msg << (unsigned char)(0x04);    // diagnosticMessage
+    msg << (unsigned char)(0x00);    // LENGTH
     
     return msg.str();
 }

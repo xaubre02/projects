@@ -68,9 +68,9 @@ public:
 // vycet podporovanych zprav od klienta
 enum MessageType : int
 {
-    ldap_bind = 0x60,
-    ldap_search = 0x61,
-    ldap_unbind = 0x82
+    ldap_bind   = 0x60,
+    ldap_search = 0x63,
+    ldap_unbind = 0x42
 };
 
 /**
