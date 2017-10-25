@@ -14,6 +14,7 @@
 #include <string.h>
 #include <fstream>
 
+
 Params::Params(int argc, char *argv[])
 {
 	// inicializace pomocnych promennych

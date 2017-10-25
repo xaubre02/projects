@@ -16,6 +16,9 @@
 #include <string>
 
 
+/**
+ *  Trida pro zpracovani vstupnich parametru.
+ */
 class Params
 {	
 public:
