@@ -162,11 +162,11 @@ void MyLDAP::process(SOCKET socket)
     }
     // dekodovani zpravy
     MyLDAPMsgDecoder msg(buff, ret);
-    // pokud se jedna o platnou zpravu bindRequest
-    if (msg.valid() && msg.getType() == ldap_bind)
+    // pokud se jedna o zpravu bindRequest
+    if (msg.getType() == ldap_bind)
     {
-        // odeslat bindResponse s danym ID zpravy
-        if (!sendMsg(socket, MyLDAPMsgConstructor::createBindResponse(msg.getID())))
+        // odeslat bindResponse s danym ID zpravy a navratovym kodem
+        if (!sendMsg(socket, MyLDAPMsgConstructor::createBindResponse(msg.getID(), msg.getID())) || msg.resultCode() != rc_success)
         {
             close(socket);
             return;
@@ -190,11 +190,11 @@ void MyLDAP::process(SOCKET socket)
     // dekodovani zpravy
     msg.clear();
     msg.decode(buff, ret);
-    // pokud se jedna o platnou zpravu searchRequest
-    if(msg.valid() && msg.getType() == ldap_search)
+    // pokud se jedna o zpravu searchRequest
+    if(msg.getType() == ldap_search)
     {
-        // odeslat searchResDone s danym ID zpravy
-        if (!sendMsg(socket, MyLDAPMsgConstructor::createSearchResultDone(msg.getID(), 0x00)))
+        // odeslat searchResDone s danym ID zpravy a navratovym kodem
+        if (!sendMsg(socket, MyLDAPMsgConstructor::createSearchResultDone(msg.getID(), msg.resultCode())))
         {
             close(socket);
             return;
@@ -218,12 +218,12 @@ void MyLDAP::process(SOCKET socket)
     // dekodovani zpravy
     msg.clear();
     msg.decode(buff, ret);
-    // pokud se jedna o platnou zpravu unbindRequest
-    if(msg.valid() && msg.getType() == ldap_unbind)
+    // pokud se jedna o zpravu unbindRequest
+    if(msg.getType() == ldap_unbind)
     {
         std::cout << "Successfully ended\n";
         close(socket);
-        *live = false;
+        //*live = false;
         return;
     }
     else

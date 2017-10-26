@@ -22,8 +22,8 @@ MyLDAPMsgDecoder::MyLDAPMsgDecoder(unsigned const char *buff, int len)
 void MyLDAPMsgDecoder::clear(void)
 {
     // inicializace promennych
-    err = true;
-    id = -1;
+    rc   = rc_protocolError;
+    id   = -1;
     type = -1;
 }
     
@@ -31,12 +31,12 @@ void MyLDAPMsgDecoder::decode(unsigned const char *buff, int len)
 {
     // -----------------------------
     // ------- DEBUG - tisk --------
-    std::cout << "Received: ";
+    std::cout << "Received <: ";
     for (int c = 0; c < len; c++)
     {
-       std::cout << "0x" << std::hex << int(buff[c]) << " ";
+       std::cout << std::hex << int(buff[c]) << " ";
     }
-    std::cout << std::endl;
+    std::cout << ":>\n";
     // -----------------------------
     
     
@@ -73,8 +73,15 @@ void MyLDAPMsgDecoder::decode(unsigned const char *buff, int len)
             if (buff[10] != 0x04 || buff[11] != 0x00)
                 return;
                 
-            // authentication simple - [0] OCTET STRING o nulové delce
-            if (buff[12] != 0x80 || buff[13] != 0x00)
+            // authentication simple - [0] OCTET STRING
+            if (buff[12] != 0x80)
+            {
+                rc = rc_authMethodNotSupported;
+                return;
+            }
+            
+            // nulova delka OCTET STRINGu
+            if (buff[13] != 0x00)
                 return;
                 
             break;
@@ -93,12 +100,12 @@ void MyLDAPMsgDecoder::decode(unsigned const char *buff, int len)
     }
     
     // zprava byla uspesne dekodovana
-    err = false;
+    rc = rc_success;
 }
 
-bool MyLDAPMsgDecoder::valid(void)
+int MyLDAPMsgDecoder::resultCode(void)
 {
-    return !err;
+    return rc;
 }
 
 int MyLDAPMsgDecoder::getType(void)
@@ -111,7 +118,7 @@ int MyLDAPMsgDecoder::getID(void)
     return id;
 }
 
-std::string MyLDAPMsgConstructor::createBindResponse(int msg_id)
+std::string MyLDAPMsgConstructor::createBindResponse(int msg_id, int res_code)
 {
     std::stringstream msg;
     
@@ -124,7 +131,7 @@ std::string MyLDAPMsgConstructor::createBindResponse(int msg_id)
     msg << (unsigned char)(0x07);    // ----- LENGTH
     msg << (unsigned char)(0x0a);    // ENUMERATE
     msg << (unsigned char)(0x01);    // LENGTH
-    msg << (unsigned char)(0x00);    // VALUE
+    msg << (unsigned char)(res_code);// VALUE
     msg << (unsigned char)(0x04);    // matchedDN
     msg << (unsigned char)(0x00);    // LENGTH
     msg << (unsigned char)(0x04);    // diagnosticMessage
@@ -133,7 +140,7 @@ std::string MyLDAPMsgConstructor::createBindResponse(int msg_id)
     return msg.str();
 }
 
-std::string MyLDAPMsgConstructor::createSearchResultDone(int msg_id, int resCode)
+std::string MyLDAPMsgConstructor::createSearchResultDone(int msg_id, int res_code)
 {
     std::stringstream msg;
     
@@ -146,7 +153,7 @@ std::string MyLDAPMsgConstructor::createSearchResultDone(int msg_id, int resCode
     msg << (unsigned char)(0x07);    // ----- LENGTH
     msg << (unsigned char)(0x0a);    // ENUMERATE
     msg << (unsigned char)(0x01);    // LENGTH
-    msg << (unsigned char)(resCode); // VALUE
+    msg << (unsigned char)(res_code);// VALUE
     msg << (unsigned char)(0x04);    // matchedDN
     msg << (unsigned char)(0x00);    // LENGTH
     msg << (unsigned char)(0x04);    // diagnosticMessage

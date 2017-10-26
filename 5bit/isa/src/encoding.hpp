@@ -15,11 +15,21 @@
 #include <string>
 
 // Vycet podporovanych zprav od klienta
-enum MessageType : int
+enum ProtocolOp : int
 {
     ldap_bind   = 0x60,
     ldap_search = 0x63,
     ldap_unbind = 0x42
+};
+
+// Vycet navratovych kodu
+enum ResultCode : int
+{
+    rc_success = 0x00,
+    rc_protocolError = 0x02,
+    rc_sizeLimitExceeded = 0x04,
+    rc_authMethodNotSupported = 0x07
+    
 };
 
 /**
@@ -27,8 +37,8 @@ enum MessageType : int
  */
 class MyLDAPMsgDecoder
 {
-    // Priznak chyby
-    bool err;
+    // Navratova hodnota zpravy - result code
+    int rc;
     
     // id zpravy
     int id;
@@ -47,8 +57,8 @@ public:
     // Dekoduje obsah bufferu
     void decode(unsigned const char *buff, int len);
     
-    // Vrati "true", pokud se jedna o platnou podporovanou zpravu, jinak "false"
-	bool valid(void);
+    // Vrati resultCode (hodnota promenne rc)
+	int resultCode(void);
     
     // Vrati typ dane zpravy
     int getType(void);
@@ -64,7 +74,7 @@ class MyLDAPMsgConstructor
 {
 public:
 
-    static std::string createBindResponse(int msg_id);
-    static std::string createSearchResultDone(int msg_id, int resultCode);
-    static std::string createNoticeOfDisconnection(int resultCode);
+    static std::string createBindResponse(int msg_id, int res_code);
+    static std::string createSearchResultDone(int msg_id, int res_code);
+    static std::string createNoticeOfDisconnection(int res_code);
 };
