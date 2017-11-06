@@ -25,12 +25,13 @@ req_atts::req_atts(std::vector<std::string> atts)
         return;
     }
     
+    // nastaveni priznaku
     for (auto str : atts)
     {
-        if (!str.compare("cn"))
+        if (!str.compare("cn") || !str.compare("CommonName"))
             cn = true;
 
-        else if (!str.compare("uid"))
+        else if (!str.compare("uid") || !str.compare("UserID"))
             uid = true;
 
         else if (!str.compare("mail"))
@@ -38,6 +39,7 @@ req_atts::req_atts(std::vector<std::string> atts)
 
         else
         {
+            // neznamy atribut
             valid = false;
             break;
         }
@@ -186,7 +188,7 @@ void StrBER::encode(const char *str)
     
     // delka vstupniho retezce
     int str_len = std::string(str).length();
-    
+
     en_val << (unsigned char)(0x04);        // OCTET STRING
     en_val << (unsigned char)(str_len);     // LENGTH
     for (int c = 0; c < str_len; c++)       // VALUE
@@ -278,8 +280,7 @@ short PartialAttribute::numOfOctets(void)
 /******************************************************************************/
 
 bool LDAPFilter::decode(const unsigned char *buff, int msg_len)
-{    
-    // -----------------------------
+{
     // offset buffer
     short off = 0;
     
@@ -374,10 +375,10 @@ bool LDAPFilter::decode(const unsigned char *buff, int msg_len)
                 return false;
             
             // kontrola a ulozeni hodnoty
-            if (!tmp.decodedValue().compare("uid"))
+            if (!tmp.decodedValue().compare("uid") || !tmp.decodedValue().compare("UserID") )
                 at_des = ad_uid;
 
-            else if (!tmp.decodedValue().compare("cn"))
+            else if (!tmp.decodedValue().compare("cn") || !tmp.decodedValue().compare("CommonName") )
                 at_des = ad_cn;
 
             else if (!tmp.decodedValue().compare("mail"))
@@ -409,10 +410,10 @@ bool LDAPFilter::decode(const unsigned char *buff, int msg_len)
                 return false;
             
             // kontrola a ulozeni hodnoty
-            if (!tmp.decodedValue().compare("uid"))
+            if (!tmp.decodedValue().compare("uid") || !tmp.decodedValue().compare("UserID"))
                 at_des = ad_uid;
 
-            else if (!tmp.decodedValue().compare("cn"))
+            else if (!tmp.decodedValue().compare("cn") || !tmp.decodedValue().compare("CommonName") )
                 at_des = ad_cn;
 
             else if (!tmp.decodedValue().compare("mail"))
@@ -728,7 +729,7 @@ std::string MyLDAPMsgConstructor::createSearchResultEntry(IntegerBER *msg_id, cs
     uid.encode("uid", rec->uid.c_str());
     mail.encode("mail", rec->mail.c_str());
     
-    // delka PartialAttributeList
+    // delka PartialAttributeList (podle klientem pozadovanych atributu)
     short p_len = 0;
     if (req_att->cn)
         p_len += cn.numOfOctets();

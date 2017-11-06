@@ -51,7 +51,7 @@ bool Params::parseParams(int argc, char *argv[])
 	// server ma dva povinne argumenty (-f <soubor>) a dva volitelne (-p <port>)  + nazev programu
 	if (argc != 3 && argc != 5)
 	{
-		em = "Neplatny pocet argumentu programu!";
+		em = "Neplatne parametry programu! Format spusteni: $(./myldap {-p <port>} -f <soubor>)";
 		return false;
 	}
 	

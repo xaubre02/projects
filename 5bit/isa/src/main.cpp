@@ -13,9 +13,10 @@
 #include "myldap.hpp"
 #include <signal.h>
 
-
+// priznak behu programu
 bool live;
 
+// funkce pro ukonceni behu serveru po stisknuti CTRL+C
 void forceExit(int sig)
 {
 	(void)sig;
@@ -27,12 +28,14 @@ int main(int argc, char *argv[])
 	live = true;
 	signal(SIGINT, &forceExit);
 	
+    // zpracovani parametru programu
     Params params(argc, argv);
     if (!params.valid())
     {
         params.printError();
         return EXIT_FAILURE;
     }
+    // inicializace a spusteni serveru, pokud vse probehlo v poradku
     else
     {
         MyLDAP myldap(&live, params.file());

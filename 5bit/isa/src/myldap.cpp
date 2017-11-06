@@ -16,7 +16,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <algorithm>
-
+#include <fcntl.h>
 
 MyLDAP::MyLDAP(bool *flag, std::string path)
 {
@@ -31,7 +31,7 @@ MyLDAP::~MyLDAP(void)
     // odstraneni vlaken
     for (auto t : list)
     {
-        t->join();
+        t->detach();
         delete(t);
     }
     
@@ -76,7 +76,16 @@ bool MyLDAP::listenTo(std::string port)
         freeaddrinfo(result);
         return false;
     }
-
+    
+    // nastaveni na neblokujici socket
+    if (fcntl(listen_socket, F_SETFL, fcntl(listen_socket, F_GETFL, 0) | O_NONBLOCK) == SOCKET_ERROR )
+    {
+        std::cerr << "Chyba pri nastavovani neblokujiciho socketu!\n";
+        close(listen_socket);
+        freeaddrinfo(result);
+        return false;
+    }
+    
     // nabindovani socketu
     if (bind(listen_socket, result->ai_addr, (int)result->ai_addrlen) == SOCKET_ERROR)
     {
@@ -133,7 +142,7 @@ void MyLDAP::serve(void)
             {    
                 std::cerr << "Chyba pri navazovani spojeni s klientem!\n";
             }
-            
+
             // vytvoreni noveho vlakna a jeho ulozeni do seznamu
             new_t = new std::thread([=] { process(in_con); });
             list.push_back(new_t);
