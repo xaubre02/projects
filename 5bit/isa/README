@@ -29,3 +29,8 @@ Příklad spuštění:
 
 
 Program neimplementuje žádné z bonusových rozšíření.
+
+Omezení
+-------
+       - Není implementován stavový automat - komunikace probíhá sekvenčně, kdy server očekává posloupnost zpráv BindRequest, SearchRequest a jako poslední UnbindRequest.
+         V případě jiného pořadí zpráv nebo příchodu nepodporovaných zpráv server ukončuje komunikaci.
