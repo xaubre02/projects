@@ -109,10 +109,10 @@ void Params::validateParams(void)
         return;
 	}
 	
-	// port musi byt cislo v rozsahu 0-65535 (unsigned 16-bit int)
+	// port musi byt cislo v rozsahu 1-65535 (unsigned 16-bit int)
 	char *error = NULL;
     long num = strtol(pn.c_str(), &error, 10);
-    if (*error != '\0' || num < 0 || num > 65535)
+    if (*error != '\0' || num < 1 || num > 65535)
     {
         em = "Neplatne cislo portu!";
         return;

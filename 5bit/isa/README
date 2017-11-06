@@ -1,0 +1,31 @@
+Jméno:   Tomáš Aubrecht
+Login:   xaubre02
+Předmět: ISA 2017/2018
+Projekt: LDAP server
+-----------------------
+Odevzdané soubory:
+    - src/
+        - encoding.cpp
+        - encoding.hpp
+        - main.cpp
+        - myldap.cpp
+        - myldap.hpp
+        - params.cpp
+        - params.hpp
+    - Makefile
+    - manual.pdf
+    - README
+----------------------
+Příklad spuštění:
+    
+    ./myldap -f isa2017-ldap.csv -p 20000
+	
+    kde
+        - "myldap" je název programu
+        - "-f isa2017-ldap.csv" je povinný přepínač uvádějící soubor, se kterým bude server pracovat
+        - "-p 20000" je specifikace portu, na kterém bude server naslouchat
+            - tento argument je volitelný
+            - implicitní hodnota portu je 389
+
+
+Program neimplementuje žádné z bonusových rozšíření.
