@@ -16,6 +16,14 @@ Odevzdané soubory:
     - manual.pdf
     - README
 ----------------------
+Popis činnosti
+ -  Klient zahájí komunikaci se serverem odesláním zprávy BindRequest.
+ -  Server na ni odpoví zprávou BindResponse.
+ -  Klient pomocí zprávy SearchRequest požádá o vyhledání záznamu.
+ -  Server vyhledá požadované záznamy a pro každý záznam odešle samostatnou zprávu SearchResEntry.
+ -  Po odeslání všech nalezených záznamů server informuje klienta o ukončení vyhledávání pomocí zprávy SearchResDone.
+ -  Klient následně uzavře komunikaci zprávou UnbindRequest.
+----------------------
 Příklad spuštění:
     
     ./myldap -f isa2017-ldap.csv -p 20000
@@ -29,8 +37,3 @@ Příklad spuštění:
 
 
 Program neimplementuje žádné z bonusových rozšíření.
-
-Omezení
--------
-       - Není implementován stavový automat - komunikace probíhá sekvenčně, kdy server očekává posloupnost zpráv BindRequest, SearchRequest a jako poslední UnbindRequest.
-         V případě jiného pořadí zpráv nebo příchodu nepodporovaných zpráv server ukončuje komunikaci.
