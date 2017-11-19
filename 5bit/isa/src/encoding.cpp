@@ -721,7 +721,7 @@ std::string MyLDAPMsgConstructor::createSearchResultEntry(IntegerBER *msg_id, cs
     StrBER dn;
     std::string tmp("uid=");
     tmp.append(rec->uid);
-    dn.encode(tmp.c_str());
+    dn.encode(tmp.c_str()); // Distinguished Name je jednoznačný identifikátor záznamu v rámci databáze, což splňuje atribut uid (xlogin)
     
     // zpracovani PartialAttribute
     PartialAttribute cn, uid, mail;
