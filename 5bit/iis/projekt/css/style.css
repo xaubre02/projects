@@ -1,0 +1,317 @@
+/*============================* COLORS *=============================*/
+.white, .hover-white:hover{
+	color: #000 !important;
+	background-color: #fff !important
+}
+
+.black, .hover-black:hover{
+	color: #fff !important;
+	background-color: #000 !important
+}
+
+.grey, .hover-grey:hover{
+	color: #000 !important;
+	background-color: #bbb !important
+}
+
+.light-grey, .hover-light-grey:hover{
+	color: #000 !important;
+	background-color: #f1f1f1 !important
+}
+
+.dark-grey, .hover-dark-grey:hover{
+	color: #fff !important;
+	background-color: #616161 !important
+}
+
+.red, .red:hover{
+	color: #fff !important;
+	background-color: #f44336 !important
+}
+
+/*============================* GLOBAL *=============================*/
+.hide {
+	display: none;
+}
+
+html {
+	height: 100%;
+	box-sizing: border-box;
+	overflow-x: hidden;
+	overflow: auto;
+}
+
+*, *:before, *:after {
+	box-sizing: inherit;
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+body {
+	background: #000 url("https://www.stud.fit.vutbr.cz/~xaubre02/pic/magic_forest.png") no-repeat fixed center !important;
+	background-size: cover !important;
+	max-width: 1200px !important;
+	width: 100% !important;
+	overflow: auto;
+	margin: auto !important;
+}
+
+.wrapper {
+   min-height: 100vh;
+   position: relative;
+}
+
+/*=============================* LOGIN *=============================*/
+#login, #register, #logout_msg{
+	width: 50%;
+	margin: auto;
+	margin-top: 15%;
+}
+
+#login img, #register img, #logout_msg img {
+	width: 78%;
+	margin-left: 11%;
+}
+
+#login form, #register form, #logout_msg form{
+	width: 60%;
+	margin: auto;
+	padding: 0.75vw;
+	background-color: #d9d9d9;
+	border-radius: 0.5vw;
+	opacity: 0.9;
+}
+
+.form-part {
+	width: 100%;
+	height: 2vw;
+	margin: auto;
+	margin-top: 5%;
+	color: black;
+}
+
+.form-part label {
+	float: left;
+	width: 40%;
+	text-align: right;
+	font-size: 1.2vw;
+	font-family: fantasy;
+	padding: 1% 3% 0 0;
+}
+
+.form-part input {
+	float: right;
+	width: 60%;
+	height: 100%;
+	font-size: 1vw;
+	font-family: fantasy;
+	padding-left: 3%;
+	border: 2px black solid;
+	border-radius: 0.5vw;
+	outline: none;
+}
+
+.confirm{
+	clear: both;
+	width: 90%;
+	margin: auto;
+	margin-top: 10%;
+}
+
+.button {
+	float: left;
+	width: 47.5%;
+	height: 3vw;
+	font-size: 1.2vw;
+	font-family: fantasy;
+	color: white;
+	background-color: black;
+	border: 2px white solid;
+	border-radius: 0.8vw;
+	transition: color .4s, border-color .4s, background-color .4s;
+	outline: none;
+}
+
+.button:first-child {
+	margin-right: 5%;
+	text-align: center;
+	padding-top: 4%;
+}
+
+.button:hover {
+	cursor: pointer;
+	color: black;
+	border-color: black;
+	background-color: white;
+}
+
+/*===========================* REGISTER *============================*/
+#register, #logout_msg{
+	margin-top: 10%;
+}
+
+#register form, #logout_msg form {
+	width: 70%;
+}
+
+#register .form-part label {
+	width: 50%;
+}
+
+#register .form-part input {
+	width: 50%;
+}
+
+#reg-succ  {
+	text-align: center;
+}
+
+#reg-succ span{
+	width: 40%;
+	margin: 5% 0 0 30%;
+	padding-top: 3%;
+}
+
+#reg-succ p {
+	font-size: 1.2vw;
+	font-family: fantasy;
+	padding: 1% 0 0 2%;
+}
+
+/*=========================* INPUT ERROR *===========================*/
+.bad-input {
+	border-color: red !important;
+	background-color: #ffcccc !important;
+}
+
+.err-msg {
+	float: right;
+	width: 60%;
+	margin: 1% 0 5% 0;
+	padding-left: 1%;
+	color: red;
+	font-style: italic;
+}
+
+#register .err-msg {
+	width: 50%;
+}
+
+/*============================* HEADER *=============================*/
+header {
+	width: 100%;
+	height: 10vh;
+	opacity: 0.95;
+}
+
+.main-menu {
+	width: 100%;
+	height: 60%;
+	font-size: 1.5vw;
+	font-family: fantasy;
+	background-color: black;
+}
+
+.main-menu a, .main-menu form{
+	float: left;
+	color: white;
+	width: 25%;
+	height: 100%;
+	text-align: center;
+	transition: color .4s, background-color .4s;
+}
+
+.main-menu a {
+	padding-top: 0.5vw;
+}
+
+.main-menu a:hover, .main-menu input:hover{
+	background-color: #b3b3b3;
+	color: black;
+}
+
+.main-menu input {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	font-size: 1.5vw;
+	font-family: fantasy;
+	background-color: black;
+	border: none;
+	outline: none;
+	color: white;
+	transition: color .4s, background-color .4s;
+}
+
+.main-menu input:hover {
+	cursor: pointer;
+}
+
+.main-menu .selected, .main-menu .selected:hover {
+	background-color: #b3b3b3;
+	color: black;
+}
+
+.sub-menu {
+	width: 100%;
+	height: 40%;
+	font-size: 1.1vw;
+	font-family: fantasy;
+	background-color: #b3b3b3;
+}
+
+.sub-menu a {
+	float: left;
+	min-width: 16.66%;
+	height: 100%;
+	color: black;
+	text-align: center;
+	padding-top: 0.3vw;
+	transition: color .4s, background-color .4s;
+}
+
+.sub-menu a:last-child {
+	border-right: none;
+}
+
+.sub-menu a:hover, .sub-menu .selected  {
+	background-color: #f2f2f2;
+	color: #404040;
+}
+
+/*===========================* CONTENT *=============================*/
+.content {
+	width: 100%;
+	min-height: 85vh;
+	background-color: #f2f2f2;
+	opacity: 0.95;
+	padding: 2vw;
+}
+
+.content h1{
+	font-size: 2vw;
+	font-family: fantasy;
+	margin-bottom: 1vw;
+}
+
+.content p {
+	font-size: 1.2vw;
+}
+
+/*============================* FOOTER *=============================*/
+footer {
+	position: absolute;
+	bottom: 0;
+	right: 0;
+	width: 100%;
+	height: 5vh;
+	text-align: center;
+	padding-top: 0.3vw;
+	opacity: 0.7;
+}
