@@ -20,18 +20,17 @@
 
 <div class="content">
 	<h1>Vítejte!</h1>
-	<p>Magie v kouzelnickém světě je členěna podle elementů (voda, oheň, vzduch, ...), které mají různé specializace (obrana, útok) a různé,
-	ale pevně dané barvy magie (např. ohnivá magie je pomerančově oranžová).
-	<br>Každé kouzlo má jeden hlavní element, přičemž každý kouzelník má positivní synergii s určitými elementy.
-	<br>U kouzelníků rovněž evidujeme velikost many, jeho dosaženou úroveň v kouzlení (předpokládáme klasickou stupnici. E, D, C, B, A, S, SS,).
-	<br>U jednotlivých kouzel pak jejich úroveň složitosti seslání a sílu. Kouzla mohou být útočná či obranná, přičemž obranná mohou mít navíc 
+	<p>&nbsp&nbsp&nbsp&nbsp&nbsp Magie v kouzelnickém světě je členěna podle <a href="overview_elements.php">elementů</a> (voda, oheň, vzduch, ...), které mají různé specializace (obrana, útok) a různé,
+	ale pevně dané, barvy magie. Například ohnivá magie je pomerančově oranžová.
+	<br>&nbsp&nbsp&nbsp&nbsp&nbsp Každé <a href="overview_spells.php">kouzlo</a> má jeden hlavní element, přičemž kouzelník může mít positivní synergii s některým z elementů.
+	<br>&nbsp&nbsp&nbsp&nbsp&nbsp U <a href="overview_wizards.php">kouzelníků</a> rovněž evidujeme velikost many, jeho dosaženou úroveň v kouzlení. Předpokládáme klasickou stupnici E, D, C, B, A, S, SS.
+	<br>&nbsp&nbsp&nbsp&nbsp&nbsp U jednotlivých kouzel pak jejich úroveň složitosti seslání a sílu. Kouzla mohou být útočná či obranná, přičemž obranná mohou mít navíc 
 	i vedlejší elementy. Kouzla mohou být samovolně sesílána, pokud je daný kouzelník umí, nebo lze využit kouzelnických knih, tzv. grimoárů.
-	<br>Grimoáry v sobě seskupují různá kouzla. Uchováváme veškerou historii jejich vlastnictví. Grimoáry mohou obsahovat kouzla různých elementů, 
+	<br>&nbsp&nbsp&nbsp&nbsp&nbsp <a href="overview_spellbooks.php">Grimoáry</a> v sobě seskupují různá kouzla. Uchováváme veškerou historii jejich vlastnictví. Grimoáry mohou obsahovat kouzla různých elementů, 
 	nicméně jeden z elementů je pro ně primární. Využívání grimoárů způsobuje ztrátu jejich nabité magie a je nutno je znovu dobít, ale pouze na 
-	dedikovaných místech, kde prosakuje magie (míra prosakování magie daného místa je evidována) určitých typů element (předpokládejte, že na daném 
-	místě prosakuje právě jeden typ). Toto nabití však nemusí být provedeno vlastníkem, ale i jiným kouzelníkem a zároveň musí být provedeno první 
-	den v novém měsíci od půlnoci do tří hodin do rána.
-	<br>Alternativním způsobem sesílání magie je pak s využitím svitků, který obsahuje právě jedno útočné kouzlo a po jeho použití se rozpadne.</p>
+	<a href="overview_ded_places.php">dedikovaných místech</a>, kde prosakuje magie určitých typů element. Míra prosakování magie daného místa je evidována a na daném místě prosakuje právě jeden typ. 
+	Toto nabití však nemusí být provedeno vlastníkem, ale i jiným kouzelníkem.
+	<br>&nbsp&nbsp&nbsp&nbsp&nbspAlternativním způsobem sesílání magie je pak s využitím <a href="overview_scrolls.php">svitků</a>, který obsahuje právě jedno útočné kouzlo a po jeho použití se rozpadne.</p>
 </div>
 
 <? include("footer.php"); ?>

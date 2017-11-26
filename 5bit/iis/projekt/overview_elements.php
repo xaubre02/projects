@@ -24,20 +24,32 @@
 
 <div class="content">
 	<h1>Elementy</h1>
-	<?php
-		include("connect_to_db.php");
-		$form = '';
+	<div class="table">
+		<div class="table_head">
+			<span>Název</span>
+			<span>Barva</span>
+			<span>Specializace</span>
+		</div>
 		
-		$sqlQuery = 'SELECT * FROM Element';
-		$result = mysql_query($sqlQuery, $db);
+		<?php
+			include("connect_to_db.php");
+			$form = '';
+			
+			$sqlQuery = 'SELECT * FROM Element';
+			$result = mysql_query($sqlQuery, $db);
 
-		while ($row = mysql_fetch_array($result))
-		{
-			$form .= $row[0] . '<br>';
-		}
+			while ($row = mysql_fetch_array($result))
+			{
+				$form .= '<br><div class="table_content">
+								<span>' .$row['druh']. '</span>
+								<span>' .$row['barva']. '</span>
+								<span>' .$row['specializace']. '</span>
+							</div>';
+			}
 
-		echo $form;
-	?>
+			echo $form;
+		?>
+	</div>
 </div>
 
 <? include("footer.php"); ?>

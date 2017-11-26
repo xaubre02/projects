@@ -24,20 +24,32 @@
 
 <div class="content">
 	<h1>Svitky</h1>
-	<?php
-		include("connect_to_db.php");
-		$form = '';
+	<div class="table">
+		<div class="table_head">
+			<span>Název</span>
+			<span>Kouzlo</span>
+			<span>Majitel</span>
+		</div>
 		
-		$sqlQuery = 'SELECT * FROM Svitek';
-		$result = mysql_query($sqlQuery, $db);
+		<?php
+			include("connect_to_db.php");
+			$form = '';
+			
+			$sqlQuery = 'SELECT * FROM Svitek';
+			$result = mysql_query($sqlQuery, $db);
 
-		while ($row = mysql_fetch_array($result))
-		{
-			$form .= $row["nazev"] . '<br>';
-		}
+			while ($row = mysql_fetch_array($result))
+			{
+				$form .= '<br><div class="table_content">
+								<span>' .$row['nazev']. '</span>
+								<span>' .$row['nazev_kouz']. '</span>
+								<span>' .$row['jmeno_kouz']. '</span>
+							</div>';
+			}
 
-		echo $form;
-	?>
+			echo $form;
+		?>
+	</div>
 </div>
 
 <? include("footer.php"); ?>

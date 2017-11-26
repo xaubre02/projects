@@ -19,8 +19,44 @@
 </header>
 
 <div class="content">
-	<h1>Dokumentace</h1>
-	<p>TODO...</p>
+    <style type="text/css">
+    	table { border-collapse: collapse; }
+    	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
+    	dt { font-weight: bold; margin-top: 0.5em; }
+    </style>
+	
+	<h1>Magický svět</h1>
+
+	<dl>
+		<dt>Autoři</dt>
+		<dd>Tomáš Aubrecht
+			<a href="mailto:xaubre02@stud.fit.vutbr.cz">xaubre02@stud.fit.vutbr.cz</a> - Všechno
+		</dd>
+		<dt>URL aplikace</dt>
+		<dd><a href="https://www.stud.fit.vutbr.cz/~xaubre02">https://www.stud.fit.vutbr.cz/~xaubre02/</a></dd>
+	</dl>
+
+	<h2>Uživatelé systému pro testování</h2>
+	<table>
+	<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
+	<tr><td>admin</td><td>root</td><td>Administrátor</td></tr>
+	<tr><td>Gandalf</td><td>123456</td><td>Kouzelník</td></tr>
+	<tr><td>Baba Yaga</td><td>123456</td><td>Kouzelník</td></tr>
+	</table>
+
+	<h2>Implementace</h2>
+	<p>...</p>
+
+	<h2>Instalace</h2>
+	<ul>
+		<li>...</li>
+		<li>...</li>
+		<li>...</li>
+	</ul>
+
+	<h2>Známé problémy</h2>
+	<p>...</p>
+
 </div>
 
 <? include("footer.php"); ?>

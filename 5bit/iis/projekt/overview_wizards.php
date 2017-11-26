@@ -24,20 +24,38 @@
 
 <div class="content">
 	<h1>Kouzelníci</h1>
-	<?php
-		include("connect_to_db.php");
-		$form = '';
+	<div class="table">
+		<div class="table_head">
+			<span>Jméno</span>
+			<span id="column_mana">Mana</span>
+			<span id="column_level">Úroveň</span>
+			<span>Synergie</span>
+			<span>Kouzla</span>
+			<span>Svitky</span>
+			<span>Grimoáry</span>
+			<span>Nabití</span>
+		</div>
 		
-		$sqlQuery = 'SELECT * FROM Kouzelnik';
-		$result = mysql_query($sqlQuery, $db);
+		<?php
+			include("connect_to_db.php");
+			$form = '';
+			
+			$sqlQuery = 'SELECT * FROM Kouzelnik';
+			$result = mysql_query($sqlQuery, $db);
 
-		while ($row = mysql_fetch_array($result))
-		{
-			$form .= $row[0] . '<br>';
-		}
+			while ($row = mysql_fetch_array($result))
+			{
+				$form .= '<br><div class="table_content">
+								<span>' .$row['jmeno_kouz']. '</span>
+								<span id="column_mana">' .$row['mana']. '</span>
+								<span id="column_level">' .$row['uroven']. '</span>
+								<span>žádná</span>
+							</div>';
+			}
 
-		echo $form;
-	?>
+			echo $form;
+		?>
+	</div>
 </div>
 
 <? include("footer.php"); ?>
