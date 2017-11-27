@@ -25,3 +25,9 @@
 - IPK
 - IPP
 - IZG
+
+### **5BIT** - Pátý semestr
+- IIS
+- IMP
+- ISA
+- ITU
