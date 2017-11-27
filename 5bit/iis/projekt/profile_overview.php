@@ -23,16 +23,6 @@
 	<h1>Váš profil</h1>
 	<div class="profile_content">
 	<?php
-		$form = '';
-		// pripojeni k databazi a ziskani informaci o aktualnim uzivateli
-		include("connect_to_db.php");
-		$sqlQuery = 'SELECT * FROM Kouzelnik WHERE jmeno_kouz=\'' . $_SESSION['login'] . '\'';
-		$wiz = mysql_query($sqlQuery, $db);
-		$wiz = mysql_fetch_array($wiz);
-		
-		$sqlQuery = 'SELECT nazev_kouz FROM Kouz_umi WHERE jmeno_kouz=\'' . $_SESSION['login'] . '\'';
-		$kouz = mysql_query($sqlQuery, $db);
-		
 		if ($_SESSION['login'] == "admin")
 		{	
 			echo '<div class="profile_part">
@@ -46,9 +36,20 @@
 					<div class="profile_part_wrapper">
 						<p class="profile_db">admin</p>
 					</div>
-				</div>';
+				</div></div></div>';
+				include("footer.php");
 			return;
 		}
+
+		$form = '';
+		// pripojeni k databazi a ziskani informaci o aktualnim uzivateli
+		include("connect_to_db.php");
+		$sqlQuery = 'SELECT * FROM Kouzelnik WHERE jmeno_kouz=\'' . $_SESSION['login'] . '\'';
+		$wiz = mysql_query($sqlQuery, $db);
+		$wiz = mysql_fetch_array($wiz);
+		
+		$sqlQuery = 'SELECT nazev_kouz FROM Kouz_umi WHERE jmeno_kouz=\'' . $_SESSION['login'] . '\'';
+		$kouz = mysql_query($sqlQuery, $db);
 		
 		echo '
 		<div class="profile_part">

@@ -23,7 +23,8 @@
 	<?
 		if ($_SESSION['login'] == "admin")
 		{
-			echo '<h1>Účet administrátora nelze upravovat</h1>';
+			echo '<h1>Účet administrátora nelze upravovat</h1></div>';
+			include("footer.php");
 			return;
 		}
 	?>

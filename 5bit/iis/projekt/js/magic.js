@@ -32,3 +32,8 @@ function display_form(id)
 		form1.className = form1.className.replace("hide", "");
 	}
 }
+
+function set_cookie(name, val)
+{
+	document.cookie = name + "=" + encodeURI(val); 
+}
