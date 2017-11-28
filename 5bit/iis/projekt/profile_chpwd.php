@@ -40,7 +40,7 @@
 				$heslo = $heslo[0];
 				
 				// spravne heslo
-				if ( $_POST['pwd_old'] == $heslo )
+				if ( md5($_POST['pwd_old']) == $heslo )
 				{
 					$error = FALSE;
 					$form = '<div class="text_input">
@@ -81,7 +81,7 @@
 					else
 					{
 						// upraveni hesla v databazi
-						$sqlQuery = 'UPDATE Kouzelnik SET heslo=\''. $_POST['pwd_new0'] .'\'WHERE jmeno_kouz = \'' . $_SESSION['login'] . '\'';
+						$sqlQuery = 'UPDATE Kouzelnik SET heslo=\''. md5($_POST['pwd_new0']) .'\'WHERE jmeno_kouz = \'' . $_SESSION['login'] . '\'';
 						$result = mysql_query($sqlQuery, $db);
 				
 						echo '<p>Změna hesla proběhla úspěšně!</p>

@@ -1,6 +1,12 @@
 <?
 	include("check_login.php");
 	include("header.php"); 
+		
+	if (isset($_GET['add']))
+	{
+		setcookie("last_page", basename($_SERVER['PHP_SELF']));
+		header('Location: overview_add.php?table=Kouzlo&nazev_kouz='.$_GET['spell']);
+	}
 ?>
 
 <header>
@@ -19,6 +25,7 @@
 		<a href="overview_scrolls.php">Svitky</a>
 		<a href="overview_elements.php">Elementy</a>
 		<a href="overview_ded_places.php">Dedikovaná místa</a>
+		<a href="overview_recharge.php">Nabití</a>
 	</nav>
 </header>
 
@@ -26,8 +33,12 @@
 	<h1>Kouzla</h1>
 	<div class="search">
 		<form method="get">
-			<input type="text" placeholder="Kouzlo" name="spell" required>
+			<input type="text" placeholder="Kouzlo" name="spell">
 			<input type="submit" name="search" value="Hledat" class="button">
+			<?
+				if ($_SESSION['login'] == "admin")
+					echo '<input type="submit" name="add" value="Přidat" class="button" id="add">';
+			?>
 		</form>
 	</div>
 	
@@ -35,12 +46,12 @@
 		<?php
 			include("connect_to_db.php");
 			$form = '<div class="table_head">
-						<span>Název</span>
+						<span style="width:240px">Název</span>
 						<span>Obtížnost</span>
 						<span>Síla</span>
 						<span>Typ</span>
-						<span>Hlavní element</span>
-						<span id="column_sec_element">Vedlejší elementy</span>
+						<span style="font-size: 19px; padding-top: 2px">Hlavní element</span>
+						<span style="font-size: 19px; padding-top: 2px">Vedlejší elementy</span>
 					</div>';
 			
 			$sqlQuery = 'SELECT * FROM Kouzlo';
@@ -51,15 +62,15 @@
 			{
 				if (isset($_GET['search']))
 				{
-					if ($_GET['spell'] == $row['nazev_kouz'] or $_GET['spell'] == $row['obtiznost'] or $_GET['spell'] == $row['sila'] or $_GET['spell'] == $row['typ'] or $_GET['spell'] == $row['druh'])
+					if ($_GET['spell'] == $row['nazev_kouz'] or $_GET['spell'] == $row['obtiznost'] or $_GET['spell'] == $row['sila'] or $_GET['spell'] == $row['typ'] or $_GET['spell'] == $row['druh'] or $_GET['spell'] == "")
 					{
 						$found_any = TRUE;
 						$form .= '<br><div class="table_content">
-										<span>' .$row['nazev_kouz']. '</span>
+										<span style="width:240px">' .$row['nazev_kouz']. '</span>
 										<span>' .$row['obtiznost']. '</span>
 										<span>' .$row['sila']. '</span>
 										<span>' .$row['typ']. '</span>
-										<span>' .$row['druh']. '</span>
+										<a href="overview_elements.php?element='.$row['druh'].'&search=Hledat"><span>' .$row['druh']. '</span></a>
 										<span id="column_sec_element">';
 										
 										if ($row['typ'] == "útočné")
@@ -76,23 +87,34 @@
 											{
 												while ($row2 = mysql_fetch_array($result2))
 												{
-													$form .= $row2['druh'].'<br>';
+													$form .= '<a href="overview_elements.php?element='.$row2['druh'].'&search=Hledat">'.$row2['druh'].'</a><br>';
 												}
 											}
 										}
 						
 						$form .= '</span></div>';
+						// dalsi prava pro admina - editace a odstraneni
+						if ($_SESSION['login'] == "admin")
+						{
+							$form .= '	<a href="overview_edit.php?table=Kouzlo" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['nazev_kouz'] .'\')">
+											<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/edit.png" Title="Upravit">
+										</a>
+										<a href="overview_delete.php?ozn=kouzlo&table=Kouzlo" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['nazev_kouz'] .'\')">
+											<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/delete.png" Title="Odstranit">
+										</a>';
+							setcookie("last_page", basename($_SERVER['PHP_SELF']));
+						}
 					}
 				}
 				else
 				{
 					$found_any = TRUE;
 					$form .= '<br><div class="table_content">
-									<span>' .$row['nazev_kouz']. '</span>
+									<span style="width:240px">' .$row['nazev_kouz']. '</span>
 									<span>' .$row['obtiznost']. '</span>
 									<span>' .$row['sila']. '</span>
 									<span>' .$row['typ']. '</span>
-									<span>' .$row['druh']. '</span>
+									<a href="overview_elements.php?element='.$row['druh'].'&search=Hledat"><span>' .$row['druh']. '</span></a>
 									<span id="column_sec_element">';
 									
 									if ($row['typ'] == "útočné")
@@ -109,13 +131,12 @@
 										{
 											while ($row2 = mysql_fetch_array($result2))
 											{
-												$form .= $row2['druh'].'<br>';
+												$form .= '<a href="overview_elements.php?element='.$row2['druh'].'&search=Hledat">'.$row2['druh'].'</a><br>';
 											}
 										}
 									}
 					
 					$form .= '</span></div>';
-					
 					// dalsi prava pro admina - editace a odstraneni
 					if ($_SESSION['login'] == "admin")
 					{

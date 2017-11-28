@@ -1,6 +1,12 @@
 <?
 	include("check_login.php");
 	include("header.php"); 
+	
+	if (isset($_GET['add']))
+	{
+		setcookie("last_page", basename($_SERVER['PHP_SELF']));
+		header('Location: overview_add.php?table=Element&druh='.$_GET['element']);
+	}
 ?>
 
 <header>
@@ -19,6 +25,7 @@
 		<a href="overview_scrolls.php">Svitky</a>
 		<a href="overview_elements.php" class="selected">Elementy</a>
 		<a href="overview_ded_places.php">Dedikovaná místa</a>
+		<a href="overview_recharge.php">Nabití</a>
 	</nav>
 </header>
 
@@ -26,8 +33,12 @@
 	<h1>Elementy</h1>
 	<div class="search">
 		<form method="get">
-			<input type="text" placeholder="Element" name="element" required>
+			<input type="text" placeholder="Element" name="element">
 			<input type="submit" name="search" value="Hledat" class="button">
+			<?
+				if ($_SESSION['login'] == "admin")
+					echo '<input type="submit" name="add" value="Přidat" class="button" id="add">';
+			?>
 		</form>
 	</div>
 	
@@ -38,7 +49,7 @@
 						<span>Název</span>
 						<span>Barva</span>
 						<span>Specializace</span>
-						<span id="column_sec_element">Místo prosakování</span>
+						<span style="width:240px">Místo prosakování</span>
 					</div>';
 			
 			$sqlQuery = 'SELECT * FROM Element';
@@ -49,14 +60,14 @@
 			{
 				if (isset($_GET['search']))
 				{
-					if ($_GET['element'] == $row['druh'] or $_GET['element'] == $row['barva'] or $_GET['element'] == $row['specializace'])
+					if ($_GET['element'] == $row['druh'] or $_GET['element'] == $row['barva'] or $_GET['element'] == $row['specializace'] or $_GET['element'] == "")
 					{
 						$found_any = TRUE;
 						$form .= '<br><div class="table_content">
 										<span>' .$row['druh']. '</span>
 										<span>' .$row['barva']. '</span>
 										<span>' .$row['specializace']. '</span>
-										<span id="column_sec_element">';
+										<span style="width:240px">';
 										
 										$sqlQuery = 'SELECT jmeno FROM Ded_misto WHERE druh=\''.$row['druh'].'\'';
 										$result2 = mysql_query($sqlQuery, $db);
@@ -67,10 +78,21 @@
 										{
 											while ($row2 = mysql_fetch_array($result2))
 											{
-												$form .= $row2['jmeno'].'<br>';
+												$form .= '<a href="overview_ded_places.php?place='.$row2['jmeno'].'&search=Hledat">'.$row2['jmeno'].'</a><br>';
 											}
 										}
-									$form .= '</span></div>';
+						$form .= '</span></div>';
+						// dalsi prava pro admina - editace a odstraneni
+						if ($_SESSION['login'] == "admin")
+						{
+							$form .= '	<a href="overview_edit.php?table=Element" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['druh'] .'\')">
+											<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/edit.png" Title="Upravit">
+										</a>
+										<a href="overview_delete.php?ozn=element&table=Element&item=druh" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['druh'] .'\')">
+											<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/delete.png" Title="Odstranit">
+										</a>';
+							setcookie("last_page", basename($_SERVER['PHP_SELF']));
+						}
 					}
 				}
 				else
@@ -80,7 +102,7 @@
 								<span>' .$row['druh']. '</span>
 								<span>' .$row['barva']. '</span>
 								<span>' .$row['specializace']. '</span>
-								<span id="column_sec_element">';
+								<span style="width:240px">';
 								
 								$sqlQuery = 'SELECT jmeno FROM Ded_misto WHERE druh=\''.$row['druh'].'\'';
 								$result2 = mysql_query($sqlQuery, $db);
@@ -91,22 +113,21 @@
 								{
 									while ($row2 = mysql_fetch_array($result2))
 									{
-										$form .= $row2['jmeno'].'<br>';
+										$form .= '<a href="overview_ded_places.php?place='.$row2['jmeno'].'&search=Hledat">'.$row2['jmeno'].'</a><br>';
 									}
 								}
-							$form .= '</span></div>';
-				}
-				
-				// dalsi prava pro admina - editace a odstraneni
-				if ($_SESSION['login'] == "admin")
-				{
-					$form .= '	<a href="overview_edit.php?table=Element" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['druh'] .'\')">
-									<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/edit.png" Title="Upravit">
-								</a>
-								<a href="overview_delete.php?ozn=element&table=Element&item=druh" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['druh'] .'\')">
-									<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/delete.png" Title="Odstranit">
-								</a>';
-					setcookie("last_page", basename($_SERVER['PHP_SELF']));
+					$form .= '</span></div>';
+					// dalsi prava pro admina - editace a odstraneni
+					if ($_SESSION['login'] == "admin")
+					{
+						$form .= '	<a href="overview_edit.php?table=Element" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['druh'] .'\')">
+										<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/edit.png" Title="Upravit">
+									</a>
+									<a href="overview_delete.php?ozn=element&table=Element&item=druh" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['druh'] .'\')">
+										<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/delete.png" Title="Odstranit">
+									</a>';
+						setcookie("last_page", basename($_SERVER['PHP_SELF']));
+					}
 				}
 			}
 			if ($found_any)

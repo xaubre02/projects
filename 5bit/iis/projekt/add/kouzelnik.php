@@ -1,9 +1,4 @@
 <?php
-	// ziskani informaci
-	$sqlQuery = 'SELECT * FROM Kouzelnik WHERE jmeno_kouz=\'' . $_COOKIE['id'] . '\'';
-	$wiz = mysql_query($sqlQuery, $db);
-	$wiz = mysql_fetch_array($wiz);
-	
 	$sqlQuery = 'SELECT druh FROM Element';
 	$elem = mysql_query($sqlQuery, $db);
 	
@@ -13,7 +8,7 @@
 	$sqlQuery = 'SELECT nazev_kouz FROM Kouz_umi WHERE jmeno_kouz=\'' . $_COOKIE['id'] . '\'';
 	$umi = mysql_query($sqlQuery, $db);
 	
-	if(isset($_POST['chwizard']))
+	if(isset($_POST['addwiz']))
 	{
 		$error = FALSE;
 		$page = '<div class="text_input">
@@ -26,7 +21,7 @@
 			$sqlQuery = 'SELECT jmeno_kouz FROM Kouzelnik WHERE jmeno_kouz = \'' . $_POST['username'] . '\'';
 			$result = mysql_query($sqlQuery, $db);
 			
-			if (mysql_num_rows($result) != 0 and $_POST['username'] != $_COOKIE['id'])
+			if (mysql_num_rows($result) != 0)
 			{
 				$error = TRUE;
 				$page .= '	<input type="text" name="username" value="'.$_POST['username'].'" class="bad-input">
@@ -159,29 +154,22 @@
 		}
 		$page .= '</div> </div>
 				<input type="hidden" name="table" value="'. $_POST['table'] .'">
-				<input type="hidden" name="id" value="'. $_COOKIE['id'] .'">
 				<div class="button_choice">
 					<a href="'. $_COOKIE['last_page'] .'" class="button">Zrušit</a>
-					<input type="submit" value="Upravit" class="button" name="chwizard">
+					<input type="submit" value="Přidat" class="button" name="addwiz">
 				</div>';
 					
 		if (!$error)
-		{	
-			// odstraneni dosavadnich kouzel, ktere kouzelnik umi
-			$sqlQuery = 'DELETE FROM Kouz_umi WHERE jmeno_kouz=\''. $_COOKIE['id'] .'\'';
-			$result = mysql_query($sqlQuery, $db);
-			
-			// upraveni udaju v databazi
-			$sqlQuery = 'UPDATE Kouzelnik SET jmeno_kouz=\''. $_POST['username'] .'\', heslo=\''. md5($_POST['pwd_new0']) .'\', mana=\''. $mana .'\', uroven=\''. $level .'\', synergie=';
+		{
+			// pridani udaju do databaze
+			$sqlQuery = 'INSERT INTO Kouzelnik(jmeno_kouz, heslo, mana, uroven, synergie) VALUES(\''. $_POST['username'] .'\', \''. md5($_POST['pwd_new0']) .'\', \''. $mana .'\', \''. $level .'\', ';
 			if ($_POST['synergy'] == "none")
-				$sqlQuery .= "NULL";
+				$sqlQuery .= "NULL".')';
 			else
-				$sqlQuery .= '\''. $_POST['synergy'] . '\'';
-			
-			$sqlQuery .= ' WHERE jmeno_kouz = \''. $_COOKIE['id'] .'\'';
+				$sqlQuery .= '\''. $_POST['synergy'] . '\')';
 			$result = mysql_query($sqlQuery, $db);
 			
-			// pridani novych kouzel, ktere kouzelnik umi
+			// pridani kouzel, ktere kouzelnik umi
 			if (!empty($_POST['check_list']))
 			{
 				foreach($_POST['check_list'] as $new_spell)
@@ -191,7 +179,7 @@
 				}
 			}
 
-			echo '	<p>Změny byly úspěšně uloženy!</p>
+			echo '	<p>Kouzelník byl úspěně uložen do databáze!</p>
 					<a href="'. $_COOKIE['last_page'] .'" class="button">Rozumím</a>';
 		}
 		else
@@ -203,23 +191,23 @@
 	{
 		echo'	<div class="text_input">
 					<label for="username">Jméno:</label>
-					<input type="text" name="username" value="'.$wiz['jmeno_kouz'].'">
+					<input type="text" name="username" value="'.$_GET['jmeno_kouz'].'">
 				</div>
 				<div class="text_input">
 					<label for="pwd_new0">Heslo:</label>
-					<input type="password" name="pwd_new0" value="'. $wiz['heslo'] .'">
+					<input type="password" name="pwd_new0">
 				</div>
 				<div class="text_input">
 					<label for="pwd_new1">Potvrdit heslo:</label>
-					<input type="password" name="pwd_new1" value="'. $wiz['heslo'] .'">
+					<input type="password" name="pwd_new1">
 				</div>
 				<div class="text_input">
 					<label for="mana">Mana:</label>
-					<input type="text" name="mana" value="'.$wiz['mana'].'">
+					<input type="text" name="mana">
 				</div>
 				<div class="text_input">
 					<label for="level">Úroveň:</label>
-					<input type="text" name="level" value="'.$wiz['uroven'].'">
+					<input type="text" name="level">
 				</div>
 				<div class="text_input">
 					<label for="synergy">Synergie:</label>
@@ -228,13 +216,11 @@
 							<input type="radio" name="synergy" checked="checked" value="none"><span>Žádná</span><br>
 						</div>';
 						while ($row = mysql_fetch_array($elem))
-						{
-							echo '	<div class="choice">';
-							if ($wiz['synergie'] == $row['druh'])
-								echo '<input type="radio" name="synergy" checked="checked" value="'.$row['druh'].'"><span>'. $row['druh'] .'</span><br></div>';
-							else
-								echo '<input type="radio" name="synergy" value="'.$row['druh'].'"><span>'. $row['druh'] .'</span><br></div>';
-						}
+							echo '	<div class="choice">
+										<input type="radio" name="synergy" checked="checked" value="'.$row['druh'].'">
+										<span>'. $row['druh'] .'</span><br>
+									</div>';
+
 		echo'			</div>
 				</div>
 				<div class="text_input">
@@ -248,29 +234,17 @@
 					}
 					
 					while ($spell = mysql_fetch_array($kouz))
-					{
-						$contains = FALSE;
-						foreach ($umi_kouzla as $spell_learned)
-						{
-							if ($spell['nazev_kouz'] == $spell_learned['nazev_kouz'])
-							{
-								$contains = TRUE;
-								echo '	<div class="choice">
-									<input type="checkbox" name="check_list[]" value="'.$spell['nazev_kouz'].'" checked="checked"><span>'. $spell['nazev_kouz'] .'</span><br></div>';
-								break;
-							}
-						}
-						if (!$contains)
-							echo '	<div class="choice">
-								<input type="checkbox" name="check_list[]" value="'.$spell['nazev_kouz'].'"><span>'. $spell['nazev_kouz'] .'</span><br></div>';
-					}
+						echo '	<div class="choice">
+									<input type="checkbox" name="check_list[]" value="'.$spell['nazev_kouz'].'">
+									<span>'. $spell['nazev_kouz'] .'</span><br>
+								</div>';
+							
 		echo'		</div>
 				</div>
 				<input type="hidden" name="table" value="'. $_GET['table'] .'">
-				<input type="hidden" name="id" value="'. $_COOKIE['id'] .'">
 				<div class="button_choice">
 					<a href="'. $_COOKIE['last_page'] .'" class="button">Zrušit</a>
-					<input type="submit" value="Upravit" class="button" name="chwizard">
+					<input type="submit" value="Přidat" class="button" name="addwiz">
 				</div>';
 	}
 ?>

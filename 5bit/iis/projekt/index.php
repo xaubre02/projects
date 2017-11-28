@@ -55,7 +55,7 @@
 			$heslo = $heslo[0];
 			
 			// kontrola hesla
-			if ($pwd == $heslo and $heslo != "")
+			if (md5($pwd) == $heslo and $heslo != "")
 			{
 				$_SESSION["login"] = $login;
 				$_SESSION["time"] = time();
@@ -254,7 +254,7 @@
 		{
 			// pripojeni k databazi a pridani noveho kouzelnika
 			include("connect_to_db.php");
-			$sqlQuery = 'INSERT INTO Kouzelnik (jmeno_kouz, heslo, mana, uroven) VALUES (\''. $_POST['username'] .'\', \''. $_POST['pwd0'] .'\', \''. $mana .'\', \''. $level .'\')';
+			$sqlQuery = 'INSERT INTO Kouzelnik (jmeno_kouz, heslo, mana, uroven) VALUES (\''. $_POST['username'] .'\', \''. md5($_POST['pwd0']) .'\', \''. $mana .'\', \''. $level .'\')';
 			$result = mysql_query($sqlQuery, $db);
 			mysql_close($db);
 			

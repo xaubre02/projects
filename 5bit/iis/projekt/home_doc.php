@@ -39,7 +39,7 @@
 	<h2>Uživatelé systému pro testování</h2>
 	<table>
 	<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
-	<tr><td>admin</td><td>root</td><td>Administrátor</td></tr>
+	<tr><td>********</td><td>********</td><td>Administrátor</td></tr>
 	<tr><td>Gandalf</td><td>123456</td><td>Kouzelník</td></tr>
 	<tr><td>Baba Yaga</td><td>123456</td><td>Kouzelník</td></tr>
 	</table>

@@ -19,6 +19,7 @@
 		<a href="overview_scrolls.php">Svitky</a>
 		<a href="overview_elements.php">Elementy</a>
 		<a href="overview_ded_places.php">Dedikovaná místa</a>
+		<a href="overview_recharge.php" class="selected">Nabití</a>
 	</nav>
 </header>
 
@@ -33,6 +34,7 @@
 	<h1>Odstranit</h1>
 	<form action="overview_delete.php" method="post">
 	<? 
+		$keys = explode("&", $_COOKIE['id']);
 		if (isset($_POST['delete']))
 		{
 			include("connect_to_db.php");
@@ -49,7 +51,7 @@
 				// kontrola, zdali neni kouzlo obsazeno v grimoaru nebo ve svitku
 				if (mysql_num_rows($grim) != 0 or mysql_num_rows($scroll) != 0)
 					echo '	<p>Nelze odstranit kouzlo, protože je součástí některého grimoáru nebo svitku!</p>
-							<a href='.'"'.$_COOKIE['last_page'].'"' . 'class="button">Rozumím</a>';
+							<a href='.'"'.$_COOKIE['last_page'].'"' .' class="button">Rozumím</a>';
 				
 				else
 				{
@@ -208,15 +210,45 @@
 				}
 			}
 			
+			// Odstranit historii vlastnictvi
+			else if ($_POST['table'] == "Kouz_mel")
+			{
+				$keys = explode("&", $_POST['id']);
+				$sqlQuery = 'DELETE FROM Kouz_mel WHERE jmeno_kouz=\''.$keys[0].'\' AND nazev_grim=\''. $keys[1] .'\'';
+				$result = mysql_query($sqlQuery, $db);
+				
+				echo '	<p>Odstranení proběhlo úspěšně!</p>
+						<a href='.'"'.$_COOKIE['last_page'].'"' . 'class="button">Rozumím</a>';
+			}
+			
+			// Odstranit nabiti
+			else if ($_POST['table'] == "Nabiti")
+			{
+				// odstraneni vsech mist 
+				$sqlQuery = 'DELETE FROM Nab_ded_mista WHERE Nabiti=\''.$_POST['id'].'\'';
+				$result = mysql_query($sqlQuery, $db);
+				
+				// odstraneni nabiti
+				$sqlQuery = 'DELETE FROM Nabiti WHERE id_nabiti=\''. $_POST['id'] .'\'';
+				$result = mysql_query($sqlQuery, $db);
+				
+				echo '	<p>Odstranení proběhlo úspěšně!</p>
+						<a href='.'"'.$_COOKIE['last_page'].'"' . 'class="button">Rozumím</a>';
+			}
+			
 			mysql_close($db);
 		}
 		else
 		{
-			echo '	<p>Opravdu chcete odstranit ' . $_GET['ozn'].' <i>'.$_COOKIE['id'].'</i> &nbsp z databáze?</p>
+			echo '	<p>Opravdu chcete odstranit ' . $_GET['ozn']; if($_GET['table'] != "Nabiti") echo '<i>'.$_COOKIE['id'].'</i>&nbsp;&nbsp;'; echo ' z databáze?</p>
 					<input type="hidden" name="table" value="'. $_GET['table'] .'">
 					<input type="hidden" name="id" value="'. $_COOKIE['id'] .'">
 					<div class="button_choice">
-						<a href='.'"'.$_COOKIE['last_page'].'"' . 'class="button">Ne</a>
+						<a href="'. $_COOKIE['last_page'];
+					if ($_GET['table'] == "Kouz_mel")
+						echo '?spellbook=' .$keys[1];
+
+			echo 		'" class="button">Ne</a>
 						<input type="submit" value="Ano" class="button" name="delete">
 					</div>';
 		}

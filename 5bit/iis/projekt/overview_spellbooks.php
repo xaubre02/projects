@@ -1,6 +1,12 @@
 <?
 	include("check_login.php");
 	include("header.php"); 
+		
+	if (isset($_GET['add']))
+	{
+		setcookie("last_page", basename($_SERVER['PHP_SELF']));
+		header('Location: overview_add.php?table=Grimoar&nazev_grim='.$_GET['spellbook']);
+	}
 ?>
 
 <header>
@@ -19,6 +25,7 @@
 		<a href="overview_scrolls.php">Svitky</a>
 		<a href="overview_elements.php">Elementy</a>
 		<a href="overview_ded_places.php">Dedikovaná místa</a>
+		<a href="overview_recharge.php">Nabití</a>
 	</nav>
 </header>
 
@@ -26,8 +33,12 @@
 	<h1>Grimoáry</h1>
 	<div class="search">
 		<form method="get">
-			<input type="text" placeholder="Grimoár" name="spellbook" required>
+			<input type="text" placeholder="Grimoár" name="spellbook">
 			<input type="submit" name="search" value="Hledat" class="button">
+			<?
+				if ($_SESSION['login'] == "admin")
+					echo '<input type="submit" name="add" value="Přidat" class="button" id="add">';
+			?>
 		</form>
 	</div>
 	
@@ -35,12 +46,12 @@
 		<?php
 			include("connect_to_db.php");
 			$form = '<div class="table_head">
-						<span id="column_scroll">Název</span>
-						<span>Mana</span>
-						<span>Element</span>
-						<span>Majitel</span>
-						<span id="column_sec_element">Kouzla</span>
-						<span>Vlastnictví</span>
+						<span style="width:240px">Název</span>
+						<span style="width:80px">Mana</span>
+						<span style="width:120px">Element</span>
+						<span style="width:200px">Majitel</span>
+						<span style="width:240px">Kouzla</span>
+						<span style="width:80px">Vlastnil</span>
 					</div>';
 			
 			$sqlQuery = 'SELECT * FROM Grimoar';
@@ -51,64 +62,73 @@
 			{
 				if (isset($_GET['search']))
 				{
-					if ($_GET['spellbook'] == $row['nazev_grim'] or $_GET['spellbook'] == $row['mana'] or $_GET['spellbook'] == $row['druh'] or $_GET['spellbook'] == $row['jmeno_kouz'])
+					if ($_GET['spellbook'] == $row['nazev_grim'] or $_GET['spellbook'] == $row['mana'] or $_GET['spellbook'] == $row['druh'] or $_GET['spellbook'] == $row['jmeno_kouz'] or $_GET['spellbook'] == "")
 					{
 						$found_any = TRUE;
 						$form .= '<br><div class="table_content">
-										<span id="column_scroll">' .$row['nazev_grim']. '</span>
-										<span>' .$row['mana']. '</span>
-										<span>' .$row['druh']. '</span>
-										<span>';
+										<span style="width:240px">' .$row['nazev_grim']. '</span>
+										<span style="width:80px">' .$row['mana']. '</span>
+										<a href="overview_elements.php?element='.$row['druh'].'&search=Hledat"><span style="width:120px">' .$row['druh']. '</span></a>';
 										if ($row['jmeno_kouz'] == "")
-											$form .= 'není</span>';
+											$form .= '<span style="width:200px">není</span>';
 										else
-											$form .= $row['jmeno_kouz'].'</span>';
+											$form .= '<a href="overview_wizards.php?wizard='.$row['jmeno_kouz'].'&search=Hledat"><span style="width:200px">'.$row['jmeno_kouz'].'</span></a>';
 										
-										$form .= '<span id="column_sec_element">';
+										$form .= '<span  style="width:240px">';
 										$sqlQuery = 'SELECT nazev_kouz FROM Grim_obsah WHERE nazev_grim=\''.$row['nazev_grim'].'\'';
 										$result2 = mysql_query($sqlQuery, $db);
 										while ($row2 = mysql_fetch_array($result2))
-											$form .= $row2['nazev_kouz'].'<br>';
+											$form .= '<a href="overview_spells.php?spell='.$row2['nazev_kouz'].'&search=Hledat">'.$row2['nazev_kouz'].'</a><br>';
 						
 						$form .= '	</span>
-							<span><a href="overview_history.php?spellbook=' .$row['nazev_grim']. '">historie</a></span>
+							<span  style="width:80px"><a href="overview_history.php?spellbook=' .$row['nazev_grim']. '">historie</a></span>
 						</div>';
+
+						// dalsi prava pro admina - editace a odstraneni
+						if ($_SESSION['login'] == "admin")
+						{
+							$form .= '	<a href="overview_edit.php?table=Grimoar" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['nazev_grim'] .'\')">
+											<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/edit.png" Title="Upravit">
+										</a>
+										<a href="overview_delete.php?ozn=grimoár&table=Grimoar&item=nazev_grim" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['nazev_grim'] .'\')">
+											<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/delete.png" Title="Odstranit">
+										</a>';
+							setcookie("last_page", basename($_SERVER['PHP_SELF']));
+						}
 					}
 				}
 				else 
 				{
 					$found_any = TRUE;
 					$form .= '<br><div class="table_content">
-									<span id="column_scroll">' .$row['nazev_grim']. '</span>
-									<span>' .$row['mana']. '</span>
-									<span>' .$row['druh']. '</span>
-									<span>';
+									<span style="width:240px">' .$row['nazev_grim']. '</span>
+									<span style="width:80px">' .$row['mana']. '</span>
+									<a href="overview_elements.php?element='.$row['druh'].'&search=Hledat"><span style="width:120px">' .$row['druh']. '</span></a>';
 									if ($row['jmeno_kouz'] == "")
-										$form .= 'není</span>';
+										$form .= '<span style="width:200px">není</span>';
 									else
-										$form .= $row['jmeno_kouz'].'</span>';
+										$form .= '<a href="overview_wizards.php?wizard='.$row['jmeno_kouz'].'&search=Hledat"><span style="width:200px">'.$row['jmeno_kouz'].'</span></a>';
 									
-									$form .= '<span id="column_sec_element">';
+									$form .= '<span  style="width:240px">';
 									$sqlQuery = 'SELECT nazev_kouz FROM Grim_obsah WHERE nazev_grim=\''.$row['nazev_grim'].'\'';
 									$result2 = mysql_query($sqlQuery, $db);
 									while ($row2 = mysql_fetch_array($result2))
-										$form .= $row2['nazev_kouz'].'<br>';
+										$form .= '<a href="overview_spells.php?spell='.$row2['nazev_kouz'].'&search=Hledat">'.$row2['nazev_kouz'].'</a><br>';
 					
 					$form .= '	</span>
-						<span><a href="overview_history.php?spellbook=' .$row['nazev_grim']. '">historie</a></span>
+						<span  style="width:80px"><a href="overview_history.php?spellbook=' .$row['nazev_grim']. '">historie</a></span>
 					</div>';
-				}
-
-				// dalsi prava pro admina - editace a odstraneni
-				if ($_SESSION['login'] == "admin")
-				{
-					$form .= '	<a href="overview_edit.php?table=Grimoar" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['nazev_grim'] .'\')">
-									<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/edit.png" Title="Upravit">
-								</a>
-								<a href="overview_delete.php?ozn=grimoár&table=Grimoar&item=nazev_grim" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['nazev_grim'] .'\')">
-									<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/delete.png" Title="Odstranit">
-								</a>';
-					setcookie("last_page", basename($_SERVER['PHP_SELF']));
+					// dalsi prava pro admina - editace a odstraneni
+					if ($_SESSION['login'] == "admin")
+					{
+						$form .= '	<a href="overview_edit.php?table=Grimoar" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['nazev_grim'] .'\')">
+										<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/edit.png" Title="Upravit">
+									</a>
+									<a href="overview_delete.php?ozn=grimoár&table=Grimoar&item=nazev_grim" class="edit_pic" onclick="set_cookie(\'id\', \''. $row['nazev_grim'] .'\')">
+										<img src="https://www.stud.fit.vutbr.cz/~xaubre02/pic/delete.png" Title="Odstranit">
+									</a>';
+						setcookie("last_page", basename($_SERVER['PHP_SELF']));
+					}
 				}
 			}
 

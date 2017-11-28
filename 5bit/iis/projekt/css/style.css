@@ -59,7 +59,7 @@ body {
 	background: #000 url("https://www.stud.fit.vutbr.cz/~xaubre02/pic/magic_forest.png") no-repeat fixed center !important;
 	background-size: cover !important;
 	max-width: 65vw !important;
-	min-width: 800px;
+	min-width: 975px;
 	min-height: 480px;
 	width: 100% !important;
 	height: 100%;
@@ -278,18 +278,18 @@ header {
 .sub-menu {
 	width: 100%;
 	height: 40%;
-	font-size: 18px;
+	font-size: 19px;
 	font-family: Impact, Charcoal, sans-serif;
 	background-color: #b3b3b3;
 }
 
 .sub-menu a {
 	float: left;
-	min-width: 16.66%;
+	min-width: 14.2857%;
 	height: 100%;
 	color: black;
 	text-align: center;
-	padding-top: 5px;
+	padding-top: 4px;
 	transition: color .4s, background-color .4s;
 }
 
@@ -323,6 +323,7 @@ header {
 .content p {
 	font-size: 18px;
 	font-weight: 100;
+	padding: 20px 40px;
 }
 
 .content a {
@@ -478,9 +479,8 @@ header {
 
 /*===========================* OVERVIEW *============================*/
 .search {
+	display: inline-block;
 	background-color: #b3b3b3;
-	width: 345px;
-	height: 60px;
 	padding: 10px 15px;
 }
 
@@ -491,7 +491,7 @@ header {
 	height: 100%;
 }
 
-.search input {
+.search input{
 	float: left;
 	border-radius: 10px !important;
 }
@@ -508,6 +508,10 @@ header {
 	font-family: Impact, Charcoal, sans-serif;
 }
 
+#add{
+	margin-left: 15px !important;
+}
+
 .search form .button{
 	margin: 0;
 	padding: 0;
@@ -521,7 +525,7 @@ header {
 	margin: auto;
 	margin-top: 30px;
 	width: 90%;
-	min-width: 1080px;
+	min-width: 1090px;
 }
 
 .table_head {
@@ -541,36 +545,40 @@ header {
 	
 }
 
-.table span {
+.table span{
 	float: left;
 	padding-left: 5px;
 	width: 150px;
+	transition: height .3s;
 }
 
 .table_content {
 	margin: auto;
+	max-height: 25px;
 	display: inline-block;
 	background-color: white;
+	transition: color .4s, background-color .4s, max-height .4s;
+}
+
+.table_content:hover {
+	background-color: #f2f2f2;
+	max-height: 1000px;
 }
 
 .table_content span {
 	font-size: 20px;
+	max-height: inherit;
+	overflow: auto;
 }
 
-#column_mana {
-	width: 75px;
+.table_content a , .table_content a span {
+	font-weight: normal;
+	color: black;
+	transition: color .4s;
 }
 
-#column_level {
-	width: 85px;
-}
-
-#column_sec_element{
-	width: 175px;
-}
-
-#column_scroll{
-	width: 220px;
+.table_content a:hover, .table_content a span:hover{
+	color: #595959;
 }
 
 .edit_pic{

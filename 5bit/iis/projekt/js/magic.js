@@ -33,7 +33,19 @@ function display_form(id)
 	}
 }
 
+// nastaveni cookies
 function set_cookie(name, val)
 {
 	document.cookie = name + "=" + encodeURI(val); 
 }
+
+// formatovani data
+$( 
+	function() 
+	{
+		$( "#datum_od" ).datepicker({ dateFormat: "dd.mm. yy", showAnim: "slideDown", maxDate: new Date() });
+		$( "#datum_do" ).datepicker({ dateFormat: "dd.mm. yy", showAnim: "slideDown", maxDate: new Date() });
+	} 
+);
+
+  
