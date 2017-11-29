@@ -33,7 +33,7 @@
 	<h1>Svitky</h1>
 	<div class="search">
 		<form method="get">
-			<input type="text" placeholder="Svitek" name="scroll">
+			<input type="text" placeholder="Svitek" name="scroll" value="<? if(isset($_GET['search'])) echo $_GET['scroll'] ?>">
 			<input type="submit" name="search" value="Hledat" class="button">
 			<?
 				if ($_SESSION['login'] == "admin")
@@ -42,7 +42,7 @@
 		</form>
 	</div>
 	
-	<div class="table">		
+	<div class="table" style="min-width:750px">		
 		<?php
 			include("connect_to_db.php");
 			$form = '<div class="table_head">

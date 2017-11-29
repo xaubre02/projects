@@ -35,7 +35,7 @@
 	<h1><?echo$_GET['spellbook']?></h1>
 	<div class="search">
 		<form <? echo 'action="overview_history.php?spellbook='. $_GET['spellbook'] .'"' ?> method="get">
-			<input type="text" placeholder="Záznam" name="record">
+			<input type="text" placeholder="Záznam" name="record" value="<? if(isset($_GET['search'])) echo $_GET['record'] ?>">
 			<input type="submit" name="search" value="Hledat" class="button">
 			<input type="hidden" name="spellbook" value=<? echo '"'. $_GET['spellbook'] .'"'?>>
 			<?

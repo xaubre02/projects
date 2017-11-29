@@ -33,7 +33,7 @@
 	<h1>Nabití</h1>
 	<div class="search">
 		<form method="get">
-			<input type="text" placeholder="Nabití" name="recharge">
+			<input type="text" placeholder="Nabití" name="recharge" value="<? if(isset($_GET['search'])) echo $_GET['recharge'] ?>">
 			<input type="submit" name="search" value="Hledat" class="button">
 			<?
 				if ($_SESSION['login'] == "admin")
@@ -42,7 +42,7 @@
 		</form>
 	</div>
 	
-	<div class="table">
+	<div class="table" style="min-width:950px">
 		<?php
 			include("connect_to_db.php");
 			$form = '<div class="table_head">

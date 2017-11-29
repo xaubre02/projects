@@ -59,7 +59,7 @@ body {
 	background: #000 url("https://www.stud.fit.vutbr.cz/~xaubre02/pic/magic_forest.png") no-repeat fixed center !important;
 	background-size: cover !important;
 	max-width: 65vw !important;
-	min-width: 975px;
+	min-width: 1000px;
 	min-height: 480px;
 	width: 100% !important;
 	height: 100%;
@@ -160,7 +160,7 @@ body {
 
 /*===========================* REGISTER *============================*/
 #register, #logout_msg{
-	margin-top: 50px;
+	margin: 50px auto;
 }
 
 #register form, #logout_msg form {
@@ -176,12 +176,13 @@ body {
 }
 
 #register p {
-	font-size: 16px;
+	font-size: 14px;
+	text-align: center;
 	font-weight: bold;
 	font-style: italic;
 	margin: auto;
 	margin-top: 16px;
-	width: 100px;
+	width: 120px;
 }
 
 #reg-succ  {
@@ -291,10 +292,6 @@ header {
 	text-align: center;
 	padding-top: 4px;
 	transition: color .4s, background-color .4s;
-}
-
-.sub-menu a:last-child {
-	border-right: none;
 }
 
 .sub-menu a:hover, .sub-menu .selected  {
@@ -526,6 +523,7 @@ header {
 	margin-top: 30px;
 	width: 90%;
 	min-width: 1090px;
+	
 }
 
 .table_head {

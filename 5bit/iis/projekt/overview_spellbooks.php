@@ -33,7 +33,7 @@
 	<h1>Grimoáry</h1>
 	<div class="search">
 		<form method="get">
-			<input type="text" placeholder="Grimoár" name="spellbook">
+			<input type="text" placeholder="Grimoár" name="spellbook" value="<? if(isset($_GET['search'])) echo $_GET['spellbook'] ?>">
 			<input type="submit" name="search" value="Hledat" class="button">
 			<?
 				if ($_SESSION['login'] == "admin")
@@ -42,16 +42,16 @@
 		</form>
 	</div>
 	
-	<div class="table">
+	<div class="table"  style="min-width:1055px">
 		<?php
 			include("connect_to_db.php");
 			$form = '<div class="table_head">
 						<span style="width:240px">Název</span>
-						<span style="width:80px">Mana</span>
+						<span style="width:85px">Mana</span>
 						<span style="width:120px">Element</span>
 						<span style="width:200px">Majitel</span>
 						<span style="width:240px">Kouzla</span>
-						<span style="width:80px">Vlastnil</span>
+						<span style="width:90px">Vlastnil</span>
 					</div>';
 			
 			$sqlQuery = 'SELECT * FROM Grimoar';
@@ -67,7 +67,7 @@
 						$found_any = TRUE;
 						$form .= '<br><div class="table_content">
 										<span style="width:240px">' .$row['nazev_grim']. '</span>
-										<span style="width:80px">' .$row['mana']. '</span>
+										<span style="width:85px">' .$row['mana']. '</span>
 										<a href="overview_elements.php?element='.$row['druh'].'&search=Hledat"><span style="width:120px">' .$row['druh']. '</span></a>';
 										if ($row['jmeno_kouz'] == "")
 											$form .= '<span style="width:200px">není</span>';
@@ -81,7 +81,7 @@
 											$form .= '<a href="overview_spells.php?spell='.$row2['nazev_kouz'].'&search=Hledat">'.$row2['nazev_kouz'].'</a><br>';
 						
 						$form .= '	</span>
-							<span  style="width:80px"><a href="overview_history.php?spellbook=' .$row['nazev_grim']. '">historie</a></span>
+							<span  style="width:90px"><a href="overview_history.php?spellbook=' .$row['nazev_grim']. '">historie</a></span>
 						</div>';
 
 						// dalsi prava pro admina - editace a odstraneni
@@ -102,7 +102,7 @@
 					$found_any = TRUE;
 					$form .= '<br><div class="table_content">
 									<span style="width:240px">' .$row['nazev_grim']. '</span>
-									<span style="width:80px">' .$row['mana']. '</span>
+									<span style="width:85px">' .$row['mana']. '</span>
 									<a href="overview_elements.php?element='.$row['druh'].'&search=Hledat"><span style="width:120px">' .$row['druh']. '</span></a>';
 									if ($row['jmeno_kouz'] == "")
 										$form .= '<span style="width:200px">není</span>';
@@ -116,7 +116,7 @@
 										$form .= '<a href="overview_spells.php?spell='.$row2['nazev_kouz'].'&search=Hledat">'.$row2['nazev_kouz'].'</a><br>';
 					
 					$form .= '	</span>
-						<span  style="width:80px"><a href="overview_history.php?spellbook=' .$row['nazev_grim']. '">historie</a></span>
+						<span  style="width:90px"><a href="overview_history.php?spellbook=' .$row['nazev_grim']. '">historie</a></span>
 					</div>';
 					// dalsi prava pro admina - editace a odstraneni
 					if ($_SESSION['login'] == "admin")

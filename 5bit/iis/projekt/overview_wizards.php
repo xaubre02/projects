@@ -33,7 +33,7 @@
 	<h1>Kouzelníci</h1>
 	<div class="search">
 		<form method="get">
-			<input type="text" placeholder="Kouzelník" name="wizard">
+			<input type="text" placeholder="Kouzelník" name="wizard" value="<? if(isset($_GET['search'])) echo $_GET['wizard'] ?>">
 			<input type="submit" name="search" value="Hledat" class="button">
 			<?
 				if ($_SESSION['login'] == "admin")
@@ -47,7 +47,7 @@
 			include("connect_to_db.php");
 			$form = '<div class="table_head">
 						<span>Jméno</span>
-						<span style="width:80px">Mana</span>
+						<span style="width:85px">Mana</span>
 						<span style="width:80px">Úroveň</span>
 						<span style="width:100px">Synergie</span>
 						<span style="width:200px">Kouzla</span>
@@ -67,15 +67,14 @@
 					{
 						$found_any = TRUE;
 						$form .= '<br><div class="table_content">
-									<span>' .$row['jmeno_kouz']. '</span>
-									<span style="width:80px">' .$row['mana']. '</span>
-									<span style="width:80px">' .$row['uroven']. '</span>
-									<span style="width:100px">';
-									if ($row['synergie'] == "")
-										$form .= 'žádná</span>';
-									else
-										$form .= $row['synergie'] . '</span>';
-									
+								<span>' .$row['jmeno_kouz']. '</span>
+								<span style="width:85px">' .$row['mana']. '</span>
+								<span style="width:80px">' .$row['uroven']. '</span>';
+								if ($row['synergie'] == "")
+									$form .= '<span style="width:100px">žádná</span>';
+								else
+									$form .= '<a href="overview_elements.php?element='.$row['synergie'].'&search=Hledat"><span style="width:100px">'.$row['synergie'] . '</span></a>';
+								
 						// pridani kouzel
 						$form .= '<span style="width:200px">';
 						$sqlQuery = 'SELECT nazev_kouz FROM Kouz_umi WHERE jmeno_kouz=\''.$row['jmeno_kouz'].'\'';
@@ -87,7 +86,7 @@
 						{
 							while ($row2 = mysql_fetch_array($result2))
 							{
-								$form .= $row2['nazev_kouz'].'<br>';
+								$form .= '<a href="overview_spells.php?spell='.$row2['nazev_kouz'].'&search=Hledat">'.$row2['nazev_kouz'].'</a><br>';
 							}
 						}
 						$form .= '</span>';
@@ -103,7 +102,7 @@
 						{
 							while ($row2 = mysql_fetch_array($result2))
 							{
-								$form .= $row2['nazev'].'<br>';
+								$form .= '<a href="overview_scrolls.php?scroll='.$row2['nazev'].'&search=Hledat">'.$row2['nazev'].'</a><br>';
 							}
 						}
 						$form .= '</span>';
@@ -119,11 +118,10 @@
 						{
 							while ($row2 = mysql_fetch_array($result2))
 							{
-								$form .= $row2['nazev_grim'].'<br>';
+								$form .= '<a href="overview_spellbooks.php?spellbook='.$row2['nazev_grim'].'&search=Hledat">'.$row2['nazev_grim'].'</a><br>';
 							}
 						}
 						$form .= '</span>';
-				
 						$form .='</div>';
 						
 						// dalsi prava pro admina - editace a odstraneni
@@ -144,7 +142,7 @@
 					$found_any = TRUE;
 					$form .= '<br><div class="table_content">
 									<span>' .$row['jmeno_kouz']. '</span>
-									<span style="width:80px">' .$row['mana']. '</span>
+									<span style="width:85px">' .$row['mana']. '</span>
 									<span style="width:80px">' .$row['uroven']. '</span>';
 									if ($row['synergie'] == "")
 										$form .= '<span style="width:100px">žádná</span>';
@@ -198,7 +196,6 @@
 						}
 					}
 					$form .= '</span>';
-			
 					$form .='</div>';
 					
 					// dalsi prava pro admina - editace a odstraneni
