@@ -14,12 +14,11 @@
 	</nav>
 	<nav class="sub-menu">
 		<a href="#" class="selected">Informace</a>
-		<a href="home_doc.php">Dokumentace</a>
 	</nav>
 </header>
 
 <div class="content">
-	<h1>Vítejte!</h1>
+	<h1>Magický svět</h1>
 	<p>&nbsp&nbsp&nbsp&nbsp&nbsp Magie v kouzelnickém světě je členěna podle <a href="overview_elements.php">elementů</a> (voda, oheň, vzduch, ...), které mají různé specializace (obrana, útok, podpora) a různé barvy magie. Například ohnivá magie je oranžová, vody je modrá apod.
 	<br>&nbsp&nbsp&nbsp&nbsp&nbsp Každé <a href="overview_spells.php">kouzlo</a> má jeden hlavní element, přičemž kouzelník může mít positivní synergii s některým z elementů.
 	<br>&nbsp&nbsp&nbsp&nbsp&nbsp U <a href="overview_wizards.php">kouzelníků</a> rovněž evidujeme velikost many, jeho dosaženou úroveň v kouzlení. Předpokládáme klasickou stupnici E, D, C, B, A, S, SS.
