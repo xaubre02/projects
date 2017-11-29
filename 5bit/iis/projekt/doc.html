@@ -36,17 +36,86 @@
 </table>
 
 <h2>Implementace</h2>
-<p>Struèná dokumentace k implementaci, která popisuje, které PHP skripty implementují jednotlivé pøípady pou¾ití uvedené v use-case diagramu z IDS. V pøípadì, ¾e bylo nutno pøi implementaci uèinit zmìny v návrhu, musí být v dokumentaci zdùvodnìny.</p>
+<p>
+	Pøedpoklad: u¾ivatel je kouzelník, kde implicitní hodnota dosa¾ené úrovnì kouzlení je E a implicitní hodnota velikosti many je 0, co¾ má za následek kouzelníka na nejni¾¹í úrovni(bì¾ný èlovìk). Díky tomuto byl upraven i vztah mezi kouzelníkem a elementem, kdy kouzelník mù¾e být v synergii buï jen s urèitým elementem nebo s ¾ádným.<br>
+	Implementovány byly v¹echny pøípady u¾ití vytvoøené v rámci projektu pro pøedmìt IUS (pozn.: míra prosakování je souèástí dedikovaného msíta).<br>
+	Pro zpracování data a jeho stylu byla pou¾ita knihovna jQuery. V¹e ostatní bylo vytvoøené pouze autorem pomocí HTML, CSS, PHP, JavaScriptu a SQL.
+</p>
+
+<h2>Soubory</h2>
+<dl>
+	<dt>header.php</dt>
+	<dd>
+		obsahuje HTML hlavièku, která se importuje do ka¾dého souboru webové stránky
+	</dd>
+	
+	<dt>footer.php</dt>
+	<dd>
+		obsahuje HTML patièku, která se importuje do ka¾dého souboru webové stránky
+	</dd>
+	
+	<dt>index.php</dt>
+	<dd>
+		hlavní skript, umo¾òuje registraci a pøihlá¹ení do systému - jediná stránka, kde mù¾e být u¾ivatel nepøihlá¹en
+	</dd>
+	
+	<dt>home.php</dt>
+	<dd>
+		hlavní stránka po pøihlá¹ení do systému
+	</dd>
+	
+	<dt>check_login.php</dt>
+	<dd>
+		kontroluje: zdali je u¾ivatel pøihlá¹en, zdali se nenaplnil èas neaktivity (10 minut) a zdali se u¾ivatel nechce odhlásit
+	</dd>
+	
+	<dt>logout.php</dt>
+	<dd>
+		odhlásí u¾ivatele ze systému
+	</dd>
+	
+	<dt>connect_to_db.php</dt>
+	<dd>
+		umo¾òuje navázaní spojení s databází
+	</dd>
+	
+	<dt>profile_*.php</dt>
+	<dd>
+		skripty pro práci s profilem - zobrazení, editace a zmìna hesla
+	</dd>
+	
+	<dt>overview_add.php a add/*</dt>
+	<dd>
+		zpracovává pøidávání nových polo¾ek do databáze
+	</dd>
+	
+	<dt>overview_edit.php a edit/*</dt>
+	<dd>
+		zpracovává upravování polo¾ek v databázi
+	</dd>
+	
+	<dt>overview_delete.php</dt>
+	<dd>
+		zpracovává odebírání polo¾ek z databáze
+	</dd>
+	
+	<dt>overview_*.php</dt>
+	<dd>
+		skripty pro zobrazení dat databáze 
+	</dd>
+</dl>
 
 <h2>Instalace</h2>
 <ul>
-<li>Struènì popi¹te postup instalace na server</li>
-<li>Softwarové po¾adavky (verze PHP apod.)</li>
-<li>Jak rozbalit, konfigurovat, inicializovat databází, ...</li>
+	<li>Zkopírovat v¹echny soubory do po¾adovaného adresáøe na serveru</li>
+	<li>Nastavit práva (644 - soubory, 755 - adresáøe)</li>
+	<li>Importovat databázi ze souboru xaubre02.sql</li>
+	<li>Nastavit pøístupové údaje k databázi v souboru connect_to_db.php</li>
+	<li>Softwarové po¾adavky - PHP5 a MySQL5</li>
 </ul>
 
 <h2>Známé problémy</h2>
-<p>Zde popi¹te, které body zadání (IDS a IIS) nejsou implementovány a z jakého dùvodu. Napø. &bdquo;Z èasových dùvodù nebyla implementována správa u¾ivatelù.&rdquo; Pomù¾ete tím zrychlit opravování, kdy¾ neimplementované funkce nebudeme muset dlouze hledat.</p>
+<p>Z hlediska povahy daného systému není mo¾né pøidávat dal¹í úèty typu administrátor. Je zde pouze jeden, který nelze upravovat. U¾ivatelské úèty lze pøidávat, upravovat a odebírat libovolnì. (Pozn.: U¾ivatel si ale nemù¾e smazat úèet sám, ale pouze adminsitrátor.)</p>
 
 </body>
 </html>
