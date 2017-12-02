@@ -9,16 +9,13 @@
 #**************************************
 
 CC=g++
-CFLAGS=-Wall -Wextra -Werror -pedantic
+CFLAGS=-O2 -g -Wall -Wextra -Werror -pedantic
 
-all: projekt
+all: wine
 
-main.o: main.cpp
-	$(CC) $(CFLAGS) main.cpp -c
-
-projekt: main.o
-	$(CC) $(CFLAGS) main.o -o wine
-	rm *.o
+wine: wine.cpp
+	$(CC) $(CFLAGS) wine.cpp -o wine -lsimlib
 
 run:
 	./wine
+
