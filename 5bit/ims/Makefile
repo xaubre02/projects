@@ -13,8 +13,8 @@ CFLAGS=-O2 -g -Wall -Wextra -Werror -pedantic
 
 all: wine
 
-wine: wine.cpp
-	$(CC) $(CFLAGS) wine.cpp -o wine -lsimlib
+wine: src/vinobrani.cpp
+	$(CC) $(CFLAGS) src/vinobrani.cpp -o vinobrani -lsimlib
 
 run:
 	./wine

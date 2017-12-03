@@ -9,26 +9,25 @@
 ***************************************/
 #pragma once
 
-// Casove konstanty - zakladni casova jednotka je minuta
-// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
-#define HOUR  * 60         // hodina -> 60 minut
-#define DAY   HOURS * 24   // den    -> 24 hodin
-/*#define MONTH DAYS  * 30   // mesic  -> 30 dni
-#define YEAR  DAYS  * 365  // rok    -> 365 dni*/
-
+// Casove konstanty - zakladni casova jednotka je sekunda
+// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+#define MIN    * 60
+#define HOUR   MIN * 60
 #define HOURS  HOUR
-#define DAYS   DAY/*
-#define MONTHS MONTH
-#define YEARS  YEAR*/
-// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
+#define DAY    HOURS * 24
+#define DAYS   DAY
+// -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 
 
-#define OUTPUT "wine.out"
-#define RUNTIME 1 DAY
-#define PRIJEZD_HROZNU 25
+#define POCET_SBERACU 2U
+#define POCET_PRACOVNIKU 1U
 
-#define PICKERS 8
-#define POCET_KERU 960
 
-#define KAPACITA_AUTA 300
+#define OUTPUT "vinobrani.out"
+#define RUNTIME 12 HOURS
+
+
+#define KAPACITA_AUTA 12    // Do auta se vleze 12 beden
+#define KAPACITA_BEDNY 25   // Jedna bedna obsahuje 25 kilo hroznu
+
 #define KAPACITA_LISU 200
