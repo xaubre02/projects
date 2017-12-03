@@ -17,5 +17,5 @@ wine: src/vinobrani.cpp
 	$(CC) $(CFLAGS) src/vinobrani.cpp -o vinobrani -lsimlib
 
 run:
-	./wine
+	./vinobrani
 
