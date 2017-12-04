@@ -11,7 +11,11 @@
 #include "simlib.h"
 #include "constants.h"
 
+// objekty pro zaznam statistik
 Histogram delka_vyroby("Delka prace pracovnika", 0, 30 MIN, 20);
+Stat doba_sberu("Doba sberu");
+Stat doba_zpracovani("Doba zpracovani");
+Stat doba_pauzy("Doba stravena na pauze");
 
 Facility Auto("Pick-up pro prepravu hroznu");
 Facility Odzrnovac("Odzrnovac");
@@ -33,8 +37,11 @@ uint most = 0;
 uint sberacu = 0;
 uint pracovniku = 0;
 
+uint sudy = 0;
+
 bool sber_ukoncen = false;
 bool transport_ukoncen = false;
+bool zpracovani_ukonceno = false;
 
 class Pracovnik : public Process 
 {
@@ -48,6 +55,7 @@ class Pracovnik : public Process
         Leave(Hadice, 1);  // Sud je naplnen
         
         Wait(Exponential(4 MIN)); // Uklizeni sudu
+        sudy++;
     }
     
     void Lisovat()
@@ -107,17 +115,25 @@ class Pracovnik : public Process
             
             else
             {
-                if (!sber_ukoncen)
-                {   
-                    WaitUntil(odpad >= 30 || bedny_ke_zpracovani >= 1 || rmut >= 120 || most >= 50);
-                }
-                else
+                if (transport_ukoncen && Hadice.Empty() && most < 50 && !Lis.Busy() && rmut < 120 && !Odzrnovac.Busy() && bedny_ke_zpracovani == 0 && Kolecka.Empty() && odpad < 30)
                 {
-                    delka_vyroby(Time - time);
+                    zpracovani_ukonceno = true;
+                    doba_zpracovani(Time - time);
+                    pracovniku--;
+                    Stop();
                     break;
                 }
+                
+                double pauza = Time;
+                WaitUntil   ( // ceka, dokud se neobjevi nejaka prace, kterou by mohl vykonavat
+                                zpracovani_ukonceno ||
+                                (!Hadice.Full() && most >= 50) ||
+                                (!Lis.Busy() && rmut >= 120) ||
+                                (!Odzrnovac.Busy() && bedny_ke_zpracovani >= 1) ||
+                                (!Kolecka.Full() && odpad >= 30)
+                            );
+                doba_pauzy(Time - pauza);
             }
-            
         }
     };
 };
@@ -163,6 +179,8 @@ class Sberac : public Process
 
     void Behavior()
     {
+        double time = Time; // zacatek sberu
+        
         sberacu++;
         while (true)
         {
@@ -175,14 +193,16 @@ class Sberac : public Process
             else // jinak po sobe uklidit a jit pomoct zpracovavat
             {
                 sber_ukoncen = true; // nastaveni priznaku ukonceni sberu
+                doba_sberu(Time - time);
                 if (!Auto.Busy() && sklizenych_beden == 0 && sklizene_hrozny == 0)
+                { 
                     transport_ukoncen = true; // nastaveni priznaku ukonceni prepravy -> vse prevezeno
-                    
+                }
                 Wait(Exponential(15 MIN)); 
                 break;
             }
         }
-        
+        sberacu--;
         (new Pracovnik)->Activate();
     };
 };
@@ -206,12 +226,20 @@ int main(void)
     Auto.Output();
     Odzrnovac.Output();
     Lis.Output();
+    Hadice.Output();
+    Kolecka.Output();
     
     delka_vyroby.Output();
+    doba_sberu.Output();
+    doba_zpracovani.Output();
     
-    Print("Celkovy pocet sberacu: %d\n", sberacu);
-    Print("Celkovy pocet pracovniku: %d\n", pracovniku);
+    Print("Pocet sberacu na zacatku: %d\n", POCET_SBERACU);
+    Print("Pocet sberacu na konci:   %d\n", sberacu);
+    Print("Pocet pracovniku na zacatku: %d\n", POCET_PRACOVNIKU);
+    Print("Pocet pracovniku na konci:   %d\n", pracovniku);
     Print("************************************************\n");
+    Print("Pocet vyrobenych sudu s vinem: %d\n\n", sudy);
+    
     Print("Pocet zbyvajicich zralych hroznu: %d\n", zrale_hrozny);
     Print("Pocet zbyvajicich sklizenych hroznu: %d\n", sklizene_hrozny);
     Print("Pocet zbyvajicich sklizenych beden: %d\n", sklizenych_beden);
@@ -220,6 +248,7 @@ int main(void)
     Print("Pocet zbyvajiciho rmutu: %d\n", rmut);
     Print("Pocet zbyvajiciho mostu: %d\n", most);
     
-
+    Print("Doba vinobrani: %d\n", SIMLIB_statistics.EndTime - SIMLIB_statistics.StartTime);
+    
     SIMLIB_statistics.Output();
 }

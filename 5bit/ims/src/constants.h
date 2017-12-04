@@ -19,12 +19,12 @@
 // -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 
 
-#define POCET_SBERACU 6U
+#define POCET_SBERACU 5U
 #define POCET_PRACOVNIKU 1U
 
 
 #define OUTPUT "vinobrani.out"
-#define RUNTIME 48 HOURS
+#define RUNTIME 3 DAYS
 
 
 #define KAPACITA_AUTA 12    // Do auta se vleze 12 beden
