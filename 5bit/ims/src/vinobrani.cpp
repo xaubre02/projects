@@ -9,39 +9,7 @@
 ***************************************/
 
 #include "simlib.h"
-#include "constants.h"
-
-// objekty pro zaznam statistik
-Histogram delka_vyroby("Delka prace pracovnika", 0, 30 MIN, 20);
-Stat doba_sberu("Doba sberu");
-Stat doba_zpracovani("Doba zpracovani");
-Stat doba_pauzy("Doba stravena na pauze");
-
-Facility Auto("Pick-up pro prepravu hroznu");
-Facility Odzrnovac("Odzrnovac");
-Facility Lis("Vodni lis");
-
-Store Hadice("Hadice", 3);
-Store Kolecka("Kolecka", 2);
-
-uint bedny_ke_zpracovani = 0;
-uint sklizenych_beden = 0;
-
-uint sklizene_hrozny = 0;
-uint zrale_hrozny = 1500;
-
-uint odpad = 0;
-uint rmut = 0;
-uint most = 0;
-
-uint sberacu = 0;
-uint pracovniku = 0;
-
-uint sudy = 0;
-
-bool sber_ukoncen = false;
-bool transport_ukoncen = false;
-bool zpracovani_ukonceno = false;
+#include "vinobrani.hpp"
 
 class Pracovnik : public Process 
 {
@@ -229,6 +197,7 @@ int main(void)
     Hadice.Output();
     Kolecka.Output();
     
+    doba_pauzy.Output();
     delka_vyroby.Output();
     doba_sberu.Output();
     doba_zpracovani.Output();

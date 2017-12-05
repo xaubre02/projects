@@ -19,7 +19,7 @@
 // -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 
 
-#define POCET_SBERACU 5U
+#define POCET_SBERACU 4U
 #define POCET_PRACOVNIKU 1U
 
 
@@ -31,3 +31,35 @@
 #define KAPACITA_BEDNY 25   // Jedna bedna obsahuje 25 kilo hroznu
 
 #define KAPACITA_LISU 200
+
+// objekty pro zaznam statistik
+Histogram delka_vyroby("Delka prace pracovnika", 0, 30 MIN, 20);
+Stat doba_sberu("Doba sberu");
+Stat doba_zpracovani("Doba zpracovani");
+Stat doba_pauzy("Doba stravena na pauze");
+
+Facility Auto("Pick-up pro prepravu hroznu");
+Facility Odzrnovac("Odzrnovac");
+Facility Lis("Vodni lis");
+
+Store Hadice("Hadice", 3);
+Store Kolecka("Kolecka", 2);
+
+uint bedny_ke_zpracovani = 0;
+uint sklizenych_beden = 0;
+
+uint sklizene_hrozny = 0;
+uint zrale_hrozny = 600;
+
+uint odpad = 0;
+uint rmut = 0;
+uint most = 0;
+
+uint sberacu = 0;
+uint pracovniku = 0;
+
+uint sudy = 0;
+
+bool sber_ukoncen = false;
+bool transport_ukoncen = false;
+bool zpracovani_ukonceno = false;
