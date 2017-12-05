@@ -12,7 +12,7 @@
 
 void Sberac::Behavior(void)
 {
-    double time = Time; // zacatek prace
+    time = Time; // zacatek prace
     
     while (true)
     {
@@ -75,7 +75,7 @@ void Sberac::Prepravit(void)
 
 void Pracovnik::Behavior(void)
 {
-    double time = Time; // zacatek prace
+    time = Time; // zacatek prace
 
     while (true)
     {
