@@ -47,8 +47,6 @@ uint odpad = 0;
 uint rmut = 0;
 uint most = 0;
 
-uint sudy = 0;
-
 // priznaky stavu cinnosti
 bool sber_ukoncen = false;
 bool transport_ukoncen = false;
