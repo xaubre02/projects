@@ -57,6 +57,8 @@ bool zpracovani_ukonceno = false;
 // Trida reprezentujici pracovnika
 class Pracovnik : public Process 
 {
+    double time;                // zaznamenani pocatecniho casu procesu
+    
     void Behavior(void);        // chovani pracovnika
     void Odzrnit(void);         // odzrneni jedne bedny hroznu
     void Lisovat(void);         // lisovani rmutu
@@ -67,6 +69,8 @@ class Pracovnik : public Process
 // Trida reprezentujici sberace
 class Sberac : public Process 
 {
+    double time;                // zaznamenani pocatecniho casu procesu
+    
     void Behavior(void);        // chovani sberace
     void Sklidit(void);         // sklizeni hroznu
     void Prepravit(void);       // prepraveni beden s hroznama ke zpracovani
