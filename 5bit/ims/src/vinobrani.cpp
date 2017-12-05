@@ -27,19 +27,24 @@ void Sberac::Behavior(void)
         // jinak po sobe uklidit a jit pomoct zpracovavat
         else
         {
-            sber_ukoncen = true; // nastaveni priznaku ukonceni sberu
-            doba_sberu(Time - time);
-            
-            // nastaveni priznaku ukonceni prepravy -> vse sklizeno a prevezeno
-            if (!Auto.Busy() && sklizenych_beden == 0)
-                transport_ukoncen = true;
-
-            Wait(Uniform(15, 20));  // presun ke zpracovani
+            PremistitSe();
             break;
         }
     }
     
     (new Pracovnik)->Activate(); // uz nesbira, ale zpracovava
+}
+
+void Sberac::PremistitSe(void)
+{
+    sber_ukoncen = true; // nastaveni priznaku ukonceni sberu
+    doba_sberu(Time - time);
+
+    // nastaveni priznaku ukonceni prepravy -> vse sklizeno a prevezeno
+    if (!Auto.Busy() && sklizenych_beden == 0)
+        transport_ukoncen = true;
+
+    Wait(Uniform(15, 20));  // presun ke zpracovani
 }
 
 void Sberac::Sklidit(void)
@@ -107,17 +112,22 @@ void Pracovnik::Behavior(void)
             }
             
             // jinak je pracovnik na pauze
-            double pauza = Time;
-            WaitUntil   ( // ceka, dokud se neobjevi nejaka prace, kterou by mohl vykonavat, nebo nez se ukonci vyroba vina
-                            zpracovani_ukonceno ||
-                            (!Cerpadlo.Busy() && most >= 30) ||
-                            (!Lis.Busy() && rmut >= KAPACITA_LISU) ||
-                            (!Odzrnovac.Busy() && bedny_ke_zpracovani >= 1) ||
-                            (!Kolecka.Full() && odpad >= 30)
-                        );
-            doba_pauzy(Time - pauza);
+            DatSiPauzu();
         }
     }
+}
+
+void Pracovnik::DatSiPauzu(void)
+{
+    pauza = Time;
+    WaitUntil   ( // ceka, dokud se neobjevi nejaka prace, kterou by mohl vykonavat, nebo nez se ukonci vyroba vina
+                    zpracovani_ukonceno ||
+                    (!Cerpadlo.Busy()  && most >= 30) ||
+                    (!Lis.Busy()       && rmut >= KAPACITA_LISU) ||
+                    (!Odzrnovac.Busy() && bedny_ke_zpracovani >= 1) ||
+                    (!Kolecka.Full()   && odpad >= 30)
+                );
+    doba_pauzy(Time - pauza); // ulozeni celkove doby stravene na pauze
 }
 
 void Pracovnik::Odzrnit(void)
