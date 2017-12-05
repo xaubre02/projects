@@ -8,58 +8,71 @@
 * -+-+-+-+-+-+-+-+-+-+-+-+-
 ***************************************/
 #pragma once
+#include "simlib.h"
 
-// Casove konstanty - zakladni casova jednotka je sekunda
+// Casove konstanty - zakladni casova jednotka je minuta
 // -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
-#define MIN    * 60
-#define HOUR   MIN * 60
+#define SEC    / 60
+#define HOUR   * 60
 #define HOURS  HOUR
 #define DAY    HOURS * 24
 #define DAYS   DAY
 // -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 
-
-#define POCET_SBERACU 4U
-#define POCET_PRACOVNIKU 1U
-
-
 #define OUTPUT "vinobrani.out"
 #define RUNTIME 3 DAYS
 
 
-#define KAPACITA_AUTA 12    // Do auta se vleze 12 beden
+#define POCET_SBERACU 6
+#define POCET_PRACOVNIKU 1
+
+#define KAPACITA_AUTA 10    // Do auta se vleze 10 beden
 #define KAPACITA_BEDNY 25   // Jedna bedna obsahuje 25 kilo hroznu
+#define KAPACITA_LISU 240
 
-#define KAPACITA_LISU 200
 
-// objekty pro zaznam statistik
-Histogram delka_vyroby("Delka prace pracovnika", 0, 30 MIN, 20);
-Stat doba_sberu("Doba sberu");
-Stat doba_zpracovani("Doba zpracovani");
-Stat doba_pauzy("Doba stravena na pauze");
-
-Facility Auto("Pick-up pro prepravu hroznu");
+Facility Auto("Pracovni auto pro prepravu hroznu");
 Facility Odzrnovac("Odzrnovac");
 Facility Lis("Vodni lis");
+Facility Cerpadlo("Cerpadlo");
 
-Store Hadice("Hadice", 3);
 Store Kolecka("Kolecka", 2);
 
-uint bedny_ke_zpracovani = 0;
+// entity systemu
+uint zrale_hrozny = 750;
 uint sklizenych_beden = 0;
-
-uint sklizene_hrozny = 0;
-uint zrale_hrozny = 600;
+uint bedny_ke_zpracovani = 0;
 
 uint odpad = 0;
 uint rmut = 0;
 uint most = 0;
 
-uint sberacu = 0;
-uint pracovniku = 0;
-
 uint sudy = 0;
 
+// priznaky stavu cinnosti
 bool sber_ukoncen = false;
 bool transport_ukoncen = false;
 bool zpracovani_ukonceno = false;
+
+// Trida reprezentujici pracovnika
+class Pracovnik : public Process 
+{
+    void Behavior(void);        // chovani pracovnika
+    void Odzrnit(void);         // odzrneni jedne bedny hroznu
+    void Lisovat(void);         // lisovani rmutu
+    void Precerpat(void);       // precerpani mostu do sudu
+    void ZpracovatOdpad(void);  // vyvezeni odpadu
+};
+
+// Trida reprezentujici sberace
+class Sberac : public Process 
+{
+    void Behavior(void);        // chovani sberace
+    void Sklidit(void);         // sklizeni hroznu
+    void Prepravit(void);       // prepraveni beden s hroznama ke zpracovani
+};
+
+// objekty pro zaznam statistik
+Stat doba_sberu("Doba sberu");
+Stat doba_zpracovani("Doba zpracovani");
+Stat doba_pauzy("Doba stravena na pauze");
