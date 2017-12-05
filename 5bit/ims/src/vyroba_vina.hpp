@@ -1,3 +1,4 @@
+#pragma once
 /**************************************
 * -+-+-+-+-+-+-+-+-+-+-+-+-
 * - Predmet: IMS
@@ -7,8 +8,10 @@
 * - Login: xaubre02
 * -+-+-+-+-+-+-+-+-+-+-+-+-
 ***************************************/
-#pragma once
+
 #include "simlib.h"
+#include <string>
+
 
 // Casove konstanty - zakladni casova jednotka je minuta
 // -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
@@ -19,17 +22,6 @@
 #define DAYS   DAY
 // -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 
-#define OUTPUT "vinobrani.out"
-#define RUNTIME 3 DAYS
-
-
-#define POCET_SBERACU 6
-#define POCET_PRACOVNIKU 1
-
-#define KAPACITA_AUTA 10    // Do auta se vleze 10 beden
-#define KAPACITA_BEDNY 25   // Jedna bedna obsahuje 25 kilo hroznu
-#define KAPACITA_LISU 240
-
 
 Facility Auto("Pracovni auto pro prepravu hroznu");
 Facility Odzrnovac("Odzrnovac");
@@ -38,7 +30,13 @@ Facility Cerpadlo("Cerpadlo");
 
 Store Kolecka("Kolecka", 2);
 
-// entity systemu
+// vychozi parametry programu
+std::string output("experiment.out");
+uint pocet_sberacu = 3;
+uint kapacita_auta = 10;
+uint kapacita_lisu = 120;
+
+// meziprodukty procesu vyroby vina
 uint zrale_hrozny = 750;
 uint sklizenych_beden = 0;
 uint bedny_ke_zpracovani = 0;
@@ -76,6 +74,9 @@ class Sberac : public Process
     void Prepravit(void);       // prepraveni beden s hroznama ke zpracovani
     void PremistitSe(void);     // presun sberace ke zpracovani -> novy proces pracovnika, proces sberace konci
 };
+
+void parseParams(int argc, char* argv[]); // funkce pro zakladni zpracovani argumentu programu
+void printData(void);           // funkce pro vypis ziskanych hodnot
 
 // objekty pro zaznam statistik
 Stat doba_sberu("Doba sberu");
