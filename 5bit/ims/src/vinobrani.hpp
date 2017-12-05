@@ -64,6 +64,7 @@ class Pracovnik : public Process
     void Lisovat(void);         // lisovani rmutu
     void Precerpat(void);       // precerpani mostu do sudu
     void ZpracovatOdpad(void);  // vyvezeni odpadu
+    void DatSiPauzu(void);      // pracovnik je na prestavce
 };
 
 // Trida reprezentujici sberace
@@ -74,6 +75,7 @@ class Sberac : public Process
     void Behavior(void);        // chovani sberace
     void Sklidit(void);         // sklizeni hroznu
     void Prepravit(void);       // prepraveni beden s hroznama ke zpracovani
+    void PremistitSe(void);     // presun sberace ke zpracovani -> novy proces pracovnika, proces sberace konci
 };
 
 // objekty pro zaznam statistik
