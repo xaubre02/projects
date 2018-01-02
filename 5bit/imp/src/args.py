@@ -4,6 +4,7 @@
  -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
  - Content:  Robot arguments
  - Author:   Tomas 'aubi' Aubrecht
+ - Login:    xaubre02
  - Date:     2017-10-07
 -+-+-++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
 """

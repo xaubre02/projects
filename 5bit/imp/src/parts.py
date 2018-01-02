@@ -4,6 +4,7 @@
  -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
  - Content:  Robot parts
  - Author:   Tomas 'aubi' Aubrecht
+ - Login:    xaubre02
  - Date:     2017-10-07
  -+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-
  - Pins:   - 5V  = 5V Output
