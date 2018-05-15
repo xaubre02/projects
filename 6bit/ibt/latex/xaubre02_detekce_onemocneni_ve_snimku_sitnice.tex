@@ -1,0 +1,185 @@
+%==============================================================================
+% kodovani: UTF-8 (zmena prikazem iconv, recode nebo cstocs)
+%------------------------------------------------------------------------------
+% zpracování: make, make pdf, make clean
+%==============================================================================
+
+\documentclass[zadani]{fitthesis} % odevzdani do wisu - odkazy jsou barevné
+%\documentclass[zadani,print]{fitthesis} % pro tisk - odkazy jsou černé
+%\documentclass[zadani,cprint]{fitthesis} % pro barevný tisk - odkazy jsou černé, znak VUT barevný
+
+% Základní balíčky jsou dole v souboru šablony fitthesis.cls
+
+% Nastavení cesty k obrázkům
+\graphicspath{{pictures/}{../pictures/}}
+
+%---rm---------------
+\renewcommand{\rmdefault}{lmr}%zavede Latin Modern Roman jako rm / set Latin Modern Roman as rm
+%---sf---------------
+\renewcommand{\sfdefault}{qhv}%zavede TeX Gyre Heros jako sf
+%---tt------------
+\renewcommand{\ttdefault}{lmtt}% zavede Latin Modern tt jako tt
+
+% vypne funkci šablony, která automaticky nahrazuje uvozovky, 
+% aby nebyly prováděny nevhodné náhrady v popisech API apod.
+\csdoublequotesoff
+
+% =======================================================================
+% balíček "hyperref" vytváří klikací odkazy v pdf, pokud tedy použijeme pdflatex
+% problém je, že balíček hyperref musí být uveden jako poslední, takže nemůže
+% být v šabloně
+\ifWis
+\ifx\pdfoutput\undefined % nejedeme pod pdflatexem / we are not using pdflatex
+\else
+  \usepackage{color}
+  \usepackage[unicode,colorlinks,hyperindex,plainpages=false,pdftex]{hyperref}
+  \definecolor{links}{rgb}{0.4,0.5,0}
+  \definecolor{anchors}{rgb}{1,0,0}
+  \def\AnchorColor{anchors}
+  \def\LinkColor{links}
+  \def\pdfBorderAttrs{/Border [0 0 0] }  % bez okrajů kolem odkazů
+  \pdfcompresslevel=9
+\fi
+\else % pro tisk budou odkazy, na které se dá klikat, černé
+\ifx\pdfoutput\undefined % nejedeme pod pdflatexem
+\else
+  \usepackage{color}
+  \usepackage[unicode,colorlinks,hyperindex,plainpages=false,pdftex,urlcolor=black,linkcolor=black,citecolor=black]{hyperref}
+  \definecolor{links}{rgb}{0,0,0}
+  \definecolor{anchors}{rgb}{0,0,0}
+  \def\AnchorColor{anchors}
+  \def\LinkColor{links}
+  \def\pdfBorderAttrs{/Border [0 0 0] } % bez okrajů kolem odkazů
+  \pdfcompresslevel=9
+\fi
+\fi
+% Řešení problému, kdy klikací odkazy na obrázky vedou za obrázek
+\usepackage[all]{hypcap}
+
+
+% Informace o práci/projektu / Information about the thesis
+%---------------------------------------------------------------------------
+\projectinfo{
+  % Práce
+  project={BP},   % typ práce: BP/SP/DP/DR
+  year={2018},    % rok odevzdání
+  date=\today,     % datum odevzdání
+  % Název práce / thesis title
+  title.cs={Detekce onemocnění ve snímku sítnice oka},           % název práce v české jazyce
+  title.en={Detection of diseases in the image of eye retina},   % název práce v anglickém jazyce
+  %title.length={14.5cm}, % nastavení délky bloku s titulkem pro úpravu zalomení řádku (lze definovat zde nebo níže)
+  % Autor
+  author.name={Tomáš},         % jméno autora
+  author.surname={Aubrecht},   % příjmení autora
+  %author.title.p={Bc.},       % titul před jménem (nepovinné)
+  %author.title.a={Ph.D.},     % titul za jménem   (nepovinné)
+  % Ústav
+  department={UITS},   % UPSY/UIFS/UITS/UPGM
+  % Školitel
+  supervisor.name={Lukáš},        % jméno školitele
+  supervisor.surname={Semerád},   % příjmení školitele
+  supervisor.title.p={Ing.},      % titul před jménem (nepovinné)
+  % Klíčová slova
+  keywords.cs={lidské oko, sítnice oka, onemocnění oka, věkem podmíněná makulární degenerace, VPMD, C{++}, zpracování obrazu, OpenCV},     % klíčová slova v českém jazyce 
+  keywords.en={human eye, eye retina, eye diseases, age-related macular degeneration, ARMD, C{++}, image processing, OpenCV},              % klíčová slova v anglickém jazyce
+  % Abstrakt
+  abstract.cs={Věkem podmíněná makulární degenerace se řadí mezi nejčastější onemocnění sítnice lidského oka, které vede různou rychlostí ke slepotě. Toto onemocnění se vyskytuje ve dvou formách. Zatímco u~vlhké formy lze zpomalit její progresi, pro suchou formu prozatím neexistuje dostupná metoda léčby, proto je ze všeho nejdůležitější prevence. Z~tohoto důvodu je cílem této práce navrhnout a implementovat software, který umožní automatickou detekci příznaků tohoto onemocnění z~pořízených snímků sítnic. Algoritmus pro detekování příznaků je založený na adaptivním prahování obrazu pro získání podezřelých oblastí, které jsou následně klasifikovány. Při vyhodnocování bylo použito 407 snímků sítnic, u~kterých tento software vykazoval velmi vysokou úspěšnost. V~případě jeho nasazení ve spojení s~optickým přístrojem pro snímání sítnice pomůže lékařům například rychleji diagnostikovat.},    % abstrakt v českém či slovenském jazyce
+  abstract.en={Age-related macular degeneration is one of the most common retinal diseases of the human eye that leads at different rates to blindness. This disease occurs in two forms. While the wet can slow down its progression, for dry form there is no available treatment method so far, so prevention is the most important. For this reason, the aim of this work is to design and implement software that allows automatic detection of the symptoms of this disease from retinal images. The symptom detection algorithm is based on adaptive thresholding which obtains suspicious areas that are subsequently categorized. 407 retinal images were used for the evaluation and the software was highly successful. When used in conjunction with an optical retinal scanner, it helps ophthalmologists, for example, to diagnose more quickly.},    % abstrakt v anglickém jazyce
+  % Prohlášení (u anglicky psané práce anglicky, u slovensky psané práce slovensky) / Declaration (for thesis in english should be in english)
+  declaration={Prohlašuji, že jsem tuto bakalářskou práci vypracoval samostatně pod vedením Ing.~Lukáše Semeráda. Uvedl jsem všechny literární prameny a publikace, ze kterých jsem čerpal.},
+  %declaration={Hereby I declare that this bachelor's thesis was prepared as an original author’s work under the supervision of Mr. X
+  % Poděkování
+  acknowledgment={Děkuji MUDr. Tomáši Mňukovi za spolupráci a odbornou pomoc poskytnutou v~průběhu tvorby této práce. Dále bych chtěl poděkovat Ing. Lukáši Semerádovi za jeho odborné rady a pečlivé vedení.},
+  % Rozšířený abstrakt (cca 3 normostrany) - lze definovat zde nebo níže
+  %extendedabstract={Do tohoto odstavce bude zapsán rozšířený výtah (abstrakt) práce v českém (slovenském) jazyce.},
+  %faculty={FIT}, % FIT/FEKT/FSI/FA/FCH/FP/FAST/FAVU/USI/DEF
+  faculty.cs={Fakulta informačních technologií},     % Fakulta v češtině - pro využití této položky výše zvolte fakultu DEF 
+  faculty.en={Faculty of Information Technology},    % Fakulta v angličtině - pro využití této položky výše zvolte fakultu DEF
+  department.cs={Ústav matematiky},                  % Ústav v češtině - pro využití této položky výše zvolte ústav DEF nebo jej zakomentujte 
+  department.en={Institute of Mathematics}           % Ústav v angličtině - pro využití této položky výše zvolte ústav DEF nebo jej zakomentujte
+}
+
+% Rozšířený abstrakt (cca 3 normostrany) - lze definovat zde nebo výše 
+%\extendedabstract{Do tohoto odstavce bude zapsán výtah (abstrakt) práce v českém jazyce.}
+
+% nastavení délky bloku s titulkem pro úpravu zalomení řádku - lze definovat zde nebo výše
+%\titlelength{14.5cm}
+
+
+% řeší první/poslední řádek odstavce na předchozí/následující stránce
+% solves first/last row of the paragraph on the previous/next page
+\clubpenalty=10000
+\widowpenalty=10000
+
+\begin{document}
+  % Vysázení titulních stran
+  % ----------------------------------------------
+  \maketitle
+
+  
+  % Obsah
+  % ----------------------------------------------
+  \setlength{\parskip}{0pt}
+
+  {\hypersetup{hidelinks}\tableofcontents}
+  
+  % Seznam obrázků a tabulek
+  \renewcommand\listfigurename{Seznam obrázků}
+  \renewcommand\listtablename{Seznam tabulek}
+  % \listoffigures
+  % \listoftables 
+
+  \ifODSAZ
+    \setlength{\parskip}{0.5\bigskipamount}
+  \else
+    \setlength{\parskip}{0pt}
+  \fi
+
+  % vynechání stránky v oboustranném režimu
+  \iftwoside
+    \cleardoublepage
+  \fi
+
+  
+  % Text práce
+  % ----------------------------------------------
+  \input{chapters/01_uvod}
+  \input{chapters/02_lidske_oko}
+  \input{chapters/03_onemocneni}
+  \input{chapters/04_zpracovani_obrazu}
+  \input{chapters/05_navrh_implementace}
+  \input{chapters/06_testovani}
+  \input{chapters/07_zaver}
+  
+  % Použitá literatura
+  % ----------------------------------------------
+  \makeatletter
+  \def\@openbib@code{\addcontentsline{toc}{chapter}{Literatura}}
+  \makeatother
+  \bibliographystyle{bib-styles/czechiso}
+
+  \begin{flushleft}
+  \bibliography{xaubre02_bibliography}
+  \end{flushleft}
+
+  % vynechání stránky v oboustranném režimu
+  \iftwoside
+    \cleardoublepage
+  \fi
+
+
+  % Přílohy
+  % ---------------------------------------------
+  \appendix
+  \renewcommand{\appendixpagename}{Přílohy}
+  \renewcommand{\appendixtocname}{Přílohy}
+  \renewcommand{\appendixname}{Příloha}
+
+  % vynechání stránky v oboustranném režimu
+  \iftwoside
+    \cleardoublepage
+  \fi
+
+  \input{xaubre02_appendices}
+  
+\end{document}
