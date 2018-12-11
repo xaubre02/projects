@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="IJA-2017" default="run" basedir=".">
+	<description>
+		Semestrální projekt
+		---------------------------------
+		Aplikace: Pasians Klondike
+		Předmět: IJA
+		Rok: 2016/2017
+		Autoři: Aubrecht Tomáš (xaubre02)
+		Bandik Matěj   (xbandi01)
+		---------------------------------
+	</description>
+
+	<property name="src" location="src"/>
+	<property name="doc" location="doc"/>
+	<property name="build" location="build"/>
+	<property name="dest-client" location="dest-client"/>
+
+	<target name="clean">
+		<delete dir="${doc}"/>
+		<delete dir="${build}"/>
+		<delete dir="${dest-client}"/>
+	</target>
+
+	<target name="compile" depends="clean">
+
+		<exec executable="/bin/sh">
+			<arg value="lib/get-libs.sh"/>
+		</exec>
+
+		<mkdir dir="${doc}"/>
+		<mkdir dir="${build}"/>
+		<mkdir dir="${dest-client}"/>
+		<mkdir dir="${dest-client}/saves"/>
+
+		<javac srcdir="${src}" destdir="${build}" includeantruntime="false"/>
+
+		<jar destfile="${dest-client}/ija-client.jar" basedir="${build}">
+			<manifest>
+				<attribute name="Main-Class" value="src.GUI.Solitaire"/>
+			</manifest>
+		</jar>
+		<javadoc destdir="${doc}" use="true" windowtitle="Solitaire">
+
+			<fileset dir="${src}" defaultexcludes="yes">
+			</fileset>
+		</javadoc>
+
+	</target>
+
+	<target name="run">
+		<java jar="dest-client/ija-client.jar" fork="true"/>
+	</target>
+
+</project>

@@ -1,0 +1,616 @@
+/*============================* COLORS *=============================*/
+.white, .hover-white:hover{
+	color: #000 !important;
+	background-color: #fff !important
+}
+
+.black, .hover-black:hover{
+	color: #fff !important;
+	background-color: #000 !important
+}
+
+.grey, .hover-grey:hover{
+	color: #000 !important;
+	background-color: #bbb !important
+}
+
+.light-grey, .hover-light-grey:hover{
+	color: #000 !important;
+	background-color: #f1f1f1 !important
+}
+
+.dark-grey, .hover-dark-grey:hover{
+	color: #fff !important;
+	background-color: #616161 !important
+}
+
+.red, .red:hover{
+	color: #fff !important;
+	background-color: #f44336 !important
+}
+
+/*============================* GLOBAL *=============================*/
+.hide {
+	display: none;
+}
+
+html {
+	padding: 0;
+	margin: 0;
+	min-height: 100%;
+	box-sizing: border-box;
+	overflow: auto;
+}
+
+*, *:before, *:after {
+	box-sizing: inherit;
+	overflow: hidden;
+	padding: 0;
+	margin: 0;
+}
+
+a {
+	text-decoration: none;
+}
+
+body {
+	padding: 0;
+	margin: 0;
+	background: #000 url("https://www.stud.fit.vutbr.cz/~xaubre02/pic/magic_forest.png") no-repeat fixed center !important;
+	background-size: cover !important;
+	max-width: 65vw !important;
+	min-width: 1000px;
+	min-height: 480px;
+	width: 100% !important;
+	height: 100%;
+	overflow: auto;
+	margin: auto !important;
+}
+
+.wrapper {
+   min-height: 100vh;
+   height: 100%;
+   position: relative;
+   margin: 0 auto;
+}
+
+/*=============================* LOGIN *=============================*/
+#login, #register, #logout_msg{
+	width: 580px;
+	margin: auto;
+	margin-top: 100px;
+}
+
+#login img, #register img, #logout_msg img {
+	width: 78%;
+	margin-left: 11%;
+}
+
+#login form, #register form, #logout_msg form{
+	width: 60%;
+	margin: auto;
+	padding: 14px;
+	background-color: #d9d9d9;
+	border-radius: 12px;
+	opacity: 0.9;
+}
+
+.form-part {
+	width: 100%;
+	height: 40px;
+	margin: auto;
+	margin-top: 5%;
+	color: black;
+}
+
+.form-part label {
+	float: left;
+	width: 40%;
+	text-align: right;
+	font-size: 21px;
+	font-family: Impact, Charcoal, sans-serif;
+	padding-top: 5px;
+}
+
+.form-part input {
+	float: right;
+	width: 60%;
+	height: 100%;
+	font-size: 18px;
+	font-family: Impact, Charcoal, sans-serif;
+	padding-left: 10px;
+	border: 2px black solid;
+	border-radius: 12px;
+	outline: none;
+}
+
+.confirm{
+	clear: both;
+	width: 90%;
+	margin: auto;
+	margin-top: 20px;
+}
+
+.button {
+	float: left;
+	width: 47.5%;
+	height: 55px;
+	font-size: 23px;
+	font-family: Impact, Charcoal, sans-serif;
+	color: white;
+	background-color: black;
+	border: 2px #b3b3b3 solid;
+	border-radius: 16px;
+	transition: color .4s, border-color .4s, background-color .4s;
+	outline: none;
+}
+
+.button:first-child {
+	margin-right: 5%;
+	text-align: center;
+	padding-top: 12px;
+}
+
+.button:hover {
+	cursor: pointer;
+	color: black;
+	border-color: black;
+	background-color: #b3b3b3;
+}
+
+/*===========================* REGISTER *============================*/
+#register, #logout_msg{
+	margin: 50px auto;
+}
+
+#register form, #logout_msg form {
+	width: 70%;
+}
+
+#register .form-part label {
+	width: 50%;
+}
+
+#register .form-part input {
+	width: 50%;
+}
+
+#register p {
+	font-size: 14px;
+	text-align: center;
+	font-weight: bold;
+	font-style: italic;
+	margin: auto;
+	margin-top: 16px;
+	width: 120px;
+}
+
+#reg-succ  {
+	text-align: center;
+}
+
+#reg-succ a, #reg-succ span{
+	width: 40%;
+	margin: 5% 0 0 30%;
+	padding-top: 3%;
+}
+
+#reg-succ p {
+	font-size: 20px;
+	width: 100%;
+	font-family: Impact, Charcoal, sans-serif;
+	padding: 1% 0 0 2%;
+}
+
+/*=========================* INPUT ERROR *===========================*/
+.bad-input {
+	border-color: red !important;
+	background-color: #ffcccc !important;
+}
+
+.err-msg {
+	float: right;
+	width: 60%;
+	margin: 1% 0 5% 0;
+	padding-left: 0px;
+	color: red;
+	font-style: italic;
+	font-size: 14px
+}
+
+#register .err-msg {
+	width: 50%;
+}
+
+/*============================* HEADER *=============================*/
+header {
+	width: 100%;
+	height: 75px;
+	opacity: 0.95;
+}
+
+.main-menu {
+	width: 100%;
+	height: 60%;
+	font-size: 28px;
+	font-family: Impact, Charcoal, sans-serif;
+	background-color: black;
+}
+
+.main-menu a, .main-menu form{
+	float: left;
+	color: white;
+	width: 25%;
+	height: 100%;
+	text-align: center;
+	transition: color .4s, background-color .4s;
+}
+
+.main-menu a {
+	padding-top: 6px;
+}
+
+.main-menu a:hover, .main-menu input:hover{
+	background-color: #b3b3b3;
+	color: black;
+}
+
+.main-menu input {
+	width: 100%;
+	height: 100%;
+	font-size: 28px;
+	font-family: Impact, Charcoal, sans-serif;
+	background-color: black;
+	border: none;
+	outline: none;
+	color: white;
+	transition: color .4s, background-color .4s;
+}
+
+.main-menu input:hover {
+	cursor: pointer;
+}
+
+.main-menu .selected, .main-menu .selected:hover {
+	background-color: #b3b3b3;
+	color: black;
+}
+
+.sub-menu {
+	width: 100%;
+	height: 40%;
+	font-size: 19px;
+	font-family: Impact, Charcoal, sans-serif;
+	background-color: #b3b3b3;
+}
+
+.sub-menu a {
+	float: left;
+	min-width: 14.2857%;
+	height: 100%;
+	color: black;
+	text-align: center;
+	padding-top: 4px;
+	transition: color .4s, background-color .4s;
+}
+
+.sub-menu a:hover, .sub-menu .selected  {
+	background-color: #f2f2f2;
+	color: #404040;
+}
+
+/*===========================* CONTENT *=============================*/
+.content {
+	overflow: auto;
+	width: 100%;
+	min-height: calc(100vh - 113px);
+	background-color: #f2f2f2;
+	opacity: 0.95;
+	padding: 16px;
+	margin-bottom: 38px;
+}
+
+.content h1{
+	font-family: Impact;
+	font-size: 28px;
+	font-weight: 100;
+	margin-bottom: 15px;
+}
+
+.content p {
+	font-size: 18px;
+	font-weight: 100;
+	padding: 20px 40px;
+}
+
+.content a {
+	color: black;
+	font-weight: bold;
+}
+
+.content br {
+	margin-left: 16px;
+}
+
+.content form {
+	margin: 64px auto;
+	width: 50%;
+}
+
+.text_input {
+	width: 80%;
+	min-width: 379px;
+	min-height: 40px;
+	margin: auto;
+	margin-top: 15px;
+}
+
+.content .err-msg {
+	width: 38%;
+	min-width: 160px;
+	margin-right: 23%;
+}
+
+.text_input label {
+	float: left;
+	text-align: right;
+	width: 35%;
+	height: 100%;
+	font-family: Impact, Charcoal, sans-serif;
+	font-size: 20px;
+	padding: 6px 15px 0 0;
+}
+
+.text_input input {
+	float: right;
+	width: 50%;
+	height: 40px;
+	font-size: 18px;
+	padding: 0 10px;
+	border: 2px black solid;
+	border-radius: 12px;
+	margin-right: 15%;
+	outline: none;
+	font-family: Impact, Charcoal, sans-serif;
+}
+
+.choice_array {
+	float: left;
+	width: 50%;
+}
+
+.choice{
+	width: 100%;
+	margin: 6px 0 10px 0;
+}
+
+.choice span{
+	float: left;
+	font-size: 18px;
+	font-family: Impact, Charcoal, sans-serif;
+}
+
+.choice input{
+	float: left;
+	width: 16px;
+	height: 16px;
+	margin: 3px 10px 0 3px;
+}
+
+.content form  .button {
+	float: left;
+	width: 142px;
+	margin-top: 30px;
+	margin-left: calc(50% - 71px);
+	color: white;
+	text-align: center;
+	font-weight: normal;
+}
+
+.content form a {
+	padding-top: 10px;
+}
+
+.content form .button:hover {
+	color: black;
+}
+
+.content form p {
+	font-size: 24px;
+	text-align: center;
+	font-family: Impact, Charcoal, sans-serif;
+}
+
+/*===========================* PROFILE *=============================*/
+.profile_content {
+	margin: auto;
+	width: 460px;
+	border-radius: 24px;
+}
+
+.profile_part {
+	font-size: 24px;
+	font-family: Impact, Charcoal, sans-serif;
+	margin-top: 5px;
+	background-color: white;
+	min-height: 42px;
+}
+
+.profile_part:first-child  {
+	margin-top: 0px;
+}
+	
+.profile_part span{
+	height: 42px;
+	padding-top: 8px;
+}
+
+.profile_part p{
+	font-size: 20px;
+	height: 36px;
+	padding-top: 12px;
+}
+	
+.profile_part span{
+	float: left;
+	width: 45%;
+	text-align: right;
+	margin-right: 5%;
+}
+
+.profile_part_wrapper{
+	float: right;
+	width: 50%;
+}
+
+.profile_db {
+	float: left;
+	width: 100%;
+	font-style: italic;
+	padding-right: 10px;
+}
+
+.profile_db:last-child {
+	margin-bottom: 10px;
+}
+
+/*===========================* OVERVIEW *============================*/
+.search {
+	display: inline-block;
+	background-color: #b3b3b3;
+	padding: 10px 15px;
+}
+
+.search form{
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.search input{
+	float: left;
+	border-radius: 10px !important;
+}
+
+.search form input:first-child{
+	width: 200px;
+	height: 40px;
+	font-size: 18px;
+	padding: 0 10px;
+	border: 2px black solid;
+	border-radius: 12px;
+	margin-right: 15px;
+	outline: none;
+	font-family: Impact, Charcoal, sans-serif;
+}
+
+#add{
+	margin-left: 15px !important;
+}
+
+.search form .button{
+	margin: 0;
+	padding: 0;
+	height: 40px;
+	width: 100px;
+	font-size: 20px;
+}
+
+.table {
+	text-align: left;
+	margin: auto;
+	margin-top: 30px;
+	width: 90%;
+	min-width: 1090px;
+	
+}
+
+.table_head {
+	display: inline-block;
+	margin: auto;
+	font-size: 22px;
+	font-family: Impact, Charcoal, sans-serif;
+	background-color: #b3b3b3;
+}
+
+.table_msg {
+	width: 500px !important; 
+	background-color: #f2f2f2 !important; 
+	font-size: 28px; 
+	margin: 0 !important; 
+	padding: 0 !important;
+	
+}
+
+.table span{
+	float: left;
+	padding-left: 5px;
+	width: 150px;
+	transition: height .3s;
+}
+
+.table_content {
+	margin: auto;
+	max-height: 25px;
+	display: inline-block;
+	background-color: white;
+	transition: color .4s, background-color .4s, max-height .4s;
+}
+
+.table_content:hover {
+	background-color: #f2f2f2;
+	max-height: 1000px;
+}
+
+.table_content span {
+	font-size: 20px;
+	max-height: inherit;
+	overflow: auto;
+}
+
+.table_content a , .table_content a span {
+	font-weight: normal;
+	color: black;
+	transition: color .4s;
+}
+
+.table_content a:hover, .table_content a span:hover{
+	color: #595959;
+}
+
+.edit_pic{
+	margin-left: 5px;
+}
+
+.edit_pic img{
+	width: 20px;
+}
+
+.button_choice {
+	margin: auto;
+	margin-top: 50px;
+	width: 304px;
+}
+
+.button_choice .button{
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+.button_choice .button:first-child{
+	padding-top: 11px !important;
+	margin-right: 20px !important;
+}
+
+/*============================* FOOTER *=============================*/
+footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	height: 38px;
+	text-align: center;
+	font-size: 12px;
+	padding-top: 6px;
+	opacity: 0.7;
+}

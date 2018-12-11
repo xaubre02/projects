@@ -1,0 +1,10 @@
+.body	{
+		color: black; 
+		font-size: 12pt;
+		}
+.mainbox{
+		box-shadow: none;
+		}
+header, footer, .sidebox{
+		display: none;
+		}

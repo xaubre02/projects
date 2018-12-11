@@ -1,0 +1,17 @@
+xambro15 100%
+xaubre02 100%
+xbedna62 100%
+
+Vedoucím projektu je David Bednařík <xbedna62>, pracoval na kartě Mapa v uživatelském rozhraní aplikace
+a na prostorové databázi. To obsahovalo implementaci zobrazení prostorových dat, interaktivní práce s
+prostorovými daty a implementace prostorových funkcí nad těmito daty. Taktéž implementoval inicializaci
+databáze ukázkovými daty.
+
+Vít Ambrož pracoval na kartě Zaměstnanci v GUI aplikace. Zabýval se ale především implementací temporální
+části projektu. Temporalitu implementoval jak na straně klienta, tak i na straně serveru. Temporální část
+následně popsal v dokumentaci.
+
+Tomáš Aubrecht pracoval na základní kostře GUI programu a na části pro přihlašování a odhlašování 
+z aplikace/databáze. Další jeho činností byla karta Zvířata zahrnující práci s multimediální databází. 
+To obnášelo přidávání, upravování a mazání multimediálního obsahu. Jednotlivé úpravy multimédií 
+probíhají na straně databáze a na straně aplikace je vytvořen pouze obraz stavu této databáze.
