@@ -511,16 +511,23 @@ t_pixel_sw thresholding(t_pixel_sw pixel, int threshold) {
    n           pocet polozek histogramu
 ***************************************************************************/
 void print_results(int frame, int threshold, int *hist, int n) {
-
 	int i;
+	// fitkit ma int na 16 bitech --> konverze na long
+	term_send_str("Frame: ");
+	term_send_num(long(frame));
+	term_send_crlf();
 
-	printf("Frame: %d\n", frame);
-	printf("Histogram: ");
-	printf("%d", hist[0]);
-	for (i = 1; i < n; i++)
-		printf(", %d", hist[i]);
-	printf("\n");
-	printf("Threshold: %d\n", threshold);
+	term_send_str("Histogram: ");
+	term_send_num(long(hist[0]));
+	for (i = 1; i < n; i++) {
+		term_send_str(", ");
+		term_send_num(long(hist[i]));
+	}
+	term_send_crlf();
+
+	term_send_str("Threshold: ");
+	term_send_num(long(threshold));
+	term_send_crlf();
 }
 
 /***************************************************************************
@@ -602,17 +609,17 @@ int main(void)
    t_pixel_sw  pix_input, pix_output;
    int         pix_output_vld;
 
-   gen_pixel(99);
    for (f = 0; f < FRAMES; f++) {
       for (r = 0; r < FRAME_ROWS; r++) {
          for (c = 0; c < FRAME_COLS; c++) {
             pix_input = gen_pixel();
-			// mereni celkoveho casu zpracovani pixelu
+			// mereni casu zpracovani jednoho pixelu snimku
             start_time = get_time();
             pixel_processing(pix_input, &pix_output, &pix_output_vld);
             end_time = get_time();
          }
       }
+	  // posunout generator o 99 snimku vpred
       gen_pixel(99);
    }
 
