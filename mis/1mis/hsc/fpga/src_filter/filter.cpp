@@ -14,11 +14,11 @@
 
  Vstupy:
    din   hodnota vstupniho pixelu
-   c     cislo sloupce prave zpracovavaneho pixelu
+   c     cislo sloupce prave zpracovavaneho pixelu: vleze se na 9 bitu
  Vystupy:
    col_window  aktualne zpracovavany sloupec tri pixelu
 ***************************************************************************/
-void buffer(t_pixel din, int c, t_pixel *col_window) {
+void buffer(t_pixel din, ac_int<9, false> c, t_pixel *col_window) {
 
 	static t_pixel buf[2][FRAME_COLS];
 	// pouze hodnoty 0 ci 1 --> bool
@@ -40,13 +40,13 @@ void buffer(t_pixel din, int c, t_pixel *col_window) {
  3x3 na okrajich snimku, kde nejsou pixely k dispozici.
 
  Vstupy:
-   r     aktualni cislo radku
-   c     aktualni cislo sloupce
+   r     aktualni cislo radku: maximum je 239 --> vleze se na 8 bitu
+   c     aktualni cislo sloupce: maximum je 319 --> vleze se na 9 bitu
    iw    aktualni hodnoty posuvneho okenka 3x3
  Vystupy:
    ow    upravene hodnoty posuvneho okenka 3x3 po osetreni krajnich hodnot
 ***************************************************************************/
-void clip_window(int r, int c, t_pixel *iw, t_pixel *ow) {
+void clip_window(ac_int<8, false> r, ac_int<9, false> c, t_pixel *iw, t_pixel *ow) {
 	// pouze hodnoty 0 ci 1 --> bool
 	bool first_row, last_row, first_col, last_col;
 	// pouze hodnoty 0 az 3 --> postaci 2 bity
@@ -136,7 +136,7 @@ void shift_window(t_pixel *window, t_pixel *col_window) {
    byt platne napr. na zacatku zpracovani, kdy jeste neni v bufferu nasunut
    dostatek novych pixelu
 ***************************************************************************/
-int system_input(t_pixel din, t_pixel *cliped_window, int *last_pixel) {
+bool system_input(t_pixel din, t_pixel *cliped_window, bool *last_pixel) {
 	// optimalizace datovych typu
 	static ac_int<8, false> row = 0, row_filter = 0;  // FRAME_ROWS - 1 = 239 --> vleze se do 8 bitu (2^8 = 256) 
 	static ac_int<9, false> col = 0, col_filter = 0;  // FRAME_COLS - 1 = 319 --> vleze se do 9 bitu (2^9 = 512)
@@ -184,14 +184,19 @@ int system_input(t_pixel din, t_pixel *cliped_window, int *last_pixel) {
    pix_out  hodnota medianu
 ***************************************************************************/
 t_pixel median(t_pixel *window){
+   // optimalizace datovych typu
+   ac_int<4, false> i;  // maximalni hodnota i = 8 --> staci 4 bity
+   ac_int<3, false> j;  // maximalni hodnota j = 4 --> staci 3 bity
 
-   int i, j;
    t_pixel max[10], max2[10];
 
-   Linit: for(i=0;i<9;i++)
+   // maximalni hodnota i
+   Linit: for (i = 0; i < 9; i++) {
       max[i] = window[i];
+   }
    max[9] = MIN_PIXEL;
-   
+
+   // maximalni hodnota j
    L2: for(j=0;j<5;j++) {
 
        L1a: for(i=0;i<5;i++) {
