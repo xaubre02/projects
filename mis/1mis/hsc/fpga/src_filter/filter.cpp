@@ -6,6 +6,174 @@
    #include <iostream>
    using namespace std;
 #endif
+
+/***************************************************************************
+ Procedura buffer() uklada vstupni hodnoty pixelu do dvou-radkovou bufferu
+ a vraci hodnoty odpovidajici aktualne zpracovavanemu sloupci 3 pixelu
+ (posledni sloupec okenka 3x3).
+
+ Vstupy:
+   din   hodnota vstupniho pixelu
+   c     cislo sloupce prave zpracovavaneho pixelu
+ Vystupy:
+   col_window  aktualne zpracovavany sloupec tri pixelu
+***************************************************************************/
+void buffer(t_pixel din, int c, t_pixel *col_window) {
+
+	static t_pixel buf[2][FRAME_COLS];
+	// pouze hodnoty 0 ci 1 --> bool
+	static bool    sel = true;
+	t_pixel        t0, t1;
+
+	if (c == 0) sel = !sel;
+	t1 = buf[1][c];
+	t0 = buf[0][c];
+	buf[sel][c] = din;
+
+	col_window[0] = sel ? t1 : t0;
+	col_window[1] = sel ? t0 : t1;
+	col_window[2] = din;
+}
+
+/***************************************************************************
+ Procedura clip_window() provadi clipping tj. doplnuje krajni hodnoty okenka
+ 3x3 na okrajich snimku, kde nejsou pixely k dispozici.
+
+ Vstupy:
+   r     aktualni cislo radku
+   c     aktualni cislo sloupce
+   iw    aktualni hodnoty posuvneho okenka 3x3
+ Vystupy:
+   ow    upravene hodnoty posuvneho okenka 3x3 po osetreni krajnich hodnot
+***************************************************************************/
+void clip_window(int r, int c, t_pixel *iw, t_pixel *ow) {
+	// pouze hodnoty 0 ci 1 --> bool
+	bool first_row, last_row, first_col, last_col;
+	// pouze hodnoty 0 az 3 --> postaci 2 bity
+	ac_int<2, false> test1, test2, test3, test4;
+
+	first_row = (r == 0);
+	first_col = (c == 0);
+	last_row = (r == FRAME_ROWS - 1);
+	last_col = (c == FRAME_COLS - 1);
+
+	ow[4] = iw[4];
+	ow[1] = first_col ? iw[4] : iw[1];
+	ow[5] = last_row ? iw[4] : iw[5];
+	ow[7] = last_col ? iw[4] : iw[7];
+	ow[3] = first_row ? iw[4] : iw[3];
+
+	test1 = first_row | (first_col << 1);
+	switch (test1) {
+	case 3:  ow[0] = iw[4]; break; /* first_row, first_col */
+	case 1:  ow[0] = iw[1]; break; /* first_row, not first_col */
+	case 2:  ow[0] = iw[3]; break; /* not first_row, first_col */
+	default: ow[0] = iw[0]; break; /* not first_row, not first_col */
+	}
+
+	test2 = first_row | (last_col << 1);
+	switch (test2) {
+	case 3:  ow[6] = iw[4]; break; /* first_row, last_col */
+	case 1:  ow[6] = iw[7]; break; /* first_row, not last_col */
+	case 2:  ow[6] = iw[3]; break; /* not first_row, last_col */
+	default: ow[6] = iw[6]; break; /* not first_row, not last_col */
+	}
+
+	test3 = last_row | (first_col << 1);
+	switch (test3) {
+	case 3:  ow[2] = iw[4]; break; /* last_row, first_col */
+	case 1:  ow[2] = iw[1]; break; /* last_row, not first_col */
+	case 2:  ow[2] = iw[5]; break; /* not last_row, first_col */
+	default: ow[2] = iw[2]; break; /* not last_row, not first_col */
+	}
+
+	test4 = last_row | (last_col << 1);
+	switch (test4) {
+	case 3:  ow[8] = iw[4]; break; /* last_row, last_col */
+	case 1:  ow[8] = iw[7]; break; /* last_row, not last_col */
+	case 2:  ow[8] = iw[5]; break; /* not last_row, last_col */
+	default: ow[8] = iw[8]; break; /* not last_row, not last_col */
+	}
+}
+
+/***************************************************************************
+ Procedura shift_window() provadi posun okenka 3x3 o jednu pozici do prava.
+
+ Vstupy:
+   window      puvodni hodnoty posuvneho okenka 3x3
+   col_window  nove nasouvany sloupec
+ Vystupy:
+   window      hodnoty vstupniho pole jsou aktualizovany
+***************************************************************************/
+void shift_window(t_pixel *window, t_pixel *col_window) {
+
+	window[2] = window[5];
+	window[1] = window[4];
+	window[0] = window[3];
+
+	window[5] = window[8];
+	window[4] = window[7];
+	window[3] = window[6];
+
+	window[8] = col_window[2];
+	window[7] = col_window[1];
+	window[6] = col_window[0];
+}
+
+/***************************************************************************
+ Funkce system_input() zajistuje zpracovani a bufferovani vstupnich pixelu.
+ Vstupni pixel ulozi do radkoveho bufferu a provede posun a clipping posuvneho
+ okenka. Funkce rozlisuje mezi vstupnim pixelem a skutecne filtrovanym
+ pixelem. Filtrovany pixel je oproti vstupnimu posunut o jeden radek a jeden
+ pixel.
+
+ Vstupy:
+   din            vstupni pixel
+ Vystupy:
+   cliped_window  posuvne okenko 3x3 po osetreni okrajovych bodu
+   last_pixel     infomace o tom, zda se jedna o posledni pixel snimku
+   navratova hodnota ukazu, zda je okenko platne ci nikoliv. Okenko nemusi
+   byt platne napr. na zacatku zpracovani, kdy jeste neni v bufferu nasunut
+   dostatek novych pixelu
+***************************************************************************/
+int system_input(t_pixel din, t_pixel *cliped_window, int *last_pixel) {
+	// optimalizace datovych typu
+	static ac_int<8, false> row = 0, row_filter = 0;  // FRAME_ROWS - 1 = 239 --> vleze se do 8 bitu (2^8 = 256) 
+	static ac_int<9, false> col = 0, col_filter = 0;  // FRAME_COLS - 1 = 319 --> vleze se do 9 bitu (2^9 = 512)
+	static bool             output_vld = false;       // pouze hodnoty 0 ci 1 --> bool
+
+	static t_pixel window[9];
+	t_pixel        col_window[3];
+
+	/* ulozeni pixelu do bufferu, posun okenka a clipping */
+	buffer(din, col, col_window);
+	shift_window(window, col_window);
+	clip_window(row_filter, col_filter, window, cliped_window);
+
+	/* od druheho radku a druheho sloupce je vystup platny */
+	if ((row == 1) && (col == 1))
+		output_vld = true;
+
+	/* oznaceni posledniho filtrovaneho pixelu snimku */
+	*last_pixel = ((row_filter == FRAME_ROWS - 1) && (col_filter == FRAME_COLS - 1));
+
+	/* aktualizace souradnic filtrovaneho pixelu */
+	if ((col_filter == FRAME_COLS - 1) && output_vld) {
+		row_filter = (row_filter == FRAME_ROWS - 1) ? 0 : row_filter + 1;
+	}
+	col_filter = col;
+
+	/* aktualizace souradnic vstupniho pixelu */
+	if (col == FRAME_COLS - 1) {
+		col = 0;
+		row = (row == FRAME_ROWS - 1) ? 0 : row + 1;
+	}
+	else
+		col++;
+
+	return output_vld;
+}
+
 /***************************************************************************
  Funkce median() vraci hodnotu medianu ze zadaneho okenka hodnot 3x3 pixelu.
  Jedna se o paralelni verzi algoritmu vhodnou pro hardware. 
@@ -69,10 +237,9 @@ t_pixel median(t_pixel *window){
 ***************************************************************************/
 #pragma hls_design top
 
-void filter(t_pixel &in_data, bool &in_data_vld, t_pixel &out_data, 
-         t_mcu_data mcu_data[MCU_SIZE]){
+void filter(t_pixel &in_data, bool &in_data_vld, t_pixel &out_data, t_mcu_data mcu_data[MCU_SIZE]){
 
-   static bool       mcu_ready = false;
+   static bool mcu_ready = false;
 
    // Demo aplikace pro synchronizaci MCU - FPGA
    if (!mcu_ready) {
