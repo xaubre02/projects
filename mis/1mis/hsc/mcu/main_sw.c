@@ -613,10 +613,7 @@ int main(void)
       for (r = 0; r < FRAME_ROWS; r++) {
          for (c = 0; c < FRAME_COLS; c++) {
             pix_input = gen_pixel();
-			// mereni casu zpracovani jednoho pixelu snimku
-            start_time = get_time();
             pixel_processing(pix_input, &pix_output, &pix_output_vld);
-            end_time = get_time();
          }
       }
 	  // posunout generator o 99 snimku vpred
