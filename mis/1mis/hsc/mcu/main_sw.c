@@ -181,7 +181,7 @@ t_pixel_sw gen_pixel(unsigned int frame_inc) {
  Vystupy:
 	hodnota vypocteneho prahu
 ***************************************************************************/
-int otsu(int *hist, int n) {
+int otsu(long *hist, int n) {
 
 	int   total = 0;
 	float sum = 0;
@@ -422,7 +422,7 @@ int system_input(t_pixel_sw din, t_pixel_sw *cliped_window, int *last_pixel) {
  Vstupy:
    hist     adresa histogramu
 ***************************************************************************/
-void histogram_clean(int *hist) {
+void histogram_clean(long *hist) {
 
 	int i;
 
@@ -457,7 +457,7 @@ t_pixel_sw thresholding(t_pixel_sw pixel, int threshold) {
    hist        adresa histogramu
    n           pocet polozek histogramu
 ***************************************************************************/
-void print_results(int frame, int threshold, int *hist, int n) {
+void print_results(int frame, int threshold, long *hist, int n) {
 	int i;
 	// fitkit ma int na 16 bitech --> konverze na long
 	term_send_str("Frame: ");
@@ -465,10 +465,10 @@ void print_results(int frame, int threshold, int *hist, int n) {
 	term_send_crlf();
 
 	term_send_str("Histogram: ");
-	term_send_num((long)hist[0]);
+	term_send_num(hist[0]);
 	for (i = 1; i < n; i++) {
 		term_send_str(", ");
-		term_send_num((long)hist[i]);
+		term_send_num(hist[i]);
 	}
 	term_send_crlf();
 
@@ -494,13 +494,13 @@ void print_results(int frame, int threshold, int *hist, int n) {
    data_out_vld   informace o tom, zda je vystupni pixel platny
 ***************************************************************************/
 void pixel_processing(t_pixel_sw data_in, t_pixel_sw *data_out, int *data_out_vld) {
-
-	static int  histogram[PIXELS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-	static int  threshold = 4, new_threshold = 4;
+	// integer pretece
+	static long  histogram[PIXELS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+	static int   threshold = 4, new_threshold = 4;
 	// pouze kazdych 100 snimku
-	static int  frame = 100;
-	t_pixel_sw  pix_filtered, window[9];
-	int         last_pixel;
+	static int frame = 100;
+	t_pixel_sw pix_filtered, window[9];
+	int        last_pixel;
 
 
 	*data_out_vld = system_input(data_in, window, &last_pixel);
