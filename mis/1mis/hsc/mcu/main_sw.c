@@ -77,6 +77,32 @@ void fpga_initialized() {
 }
 
 /***************************************************************************
+ Procedura update_base_pos zajistuje aktualizaci bazove pozice, ktera posouva
+ objekt po obrazovce
+***************************************************************************/
+void update_base_pos(unsigned int *base_r, unsigned int *base_c) {
+
+	static int inc_r = 1, inc_c = 1;
+
+	if (*base_r == BASE_LST_ROW) {
+		inc_r = -1;
+	}
+	else if (*base_r == BASE_FST_ROW) {
+		inc_r = 1;
+	}
+
+	if (*base_c == BASE_LST_COL) {
+		inc_c = -1;
+	}
+	else if (*base_c == BASE_FST_COL) {
+		inc_c = 1;
+	}
+
+	*base_r = (*base_r) + inc_r;
+	*base_c = (*base_c) + inc_c;
+}
+
+/***************************************************************************
  Funkce gen_pixel() zajistuje generovani vstupnich pixelu.
 
  Vstupy
@@ -97,8 +123,9 @@ t_pixel_sw gen_pixel(unsigned int frame_inc) {
 
    /* posun generatoru o nekolik smimku vpred */
    if(frame_inc > 0) {
-      for (i = 0; i < frame_inc; i++)
-         update_base_pos(&base_r, &base_c);
+	  for (i = 0; i < frame_inc; i++) {
+        update_base_pos(&base_r, &base_c);
+	  }
       noise_inc = (long)FRAME_ROWS*(long)FRAME_COLS*(long)frame_inc;
       noise_cnt =  (noise_cnt + noise_inc) % NOISE_INTERVAL;
       frame_cnt += frame_inc;
@@ -389,86 +416,6 @@ int system_input(t_pixel_sw din, t_pixel_sw *cliped_window, int *last_pixel) {
 }
 
 /***************************************************************************
- Procedura update_base_pos zajistuje aktualizaci bazove pozice, ktera posouva
- objekt po obrazovce
-***************************************************************************/
-void update_base_pos(unsigned int *base_r, unsigned int *base_c) {
-
-	static int inc_r = 1, inc_c = 1;
-
-	if (*base_r == BASE_LST_ROW) {
-		inc_r = -1;
-	}
-	else if (*base_r == BASE_FST_ROW) {
-		inc_r = 1;
-	}
-
-	if (*base_c == BASE_LST_COL) {
-		inc_c = -1;
-	}
-	else if (*base_c == BASE_FST_COL) {
-		inc_c = 1;
-	}
-
-	*base_r = (*base_r) + inc_r;
-	*base_c = (*base_c) + inc_c;
-}
-
-/***************************************************************************
- Funkce gen_pixel() zajistuje generovani vstupnich pixelu.
-
- Vystupy:
-   navratova hodnota reprezentuje nove vygenerovany pixel
-***************************************************************************/
-t_pixel_sw gen_pixel() {
-
-	static unsigned int        r = 0, c = 0, base_r = 100, base_c = 100;
-	static unsigned int        noise_cnt = 0, frame_cnt = 0;
-	t_pixel_sw                 pixel_int, noise_pix, diff, diff_pix;
-	unsigned int               diff_r, diff_c;
-
-	/* vypocet rozdilu aktualni pozice vuci bazove pozici */
-	diff_r = r - base_r;
-	diff_c = c - base_c;
-	diff = (diff_r > diff_c) ? (diff_r >> NUM1) : (diff_c >> NUM1);
-	diff = ~diff & MAX_PIXEL;
-	diff_pix = diff + ((frame_cnt >> 3) & MAX_PIXEL);
-	if (diff_pix > MAX_PIXEL)
-		diff_pix = MAX_PIXEL;
-
-	/* vykresli pixel pokud je v blizkosti bazovych souradnic */
-	if ((diff_c < IMG_SIZE) && (diff_r < IMG_SIZE))
-		pixel_int = diff_pix;
-	else
-		pixel_int = MIN_PIXEL;
-
-	noise_pix = (noise_cnt == NOISE_INTERVAL - 1) ? MAX_PIXEL : MIN_PIXEL;
-
-	pixel_int |= noise_pix;
-
-	/* aktualizace aktualnich souradnic */
-	if (c == FRAME_COLS - 1) {
-		c = 0;
-		if (r == FRAME_ROWS - 1) {
-			r = 0;
-			/* na konci smiku - aktualizace bazovych souradnic */
-			update_base_pos(&base_r, &base_c);
-			frame_cnt++;
-		}
-		else
-			r++;
-	}
-	else
-		c++;
-
-	/* citac sumu */
-	noise_cnt = (noise_cnt == NOISE_INTERVAL - 1) ? 0 : noise_cnt + 1;
-
-	return pixel_int;
-}
-
-
-/***************************************************************************
  Procedura histogram_clean() zajistuje vymazani histogramu, ktery je potreba
  zejmena na konci zpracovani kazdeho snimku.
 
@@ -514,19 +461,19 @@ void print_results(int frame, int threshold, int *hist, int n) {
 	int i;
 	// fitkit ma int na 16 bitech --> konverze na long
 	term_send_str("Frame: ");
-	term_send_num(long(frame));
+	term_send_num((long)frame);
 	term_send_crlf();
 
 	term_send_str("Histogram: ");
-	term_send_num(long(hist[0]));
+	term_send_num((long)hist[0]);
 	for (i = 1; i < n; i++) {
 		term_send_str(", ");
-		term_send_num(long(hist[i]));
+		term_send_num((long)hist[i]);
 	}
 	term_send_crlf();
 
 	term_send_str("Threshold: ");
-	term_send_num(long(threshold));
+	term_send_num((long)threshold);
 	term_send_crlf();
 }
 
@@ -549,7 +496,7 @@ void pixel_processing(t_pixel_sw data_in, t_pixel_sw *data_out, int *data_out_vl
 
 	static int  histogram[PIXELS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 	static int  threshold = 4, new_threshold = 4;
-	static int  frame = 1;
+	static int  frame = 100;
 	t_pixel_sw  pix_filtered, window[9];
 	int         last_pixel;
 
@@ -579,7 +526,7 @@ void pixel_processing(t_pixel_sw data_in, t_pixel_sw *data_out, int *data_out_vl
 			}
 			else if ((frame % 10) == 1)
 				threshold = new_threshold;
-			frame++;
+			frame += 100;
 		}
 	}
 }
@@ -609,11 +556,16 @@ int main(void)
    t_pixel_sw  pix_input, pix_output;
    int         pix_output_vld;
 
-   for (f = 0; f < FRAMES; f++) {
+   // posunout generator o 99 snimku vpred na 99. snimek
+   gen_pixel(99);
+
+   for (f = 0; f < FRAMES; f+=100) {
       for (r = 0; r < FRAME_ROWS; r++) {
          for (c = 0; c < FRAME_COLS; c++) {
-            pix_input = gen_pixel();
+            pix_input = gen_pixel(0);
+			start_time = get_time();
             pixel_processing(pix_input, &pix_output, &pix_output_vld);
+			end_time = get_time();
          }
       }
 	  // posunout generator o 99 snimku vpred
