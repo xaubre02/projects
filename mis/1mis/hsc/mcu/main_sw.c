@@ -475,6 +475,7 @@ void print_results(int frame, int threshold, int *hist, int n) {
 	term_send_str("Threshold: ");
 	term_send_num((long)threshold);
 	term_send_crlf();
+	term_send_crlf();
 }
 
 /***************************************************************************
@@ -496,6 +497,7 @@ void pixel_processing(t_pixel_sw data_in, t_pixel_sw *data_out, int *data_out_vl
 
 	static int  histogram[PIXELS] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 	static int  threshold = 4, new_threshold = 4;
+	// pouze kazdych 100 snimku
 	static int  frame = 100;
 	t_pixel_sw  pix_filtered, window[9];
 	int         last_pixel;
@@ -526,6 +528,7 @@ void pixel_processing(t_pixel_sw data_in, t_pixel_sw *data_out, int *data_out_vl
 			}
 			else if ((frame % 10) == 1)
 				threshold = new_threshold;
+			// pouze kazdych 100 snimku
 			frame += 100;
 		}
 	}
@@ -538,6 +541,10 @@ int main(void)
 {
    short counter = 0;
    unsigned long start_time, end_time;
+   // doba zpracovani vsech pixelu jednoho snimku
+   unsigned long proc_time = 0;
+   // 320 * 240 * 6 snimku
+   unsigned long pixels = 460800;
 
    initialize_hardware();
    set_led_d6(1);  //rozsvitit LED D6
@@ -558,14 +565,25 @@ int main(void)
 
    // posunout generator o 99 snimku vpred na 99. snimek
    gen_pixel(99);
-
+   // pouze kazdych 100 snimku
    for (f = 0; f < FRAMES; f+=100) {
       for (r = 0; r < FRAME_ROWS; r++) {
          for (c = 0; c < FRAME_COLS; c++) {
             pix_input = gen_pixel(0);
-			start_time = get_time();
-            pixel_processing(pix_input, &pix_output, &pix_output_vld);
-			end_time = get_time();
+
+#ifdef PROFILE
+            // mereni casu zpracovani pixelu
+            start_time = get_time();
+#endif
+			pixel_processing(pix_input, &pix_output, &pix_output_vld);
+
+#ifdef PROFILE
+            end_time = get_time();
+#endif
+#ifdef PROFILE
+            // ulozeni casu pro vypocet prumerne hodnoty
+            proc_time += (end_time - start_time);
+#endif
          }
       }
 	  // posunout generator o 99 snimku vpred
@@ -573,13 +591,10 @@ int main(void)
    }
 
 #ifdef PROFILE
-   // Demo priklad pro mereni casu
-   start_time = get_time();
-   delay_ms(100);
-   end_time = get_time();
-
-   term_send_str("Time diff (us): ");
-   term_send_num((long)(((float)(end_time-start_time))*TIMER_TICK));
+   // tisk prumerne doby zpracovani jednoho pixelu
+   term_send_str("Avg. processing time of one pixel: ");
+   term_send_num((long)(((float)(proc_time / pixels)) * TIMER_TICK));
+   term_send_crlf();
    term_send_crlf();
 #endif
    
