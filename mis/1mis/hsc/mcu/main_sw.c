@@ -475,7 +475,6 @@ void print_results(int frame, int threshold, long *hist, int n) {
 	term_send_str("Threshold: ");
 	term_send_num((long)threshold);
 	term_send_crlf();
-	term_send_crlf();
 }
 
 /***************************************************************************
@@ -543,8 +542,8 @@ int main(void)
    unsigned long start_time, end_time;
    // doba zpracovani vsech pixelu jednoho snimku
    unsigned long proc_time = 0;
-   // 320 * 240 * 6 snimku
-   unsigned long pixels = 460800;
+   // 320 * 240 = 76800 pixelu na snimek
+   unsigned long pixels = 76800;
 
    initialize_hardware();
    set_led_d6(1);  //rozsvitit LED D6
@@ -571,32 +570,28 @@ int main(void)
          for (c = 0; c < FRAME_COLS; c++) {
             pix_input = gen_pixel(0);
 
-#ifdef PROFILE
             // mereni casu zpracovani pixelu
             start_time = get_time();
-#endif
 			pixel_processing(pix_input, &pix_output, &pix_output_vld);
-
-#ifdef PROFILE
             end_time = get_time();
-#endif
-#ifdef PROFILE
+
             // ulozeni casu pro vypocet prumerne hodnoty
             proc_time += (end_time - start_time);
-#endif
          }
       }
 	  // posunout generator o 99 snimku vpred
       gen_pixel(99);
-   }
 
 #ifdef PROFILE
-   // tisk prumerne doby zpracovani jednoho pixelu
-   term_send_str("Avg. processing time of one pixel: ");
-   term_send_num((long)(((float)(proc_time / pixels)) * TIMER_TICK));
-   term_send_crlf();
-   term_send_crlf();
+      // tisk prumerne doby zpracovani jednoho pixelu
+      term_send_str("Avg. proc. time: ");
+      term_send_num((long)(((float)(proc_time / pixels)) * TIMER_TICK));
+	  term_send_str(" us");
+      term_send_crlf();
+      // vynulovani pocitadla casu pro dalsi snimek
+	  proc_time = 0;
 #endif
+   }
    
    CCTL0 &= ~CCIE;  // disable interrupt
    /**************************************************************************/
