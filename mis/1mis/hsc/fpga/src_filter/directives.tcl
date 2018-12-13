@@ -19,6 +19,7 @@ solution options set /Output/GenerateCycleNetlist false
 solution file add {./src_filter/filter.h} -type CHEADER
 solution file add {./src_filter/filter.cpp} -type C++
 solution file add {./src_filter/addr_space.h} -type CHEADER
+go new
 directive set -DESIGN_GOAL area
 directive set -OLD_SCHED false
 directive set -SPECULATE true
@@ -54,17 +55,20 @@ directive set -CLUSTER_RTL_SYN false
 directive set -CLUSTER_FAST_MODE false
 directive set -CLUSTER_TYPE combinational
 directive set -COMPGRADE fast
-go new
 directive set -DESIGN_HIERARCHY filter__FR31ac_int__tm__17_XCiL_1_3XCbL_1_0RbT1P32ac_int__tm__18_XCiL_2_32XCbL_1_0
-go compile
+go analyze
 solution library add mgc_Xilinx-SPARTAN3-4_beh_xst -- -rtlsyntool Xilinx -manufacturer Xilinx -family SPARTAN3 -speed -4 -part 3s50tq144
 solution library add Xilinx_RAMS
 go libraries
 directive set -CLOCKS {clk {-CLOCK_PERIOD 40.0 -CLOCK_EDGE rising -CLOCK_UNCERTAINTY 0.0 -CLOCK_HIGH_TIME 20.0 -RESET_SYNC_NAME rst -RESET_ASYNC_NAME arst_n -RESET_KIND sync -RESET_SYNC_ACTIVE high -RESET_ASYNC_ACTIVE low -ENABLE_ACTIVE high}}
 go assembly
-directive set /filter/core/main -PIPELINE_INIT_INTERVAL 2
-directive set /filter/out_data:rsc -MAP_TO_MODULE mgc_ioport.mgc_out_stdreg_en
-directive set /filter/in_data:rsc -MAP_TO_MODULE mgc_ioport.mgc_in_wire_en
 directive set /filter/mcu_data:rsc -MAP_TO_MODULE Xilinx_RAMS.BLOCK_SPRAM_RBW
+directive set /filter/in_data:rsc -MAP_TO_MODULE mgc_ioport.mgc_in_wire_en
+directive set /filter/out_data:rsc -MAP_TO_MODULE mgc_ioport.mgc_out_stdreg_en
+directive set /filter/core/main -PIPELINE_INIT_INTERVAL 4
+directive set /filter/core/Linit -UNROLL yes
+directive set /filter/core/L2 -UNROLL yes
+directive set /filter/core/L1a -UNROLL yes
+directive set /filter/core/L1b -UNROLL yes
 go architect
 go extract

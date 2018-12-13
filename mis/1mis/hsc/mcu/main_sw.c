@@ -550,7 +550,7 @@ int main(void)
    set_led_d5(1);  //rozsvitit LED D5
 
    /* nastaveni casovace na periodu 10 ms */
-   CCTL0 = CCIE;  // enable interrupt               
+   CCTL0 = CCIE;  // enable interrupt
    CCR0 = 0x80;
    TACTL = TASSEL_1 + MC_2;
 
@@ -592,7 +592,7 @@ int main(void)
 	  proc_time = 0;
 #endif
    }
-   
+
    CCTL0 &= ~CCIE;  // disable interrupt
    /**************************************************************************/
 

@@ -175,6 +175,24 @@ bool system_input(t_pixel din, t_pixel *cliped_window, bool *last_pixel) {
 }
 
 /***************************************************************************
+Funkce thresholding() provadi prahovani vstupniho pixelu vuci zadanemu
+prahu.
+
+Vstupy:
+pixel       vstupni pixel
+threshold   hodnota prahu
+Vystupy:
+navratova hodnota reprezentuje vystupni pixel po provedeni prahovani
+***************************************************************************/
+t_pixel thresholding(t_pixel pixel, int threshold) {
+
+	if (pixel >= threshold)
+		return MAX_PIXEL;
+	else
+		return MIN_PIXEL;
+}
+
+/***************************************************************************
  Funkce median() vraci hodnotu medianu ze zadaneho okenka hodnot 3x3 pixelu.
  Jedna se o paralelni verzi algoritmu vhodnou pro hardware. 
 
@@ -219,7 +237,7 @@ t_pixel median(t_pixel *window){
               max[(i*2)+1] = max2[(i*2)+2]; 
               max[(i*2)+2] = max2[(i*2)+1];
           }
-       }     
+       }
        max[0] = max2[0];
        max[9] = max2[9];
    }
@@ -246,11 +264,19 @@ void filter(t_pixel &in_data, bool &in_data_vld, t_pixel &out_data, t_mcu_data m
 
    static bool mcu_ready = false;
 
+	// maximum je 8 - vleze se na 4 bity
+   static ac_int<4, false> threshold = 4, new_threshold = 4;
+	// max snimek = 501 -> vleze se do 9 bitu
+	static ac_int<9, false>  frame = 1;
+	t_pixel pix_filtered, window[9];
+	bool        last_pixel;
+
    // Demo aplikace pro synchronizaci MCU - FPGA
    if (!mcu_ready) {
       if(mcu_data[FPGA_MCU_READY] == 1) {
          mcu_ready = true;
          mcu_data[FPGA_MCU_READY] = 2;
+		 mcu_data[FPGA_THRESHOLD] = threshold;
 
 #ifdef CCS_DUT_SYSC
          // Tisk vystupu pouze pro ucely simulace v Catapult C
@@ -261,7 +287,27 @@ void filter(t_pixel &in_data, bool &in_data_vld, t_pixel &out_data, t_mcu_data m
       }
    }
    else if (in_data_vld) {
-      out_data = in_data;
+		if (system_input(in_data, window, &last_pixel)) {
+			/* Filtrace medianem, aktualizace histogramu, prahovani */
+			pix_filtered = median(window);
+			if ((frame % 10) == 0)
+				mcu_data[(int)(FPGA_HISTOGRAM + pix_filtered)]++;
+
+			out_data = thresholding(pix_filtered, threshold);
+
+			/* Test na posledni pixel predchoziho snimku */
+			if (last_pixel) {
+				if ((frame % 10) == 1)
+					threshold = new_threshold;
+
+				// zvysit pocet zpracovanych snimku
+				mcu_data[FPGA_FRAME_CNT] = frame;
+				frame++;
+			}
+			// aktualizovat threshold
+			else if (mcu_data[FPGA_THRESHOLD] != new_threshold) {
+				new_threshold = mcu_data[FPGA_THRESHOLD];
+			}
+		}
    }
 }
-
