@@ -4,8 +4,13 @@
 
 ### **BIT** (Bakalářské studium)
 #### **1BIT** - První semestr
-- **IEL** >[8/12] (-4 body za .rar místo .zip)
-- **IZP** >[5/5], [9/7], [10/10], [3/4]
+- **IEL** 
+  1. [8/12] (-4 body za .rar místo .zip)
+- **IZP**
+  1. [5/5]
+  2. [9/7]
+  3a. [10/10]
+  3b. [3/4]
 
 #### **2BIT** - Druhý semestr
 - **INC** [20/20]
