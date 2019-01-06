@@ -79,5 +79,8 @@
 ### **MIS** (Magisterské studium)
 #### **1MIS** - První semestr
 - **HSC**
+  - [25/25]
 - **PDB**
+  - [16/20] (-4 body za nedostačující temporální dotazy)
 - **SIN**
+  - [15/15]
