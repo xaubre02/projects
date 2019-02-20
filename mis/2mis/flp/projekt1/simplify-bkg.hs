@@ -166,22 +166,57 @@ getNiSet terms (x:xs) = if isTerminating (right x) terms
 getNtSet :: Set.Set Char -> Set.Set Char -> Set.Set Char -> [Rule] -> Set.Set Char
 getNtSet new prev terminals rules = if new == prev
   then new
+  -- params: Ni u Sigma(Terminals), rules
   else getNtSet (getNiSet (Set.union new terminals) rules) new terminals rules
 
--- remove all nonterminating nonterminals
-removeNonterminatingNonterminals :: Grammar -> IO()
-removeNonterminatingNonterminals grammar = if elem (startSymbol grammar) setNt -- check if L(G) is not empty
-  then error ("Valid: " ++ (Set.toList setNt))
+-- filter out rules that contains symbols that are not in the provided symbol set
+filterRules :: [Rule] -> Set.Set Char -> Set.Set Rule
+filterRules [] symbols = Set.fromList []
+filterRules (x:xs) symbols = if isIncluded x symbols
+  then Set.union (Set.fromList [x]) (filterRules xs symbols)
+  else filterRules xs symbols
+  where
+    -- both left and right side consists of symbols in provided set of symbols 
+    isIncluded rule symbols = elem (left rule) symbols && isTerminating (right rule) symbols
+
+-- remove all nonterminating symbols (Algorithm 4.1)
+removeNonterminatingSymbols :: Grammar -> Grammar
+removeNonterminatingSymbols grammar = if elem (startSymbol grammar) setNt -- check if L(G) is not empty
+  then Grammar setNt (terminals grammar) (startSymbol grammar) (filterRules (Set.toList (rules grammar)) (Set.union setNt (terminals grammar)))
   else error "Grammar produces an empty language!"
   where
     setNt = getNtSet (getNiSet (terminals grammar) ruleList) (Set.fromList []) (terminals grammar) ruleList
     ruleList = Set.toList (rules grammar)
-    
 
--- remove all unreachable symbols
+-- get one step of the Vi of the 4.2 algorithm
+getViStep :: Set.Set Char -> [Rule] -> Set.Set Char
+getViStep derivatives [] = Set.fromList []
+-- 'A->alpha' add all symbols in alpha if the A is a derivative of the start symbol
+getViStep derivatives (x:xs) = if elem (left x) derivatives
+  then Set.union (addAlpha (right x)) (getViStep derivatives xs)
+  else getViStep derivatives xs
+  where
+    addAlpha [] = Set.fromList []
+    addAlpha (x:xs) = Set.union (Set.fromList [x]) (addAlpha xs)
+
+-- get the resulting Vi set of the 4.2 algorithm
+getViSet :: Set.Set Char -> Set.Set Char -> [Rule] -> Set.Set Char
+getViSet new prev rules = if new == prev
+  then new
+  else getViSet (Set.union (getViStep (Set.union new prev) rules) new) new rules
+
+-- remove all unreachable symbols (Algorithm 4.2)
 removeUnreachableSymbols :: Grammar -> Grammar
-removeUnreachableSymbols grammar = grammar
+-- params: Vi n Nt, Vi n T, start symbol, filtered rules (n = intersection)
+removeUnreachableSymbols grammar = Grammar (Set.intersection setVi (nonterminals grammar)) (Set.intersection setVi (terminals grammar)) (startSymbol grammar) (filterRules (Set.toList (rules grammar)) setVi)
+  where
+    -- params: V1 u V0, V0, rules
+    setVi = getViSet (Set.union (getViStep (Set.fromList [startSymbol grammar]) ruleList) (Set.fromList [startSymbol grammar])) (Set.fromList [startSymbol grammar]) ruleList
+    ruleList = Set.toList (rules grammar)
 
+-- remove all useless symbols (Algorithm 4.3)
+removeUselessSymbols :: Grammar -> Grammar
+removeUselessSymbols grammar = removeUnreachableSymbols (removeNonterminatingSymbols grammar)
 
 -- ----------- MAIN FUNCTION -----------
 
@@ -203,7 +238,6 @@ main = do
         -- first argument
         case(head args) of
           "-i" -> printGrammar (parseInput (lines input))
-          "-1" -> removeNonterminatingNonterminals (parseInput (lines input))
-          --"-1" -> printGrammar (removeNonterminatingNonterminals (parseInput (lines input)))
-          "-2" -> printGrammar (removeUnreachableSymbols (parseInput (lines input)))
+          "-1" -> printGrammar (removeNonterminatingSymbols (parseInput (lines input)))
+          "-2" -> printGrammar (removeUselessSymbols (parseInput (lines input)))
           otherwise -> error ("Unknown argument: " ++ (head args))
