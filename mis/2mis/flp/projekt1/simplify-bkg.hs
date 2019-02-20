@@ -33,28 +33,6 @@ data Grammar = Grammar
   }
 
 
--- ---------- PRINT FUNCTIONS ----------
-
--- print a set of characters
-printCharSet list = putStrLn (intersperse ',' (Set.toList (list)))
-
--- print a single rule
-printRule :: Rule -> IO()
-printRule rule = printf "%c->%s\n" (left rule) (right rule)
-
--- print a set of rules
-printRuleSet :: Set.Set Rule -> IO()
-printRuleSet rules = mapM_ printRule (Set.toList(rules))
-
--- print a grammar
-printGrammar :: Grammar -> IO()
-printGrammar grammar = do
-  printCharSet (nonterminals grammar)  -- print nonterminals
-  printCharSet (terminals grammar)     -- print terminals
-  printf "%c\n" (startSymbol grammar)  -- print start symbol
-  printRuleSet (rules grammar)         -- print rules
-
-
 -- ---------- PARSE FUNCTIONS ----------
 
 -- remove spaces from a string
@@ -69,85 +47,140 @@ splitStr string = split string []
   where
     split [] t = [t]
     split (x:xs) t = if x == ','
-      then (t:split xs [])
+      then t : split xs []
       else split xs (t ++ [x])
 
 -- check whether all elements in a list are unique - the list is a set
 isSet :: [String] -> Bool
-isSet = all ( (==) 1 . length) . sg
-  where
-    sg :: Ord a => [a] -> [[a]]
-    sg = group . sort
+isSet = all ( (==) 1 . length) . group . sort
 
 -- parse nonterminals
 parseNonterminals :: String -> Set.Set Char
-parseNonterminals string = do
-  let parts = splitStr (removeSpaces string)
+parseNonterminals string =
   -- each part has to be a valid unique nonterminal symbol
   if isSet parts && all isNonterminal parts
     then Set.fromList (map head parts)
     else error "Nonterminals are not valid! Has to be a set of letters A-Z."
     where
+      parts = splitStr (removeSpaces string)
       -- check whether the string is a nonterminal
       isNonterminal :: String -> Bool
-      isNonterminal string = if (length string) == 1 && isAlpha (head string) && isUpper (head string)
-        then True
-        else False
+      isNonterminal string = (length string) == 1 && isAlpha (head string) && isUpper (head string)
 
 -- parse terminals
 parseTerminals :: String -> Set.Set Char
-parseTerminals string = do
-  let parts = splitStr (removeSpaces string)
+parseTerminals string =
   -- each part has to be a valid unique nonterminal symbol
   if isSet parts && all isTerminal parts
     then Set.fromList (map head parts)
     else error "Terminals are not valid! Has to be a set of letters a-z."
     where
+      parts = splitStr (removeSpaces string)
       -- check whether the string is a terminal
       isTerminal :: String -> Bool
-      isTerminal string = if (length string) == 1 && isAlpha (head string) && isLower (head string)
-        then True
-        else False
+      isTerminal string = (length string) == 1 && isAlpha (head string) && isLower (head string)
 
 -- parse a start symbol from a string
 parseStartSymbol :: String -> Set.Set Char -> Char
 parseStartSymbol string nonterminals =
   -- start symbol has to be one of the nonterminals
-  if elem (head string) nonterminals
+  if (length string) == 1 && elem (head string) nonterminals
     then (head string)
     else error "Start symbol has to be one of the nonterminals!"
 
--- parse rewrite rules
-parseRules :: [String] -> [Char] -> [Char] -> Set.Set Rule
-parseRules rules nonterms terms =
-  Set.fromList (mapM_ (parseRule nonterms terms) rules)
-  where
---        parseRule :: String -> Set.Set Char -> Set.Set Char -> IO()
-    parseRule nonterms terms rule = do
-      let str = removeSpaces rule
-      -- NONTERM -> alpha, where alpha in (NONTERMS u TERMS)*
-      if (length str) >= 4 && elem (str !! 0) nonterms && str !! 1 == '-' && str !! 2 == '>' && ((isOK (drop 3 str) nonterms terms) || (drop 3 str) == "#")
-        then Rule (str !! 0) (drop 3 str)
-        else error ("'" ++ str ++ "' is an invalid rule!")
-        where
-          --isOK :: String -> Bool
-          isOK rest nonterms terms = all (isValid nonterms terms) rest
-          isValid nonterms terms char = elem char nonterms || elem char terms
+-- parse a single rewrite rule
+parseRule :: String -> Set.Set Char -> Set.Set Char -> Rule
+parseRule rule nonterms terms =
+  -- NONTERM -> alpha, where alpha in (NONTERMS u TERMS)*
+  if (length rule) >= 4 && elem (rule !! 0) nonterms && rule !! 1 == '-' && rule !! 2 == '>' && ((validAlpha (drop 3 rule) nonterms terms) || (drop 3 rule) == "#")
+    then Rule (rule !! 0) (drop 3 rule)
+    else error ("'" ++ rule ++ "' is an invalid rule!")
+    where
+      -- each symbol of alpha has to be either in nonterms or terms
+      validAlpha alpha nonterms terms = all (isIn nonterms terms) alpha
+      isIn nonterms terms char = elem char nonterms || elem char terms
 
+-- parse a list of rewrite rules
+parseRules :: [String] -> Set.Set Char -> Set.Set Char -> Set.Set Rule
+parseRules rules nonterms terms = 
+  if isSet(rules) 
+    then Set.fromList (createList rules [])
+    else error "Rules are not unique!"
+    where
+      createList [] list = list
+      createList (x:xs) list = createList xs (list ++ [parseRule (removeSpaces x) nonterms terms])
 
 -- parse input and return a grammar
---parseInput :: [String] -> Grammar
-parseInput lines = do
+parseInput :: [String] -> Grammar
+parseInput lines =
   if (length lines) < 4
-    then error "Invalid grammar on input!"  -- a grammar has to be a quaternion
-    else do
-      let nonterms = parseNonterminals (lines !! 0)
-      let terms = parseTerminals (lines !! 1)
-      --print (Set.toList nonterms)
-      --print (Set.toList terms)
-      --printf "%c\n" (parseStartSymbol (lines !! 2) nonterms)
-      printRuleSet (parseRules (drop 3 lines) (Set.toList nonterms) (Set.toList terms))
-      --printRuleSet (parseRules (drop 3 lines)) -- get only the lines with rules
+    then error "Invalid grammar on input! At least 4 lines needed!"  -- a grammar has to be a quaternion
+    else Grammar nonterms terms (parseStartSymbol (lines !! 2) nonterms) (parseRules (drop 3 lines) nonterms terms)
+    where
+      nonterms = parseNonterminals (lines !! 0)
+      terms    = parseTerminals (lines !! 1)
+
+
+-- ---------- PRINT FUNCTIONS ----------
+
+-- print a grammar
+printGrammar :: Grammar -> IO()
+printGrammar grammar = do
+  printCharSet (nonterminals grammar) -- print nonterminals
+  printCharSet (terminals grammar)    -- print terminals
+  printOneChar (startSymbol grammar)  -- print start symbol
+  printRuleSet (rules grammar)        -- print rules
+  where
+    -- print a set of chars
+    printCharSet :: Set.Set Char -> IO()
+    printCharSet list = putStrLn (intersperse ',' (Set.toList (list)))
+    -- print a single char
+    printOneChar :: Char -> IO()
+    printOneChar char = printf "%c\n" char
+    -- print a set of rules
+    printRuleSet :: Set.Set Rule -> IO()
+    printRuleSet rules = mapM_ printRule rules
+    -- print a single rule
+    printRule :: Rule -> IO()
+    printRule rule = printf "%c->%s\n" (left rule) (right rule)
+
+
+-- ------- SIMPLIFYING FUNCTIONS -------
+
+-- check whether a string is terminating or not
+isTerminating :: String -> Set.Set Char -> Bool
+isTerminating string terminatings = string == "#" || (all (isTerm terminatings) string)
+  where
+    -- check whether a char is terminating symbol or terminal
+    isTerm terminatings char = elem char terminatings
+
+-- get Ni set of the 4.1 algorithm
+getNiSet :: Set.Set Char -> [Rule] -> Set.Set Char
+getNiSet terms [] = Set.fromList []
+-- 'A->alpha' check whether the alpha consists of terminating symbols only
+getNiSet terms (x:xs) = if isTerminating (right x) terms
+  then Set.union (Set.fromList [left x]) (getNiSet terms xs)
+  else getNiSet terms xs
+
+-- get the resulting Nt set of the 4.1 algorithm
+getNtSet :: Set.Set Char -> Set.Set Char -> Set.Set Char -> [Rule] -> Set.Set Char
+getNtSet new prev terminals rules = if new == prev
+  then new
+  else getNtSet (getNiSet (Set.union new terminals) rules) new terminals rules
+
+-- remove all nonterminating nonterminals
+removeNonterminatingNonterminals :: Grammar -> IO()
+removeNonterminatingNonterminals grammar = if elem (startSymbol grammar) setNt -- check if L(G) is not empty
+  then error ("Valid: " ++ (Set.toList setNt))
+  else error "Grammar produces an empty language!"
+  where
+    setNt = getNtSet (getNiSet (terminals grammar) ruleList) (Set.fromList []) (terminals grammar) ruleList
+    ruleList = Set.toList (rules grammar)
+    
+
+-- remove all unreachable symbols
+removeUnreachableSymbols :: Grammar -> Grammar
+removeUnreachableSymbols grammar = grammar
 
 
 -- ----------- MAIN FUNCTION -----------
@@ -169,14 +202,8 @@ main = do
 
         -- first argument
         case(head args) of
-          "-i" -> parseInput (lines input)
-          "-1" -> putStrLn "argument -1"
-          "-2" -> putStrLn "argument -2"
+          "-i" -> printGrammar (parseInput (lines input))
+          "-1" -> removeNonterminatingNonterminals (parseInput (lines input))
+          --"-1" -> printGrammar (removeNonterminatingNonterminals (parseInput (lines input)))
+          "-2" -> printGrammar (removeUnreachableSymbols (parseInput (lines input)))
           otherwise -> error ("Unknown argument: " ++ (head args))
-
---        let r1 = Rule 'S' ['#']
---        let r2 = Rule 'S' ['a']
-
-        --printList (Set.fromList ['a', 'b', 'c'])
---        let g = Grammar (Set.fromList ['S', 'V']) (Set.fromList ['a', 'b', 'c', 'c']) 'S' (Set.fromList [r1, r2, r1])
---        printGrammar g
