@@ -21,7 +21,7 @@ import Data.Char                  -- isAlpha, isUpper, ..
 data Rule = Rule
   {
     left :: Char,    -- A: nonterminal
-    right :: [Char]  -- alpha: in (N u T)*
+    right :: String  -- alpha: in (N u T)*
   } deriving (Show, Eq, Ord)
 
 -- record representing a grammar in format: G = (N, T, S, P)
@@ -39,8 +39,8 @@ data Grammar = Grammar
 -- remove spaces from a string
 removeSpaces :: String -> String
 removeSpaces [] = []
-removeSpaces (' ':xs) = removeSpaces (xs)
-removeSpaces ('\r':xs) = removeSpaces (xs)
+removeSpaces (' ':xs) = removeSpaces xs
+removeSpaces ('\r':xs) = removeSpaces xs
 removeSpaces (x:xs) = x : removeSpaces xs
 
 -- split a string into separate parts by a comma
@@ -67,7 +67,7 @@ parseNonterminals string =
       parts = splitStr (removeSpaces string)
       -- check whether the string is a nonterminal
       isNonterminal :: String -> Bool
-      isNonterminal string = (length string) == 1 && elem (head string) ['A'..'Z']
+      isNonterminal string = length string == 1 && elem (head string) ['A'..'Z']
 
 -- parse terminals
 parseTerminals :: String -> Set.Set Char
@@ -80,14 +80,14 @@ parseTerminals string =
       parts = splitStr (removeSpaces string)
       -- check whether the string is a terminal
       isTerminal :: String -> Bool
-      isTerminal string = (length string) == 1 && elem (head string) ['a'..'z']
+      isTerminal string = length string == 1 && elem (head string) ['a'..'z']
 
 -- parse a start symbol from a string
 parseStartSymbol :: String -> Set.Set Char -> Char
 parseStartSymbol string nonterminals =
   -- start symbol has to be one of the nonterminals
-  if (length parsedString) == 1 && Set.member (head parsedString) nonterminals
-    then (head parsedString)
+  if length parsedString == 1 && Set.member (head parsedString) nonterminals
+    then head parsedString
     else error "Start symbol has to be one of the nonterminals!"
     where
       parsedString = removeSpaces string
@@ -96,8 +96,8 @@ parseStartSymbol string nonterminals =
 parseRule :: String -> Set.Set Char -> Set.Set Char -> Rule
 parseRule rule nonterms terms =
   -- NONTERM -> alpha, where alpha in (NONTERMS u TERMS)*
-  if (length rule) >= 4 && Set.member (rule !! 0) nonterms && rule !! 1 == '-' && rule !! 2 == '>' && ((validAlpha (drop 3 rule) nonterms terms) || (drop 3 rule) == "#")
-    then Rule (rule !! 0) (drop 3 rule)
+  if length rule >= 4 && Set.member (head rule) nonterms && rule !! 1 == '-' && rule !! 2 == '>' && (validAlpha (drop 3 rule) nonterms terms || drop 3 rule == "#")
+    then Rule (head rule) (drop 3 rule)
     else error ("'" ++ rule ++ "' is an invalid rule!")
     where
       -- each symbol of alpha has to be either in nonterms or terms
@@ -107,21 +107,20 @@ parseRule rule nonterms terms =
 -- parse a list of rewrite rules
 parseRules :: [String] -> Set.Set Char -> Set.Set Char -> Set.Set Rule
 parseRules rules nonterms terms = 
-  if isSet(rules) 
+  if isSet rules
     then Set.fromList (createList rules [])
     else error "Rules are not unique!"
     where
-      createList [] list = list
-      createList (x:xs) list = createList xs (list ++ [parseRule (removeSpaces x) nonterms terms])
+      createList xs list = foldl (\ list x -> list ++ [parseRule (removeSpaces x) nonterms terms]) list xs
 
 -- parse input and return a grammar
 parseInput :: [String] -> Grammar
 parseInput lines =
-  if (length lines) < 4
+  if length lines < 4
     then error "Invalid grammar on input! At least 4 lines needed!"  -- a grammar has to be a quaternion
     else Grammar nonterms terms (parseStartSymbol (lines !! 2) nonterms) (parseRules (drop 3 lines) nonterms terms)
     where
-      nonterms = parseNonterminals (lines !! 0)
+      nonterms = parseNonterminals (head lines)
       terms    = parseTerminals (lines !! 1)
 
 
@@ -137,10 +136,10 @@ printGrammar grammar = do
   where
     -- print a set of chars
     printCharSet :: Set.Set Char -> IO()
-    printCharSet list = putStrLn (intersperse ',' (Set.toList (list)))
+    printCharSet list = putStrLn (intersperse ',' (Set.toList list))
     -- print a single char
     printOneChar :: Char -> IO()
-    printOneChar char = printf "%c\n" char
+    printOneChar char = printf "%c\n"
     -- print a set of rules
     printRuleSet :: Set.Set Rule -> IO()
     printRuleSet rules = mapM_ printRule (Set.toList rules)
@@ -153,7 +152,7 @@ printGrammar grammar = do
 
 -- check whether a string is terminating or not
 isTerminating :: String -> Set.Set Char -> Bool
-isTerminating string terminatings = string == "#" || (all (isTerm terminatings) string)
+isTerminating string terminatings = string == "#" || all (isTerm terminatings) string
   where
     -- check whether a char is terminating symbol or terminal
     isTerm terminatings char = Set.member char terminatings
@@ -200,8 +199,7 @@ getViStep derivatives (x:xs) = if Set.member (left x) derivatives
   then Set.union (addAlpha (right x)) (getViStep derivatives xs)
   else getViStep derivatives xs
   where
-    addAlpha [] = Set.fromList []
-    addAlpha (x:xs) = Set.union (Set.fromList [x]) (addAlpha xs)
+    addAlpha = foldr (\ x -> Set.union (Set.fromList [x])) (Set.fromList [])
 
 -- get the resulting Vi set of the 4.2 algorithm
 getViSet :: Set.Set Char -> Set.Set Char -> [Rule] -> Set.Set Char
@@ -228,20 +226,20 @@ main = do
   -- program arguments
   args <- getArgs
   -- mandatory argument not provided
-  if (length args) == 0
+  if null args
     then error "Too few arguments!"
     -- too many arguments provided
-    else if (length args > 2)
+    else if length args > 2
       then error "Too many arguments!"
       else do
         -- get input
-        input <- if (length args) == 2
-          then readFile (head (tail args))  -- from file
-          else hGetContents stdin           -- from stdin
+        input <- if length args == 2
+          then readFile (head (tail args))  -- from a file
+          else getContents                  -- from the stdin
 
         -- first argument
-        case(head args) of
+        case head args of
           "-i" -> printGrammar (parseInput (lines input))
           "-1" -> printGrammar (removeNonterminatingSymbols (parseInput (lines input)))
           "-2" -> printGrammar (removeUselessSymbols (parseInput (lines input)))
-          otherwise -> error ("Unknown argument: " ++ (head args))
+          _ -> error ("Unknown argument: " ++ head args)
