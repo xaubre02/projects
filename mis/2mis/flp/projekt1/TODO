@@ -1,5 +1,0 @@
-TODO
-----
-- Pouzijte nastroj hlint, ktery vas upozorni na nedostatky v kodu a na jeho casti, ktere by sly napsat lepe.
-  - Neopakujte stejne casti kodu, dodrzujte princip DRY.
-  - radky ne delsi nez 100 znaku
