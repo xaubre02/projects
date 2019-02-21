@@ -86,9 +86,11 @@ parseTerminals string =
 parseStartSymbol :: String -> Set.Set Char -> Char
 parseStartSymbol string nonterminals =
   -- start symbol has to be one of the nonterminals
-  if (length string) == 1 && Set.member (head string) nonterminals
-    then (head string)
+  if (length parsedString) == 1 && Set.member (head parsedString) nonterminals
+    then (head parsedString)
     else error "Start symbol has to be one of the nonterminals!"
+    where
+      parsedString = removeSpaces string
 
 -- parse a single rewrite rule
 parseRule :: String -> Set.Set Char -> Set.Set Char -> Rule
