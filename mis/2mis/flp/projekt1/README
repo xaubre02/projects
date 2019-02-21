@@ -35,6 +35,7 @@ TESTOVÁNÍ
   spuštění a vyhodnocení připravených testů. Skript je zaintegrován do souboru Makefile. Testování
   je tedy možné spustit pomocí příkazu 'make tests'. Po spuštění automatických testů se na konzoli
   postupně vypíše výsledek aktuálního testu a na závěr se vypíše celkové vyhodnocení všech testů.
+  Testování se zaměřuje pouze na neplatný vstup, tedy na parsování gramatiky.
   
   Popis jednotlivých testů je uveden níže:
 

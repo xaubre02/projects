@@ -17,7 +17,7 @@ all: clean
 
 # zip
 zip:
-	zip ${ZIPFILE} ${SOURCE} README Makefile tests
+	zip ${ZIPFILE} ${SOURCE} README Makefile run_tests.sh tests
 
 # cleanup
 clean:

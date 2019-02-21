@@ -1,19 +1,5 @@
 TODO
 ----
-- pridat testy a testovaci skript, popsat v README
-  - pridat 'chmod +x' na skript do makefilu?
-- otestovat na merlinovi
 - Pouzijte nastroj hlint, ktery vas upozorni na nedostatky v kodu a na jeho casti, ktere by sly napsat lepe.
   - Neopakujte stejne casti kodu, dodrzujte princip DRY.
-  - radky ne deksi nez 100 znaku
-
-Priklad:
-S,A,B
-a,b,c,d
-S
-S->#
-S->AB
-A->aAb
-A->ab
-B->cBd
-B->cd
+  - radky ne delsi nez 100 znaku

@@ -67,7 +67,7 @@ parseNonterminals string =
       parts = splitStr (removeSpaces string)
       -- check whether the string is a nonterminal
       isNonterminal :: String -> Bool
-      isNonterminal string = (length string) == 1 && isAlpha (head string) && isUpper (head string)
+      isNonterminal string = (length string) == 1 && elem (head string) ['A'..'Z']
 
 -- parse terminals
 parseTerminals :: String -> Set.Set Char
@@ -80,7 +80,7 @@ parseTerminals string =
       parts = splitStr (removeSpaces string)
       -- check whether the string is a terminal
       isTerminal :: String -> Bool
-      isTerminal string = (length string) == 1 && isAlpha (head string) && isLower (head string)
+      isTerminal string = (length string) == 1 && elem (head string) ['a'..'z']
 
 -- parse a start symbol from a string
 parseStartSymbol :: String -> Set.Set Char -> Char
