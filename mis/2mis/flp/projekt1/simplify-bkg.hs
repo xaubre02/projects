@@ -7,23 +7,24 @@
 -- ------------------------
 
 -- Imports
-import System.Environment -- getArgs
-import System.IO          -- handles
-import qualified Data.Set as Set -- TOD: what is qualified?
-import Text.Printf
-import Data.List  -- intercalate, map, lines
-import Data.Char -- isAlpha, isUpper
+import System.Environment         -- getArgs
+import System.IO                  -- handles
+import qualified Data.Set as Set  -- working with sets
+import Text.Printf                -- printing functions
+import Data.List                  -- intercalate, map, lines, ..
+import Data.Char                  -- isAlpha, isUpper, ..
+
 
 -- ---------- CUSTOM RECORDS -----------
 
--- A -> alpha
+-- record representing a rewrite rule in format: A -> alpha
 data Rule = Rule
   {
     left :: Char,    -- A: nonterminal
     right :: [Char]  -- alpha: in (N u T)*
   } deriving (Show, Eq, Ord)
 
--- G = (N, T, S, P)
+-- record representing a grammar in format: G = (N, T, S, P)
 data Grammar = Grammar
   {
     nonterminals :: Set.Set Char,  -- N: a finite set of nonterminals
