@@ -40,6 +40,7 @@ data Grammar = Grammar
 removeSpaces :: String -> String
 removeSpaces [] = []
 removeSpaces (' ':xs) = removeSpaces (xs)
+removeSpaces ('\r':xs) = removeSpaces (xs)
 removeSpaces (x:xs) = x : removeSpaces xs
 
 -- split a string into separate parts by a comma
