@@ -1,8 +1,39 @@
--- ------------------------
--- Subject: FLP 2018/2019
--- Project: simplify-bkg
--- Date:    2019-02-16
--- Author:  Tomas Aubrecht
--- Login:   xaubre02
--- ------------------------
+------------------------
+Předmět: FLP 2018/2019
+Projekt: simplify-bkg
+Datum:   2019-02-16
+Autor:   Tomáš Aubrecht
+Login:   xaubre02
+------------------------
 
+_________
+TESTOVÁNÍ
+
+  Pro účely testování byl vytvořen samostatný skript 'run_tests.sh', který slouží pro automatické
+  spuštění a vyhodnocení připravených testů. Skript je zaintegrován do souboru Makefile. Testování
+  je tedy možné spustit pomocí příkazu 'make tests'. Po spuštění automatických testů se na konzoli
+  postupně vypíše výsledek aktuálního testu a na závěr se vypíše celkové vyhodnocení všech testů.
+  
+  Popis jednotlivých testů je uveden níže:
+
+    test00.in  - 
+    test01.in  - 
+    test02.in  - 
+    test03.in  - 
+    test04.in  - 
+    test05.in  - 
+    test06.in  - 
+    test07.in  - 
+    test08.in  - 
+    test09.in  - 
+    test10.in  - 
+    test11.in  - 
+    test12.in  - 
+    test13.in  - 
+    test14.in  - 
+    test15.in  - 
+    test16.in  - 
+    test17.in  - 
+    test18.in  - 
+    test19.in  -  
+    test20.in  - 
