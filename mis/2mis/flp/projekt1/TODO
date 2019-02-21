@@ -6,8 +6,6 @@ TODO
 - Pouzijte nastroj hlint, ktery vas upozorni na nedostatky v kodu a na jeho casti, ktere by sly napsat lepe.
   - Neopakujte stejne casti kodu, dodrzujte princip DRY.
   - radky ne deksi nez 100 znaku
-- udelat Makefile, ktery se take odevzda -> preklad pomoci gmake
-  - nazev projektu a programu:  simplify-bkg
 
 Priklad:
 S,A,B
