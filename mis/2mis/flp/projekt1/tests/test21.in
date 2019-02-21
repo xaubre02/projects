@@ -1,4 +1,4 @@
-S,A,2,B
+S,A,B
 a,b,c
 S
 S->AB
@@ -6,3 +6,4 @@ A->aAb
 A->ab
 B->bBc
 B->bc
+S->AB

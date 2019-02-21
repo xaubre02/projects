@@ -38,24 +38,33 @@ TESTOVÁNÍ
   
   Popis jednotlivých testů je uveden níže:
 
-    test00.in  - 
-    test01.in  - 
-    test02.in  - 
-    test03.in  - 
-    test04.in  - 
-    test05.in  - 
-    test06.in  - 
-    test07.in  - 
-    test08.in  - 
-    test09.in  - 
-    test10.in  - 
-    test11.in  - 
-    test12.in  - 
-    test13.in  - 
-    test14.in  - 
-    test15.in  - 
-    test16.in  - 
-    test17.in  - 
-    test18.in  - 
-    test19.in  -  
-    test20.in  - 
+    test00.in  - neplatný vstup: nedostatek řádků
+    test01.in  - neplatný vstup: prázdný řádek 1
+    test02.in  - neplatný vstup: prázdný řádek 2
+    test03.in  - neplatný vstup: neterminály: nejsou množina
+    test04.in  - neplatný vstup: neterminály: obsahují řetězec
+    test05.in  - neplatný vstup: neterminály: obsahují malé písmeno
+    test06.in  - neplatný vstup: neterminály: obsahují číslo
+    test07.in  - neplatný vstup: neterminály: obsahují # (epsilon)
+    test08.in  - neplatný vstup: neterminály: obsahují diakritiku
+    test09.in  - neplatný vstup: terminály: nejsou množina
+    test10.in  - neplatný vstup: terminály: obsahují řetězec
+    test11.in  - neplatný vstup: terminály: obsahují velké písmeno
+    test12.in  - neplatný vstup: terminály: obsahují číslo
+    test13.in  - neplatný vstup: terminály: obsahují # (epsilon)
+    test14.in  - neplatný vstup: terminály: obsahují diakritiku
+    test15.in  - neplatný vstup: počáteční symbol: řetězec
+    test16.in  - neplatný vstup: počáteční symbol: malé písmeno
+    test17.in  - neplatný vstup: počáteční symbol: číslo
+    test18.in  - neplatný vstup: počáteční symbol: epsilon
+    test19.in  - neplatný vstup: počáteční symbol: diakritika
+    test20.in  - neplatný vstup: počáteční symbol: velké písmeno, ale ne součástí neterminálů
+	test21.in  - neplatný vstup: pravidla: nejsou množina
+	test22.in  - neplatný vstup: pravidla: žádná pravidla
+	test23.in  - neplatný vstup: pravidla: A není neterminál
+	test24.in  - neplatný vstup: pravidla: druhý znak není pomlčka
+	test25.in  - neplatný vstup: pravidla: třetí znak není šipka
+	test26.in  - neplatný vstup: pravidla: alfa není prvkem (N u T)*
+	test27.in  - neplatný vstup: pravidla: alfa obsahuje také epsilon (i další znaky)
+	test28.in  - neplatný vstup: pravidla: alfa obsahuje také epsilon (i další znaky)
+	test29.in  - neplatný vstup: pravidla: alfa zcela chybí

@@ -29,4 +29,7 @@ run: all
 
 # run tests
 tests:
+	chmod +x ./run_tests.sh
 	./run_tests.sh
+
+.PHONY: tests
