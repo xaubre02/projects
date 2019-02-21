@@ -13,7 +13,7 @@ ZIPFILE=flp-fun-xaubre02.zip
 # compilation
 all: clean
 	ghc ${SOURCE} -o ${TARGET}
-  rm -rf *.hi *.o
+	rm -rf *.hi *.o
 
 # zip
 zip:

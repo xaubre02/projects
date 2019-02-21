@@ -85,7 +85,7 @@ parseTerminals string =
 parseStartSymbol :: String -> Set.Set Char -> Char
 parseStartSymbol string nonterminals =
   -- start symbol has to be one of the nonterminals
-  if (length string) == 1 && elem (head string) nonterminals
+  if (length string) == 1 && Set.member (head string) nonterminals
     then (head string)
     else error "Start symbol has to be one of the nonterminals!"
 
@@ -93,13 +93,13 @@ parseStartSymbol string nonterminals =
 parseRule :: String -> Set.Set Char -> Set.Set Char -> Rule
 parseRule rule nonterms terms =
   -- NONTERM -> alpha, where alpha in (NONTERMS u TERMS)*
-  if (length rule) >= 4 && elem (rule !! 0) nonterms && rule !! 1 == '-' && rule !! 2 == '>' && ((validAlpha (drop 3 rule) nonterms terms) || (drop 3 rule) == "#")
+  if (length rule) >= 4 && Set.member (rule !! 0) nonterms && rule !! 1 == '-' && rule !! 2 == '>' && ((validAlpha (drop 3 rule) nonterms terms) || (drop 3 rule) == "#")
     then Rule (rule !! 0) (drop 3 rule)
     else error ("'" ++ rule ++ "' is an invalid rule!")
     where
       -- each symbol of alpha has to be either in nonterms or terms
       validAlpha alpha nonterms terms = all (isIn nonterms terms) alpha
-      isIn nonterms terms char = elem char nonterms || elem char terms
+      isIn nonterms terms char = Set.member char nonterms || Set.member char terms
 
 -- parse a list of rewrite rules
 parseRules :: [String] -> Set.Set Char -> Set.Set Char -> Set.Set Rule
@@ -140,7 +140,7 @@ printGrammar grammar = do
     printOneChar char = printf "%c\n" char
     -- print a set of rules
     printRuleSet :: Set.Set Rule -> IO()
-    printRuleSet rules = mapM_ printRule rules
+    printRuleSet rules = mapM_ printRule (Set.toList rules)
     -- print a single rule
     printRule :: Rule -> IO()
     printRule rule = printf "%c->%s\n" (left rule) (right rule)
@@ -153,7 +153,7 @@ isTerminating :: String -> Set.Set Char -> Bool
 isTerminating string terminatings = string == "#" || (all (isTerm terminatings) string)
   where
     -- check whether a char is terminating symbol or terminal
-    isTerm terminatings char = elem char terminatings
+    isTerm terminatings char = Set.member char terminatings
 
 -- get Ni set of the 4.1 algorithm
 getNiSet :: Set.Set Char -> [Rule] -> Set.Set Char
@@ -178,11 +178,11 @@ filterRules (x:xs) symbols = if isIncluded x symbols
   else filterRules xs symbols
   where
     -- both left and right side consists of symbols in provided set of symbols 
-    isIncluded rule symbols = elem (left rule) symbols && isTerminating (right rule) symbols
+    isIncluded rule symbols = Set.member (left rule) symbols && isTerminating (right rule) symbols
 
 -- remove all nonterminating symbols (Algorithm 4.1)
 removeNonterminatingSymbols :: Grammar -> Grammar
-removeNonterminatingSymbols grammar = if elem (startSymbol grammar) setNt -- check if L(G) is not empty
+removeNonterminatingSymbols grammar = if Set.member (startSymbol grammar) setNt -- check if L(G) is not empty
   then Grammar setNt (terminals grammar) (startSymbol grammar) (filterRules (Set.toList (rules grammar)) (Set.union setNt (terminals grammar)))
   else error "Grammar produces an empty language!"
   where
@@ -193,7 +193,7 @@ removeNonterminatingSymbols grammar = if elem (startSymbol grammar) setNt -- che
 getViStep :: Set.Set Char -> [Rule] -> Set.Set Char
 getViStep derivatives [] = Set.fromList []
 -- 'A->alpha' add all symbols in alpha if the A is a derivative of the start symbol
-getViStep derivatives (x:xs) = if elem (left x) derivatives
+getViStep derivatives (x:xs) = if Set.member (left x) derivatives
   then Set.union (addAlpha (right x)) (getViStep derivatives xs)
   else getViStep derivatives xs
   where
