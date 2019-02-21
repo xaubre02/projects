@@ -139,7 +139,7 @@ printGrammar grammar = do
     printCharSet list = putStrLn (intersperse ',' (Set.toList list))
     -- print a single char
     printOneChar :: Char -> IO()
-    printOneChar char = printf "%c\n"
+    printOneChar = printf "%c\n"
     -- print a set of rules
     printRuleSet :: Set.Set Rule -> IO()
     printRuleSet rules = mapM_ printRule (Set.toList rules)
