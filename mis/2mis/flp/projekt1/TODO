@@ -1,6 +1,5 @@
 TODO
 ----
-- strucna dokumentace
 - pridat testy a testovaci skript, popsat v README
 - otestovat na merlinovi
 - Pouzijte nastroj hlint, ktery vas upozorni na nedostatky v kodu a na jeho casti, ktere by sly napsat lepe.

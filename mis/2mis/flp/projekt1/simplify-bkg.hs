@@ -167,7 +167,7 @@ getNiSet terms (x:xs) = if isTerminating (right x) terms
 getNtSet :: Set.Set Char -> Set.Set Char -> Set.Set Char -> [Rule] -> Set.Set Char
 getNtSet new prev terminals rules = if new == prev
   then new
-  -- params: Ni u Sigma(Terminals), rules
+  -- params: Ni u Sigma(Terminals), rules (u = union)
   else getNtSet (getNiSet (Set.union new terminals) rules) new terminals rules
 
 -- filter out rules that contains symbols that are not in the provided symbol set
@@ -211,7 +211,7 @@ removeUnreachableSymbols :: Grammar -> Grammar
 -- params: Vi n Nt, Vi n T, start symbol, filtered rules (n = intersection)
 removeUnreachableSymbols grammar = Grammar (Set.intersection setVi (nonterminals grammar)) (Set.intersection setVi (terminals grammar)) (startSymbol grammar) (filterRules (Set.toList (rules grammar)) setVi)
   where
-    -- params: V1 u V0, V0, rules
+    -- params: V1 u V0, V0, rules (u = union)
     setVi = getViSet (Set.union (getViStep (Set.fromList [startSymbol grammar]) ruleList) (Set.fromList [startSymbol grammar])) (Set.fromList [startSymbol grammar]) ruleList
     ruleList = Set.toList (rules grammar)
 
@@ -233,8 +233,8 @@ main = do
       else do
         -- get input
         input <- if (length args) == 2
-          then readFile (head (tail args))
-          else hGetContents stdin
+          then readFile (head (tail args))  -- from file
+          else hGetContents stdin           -- from stdin
 
         -- first argument
         case(head args) of

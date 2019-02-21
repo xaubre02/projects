@@ -6,6 +6,28 @@ Autor:   Tomáš Aubrecht
 Login:   xaubre02
 ------------------------
 
+_____
+POPIS
+
+  Program provádí na základě vstupních parametrů kontrolu a výpis vstupní gramatiky, odstranění
+  symbolů, které nelze derivovat na řetězec pouze z terminálních symbolů či prázdný řetězec nebo
+  provádí odstranění nedostupných symbolů.
+  Ve výsledku tedy může program odstranit všechny zbytečné symboly dané gramatiky.
+
+____________
+IMPLEMENTACE
+
+  Zdrojový soubor obsahuje stručné komentáře ke každé funkci a definované datové struktuře. Tyto
+  struktury jsou dvě: 'Rule' představující přepisovací pravidlo gramatiky a 'Grammar' představující
+  samotnou gramatiku. K nim jsou vytvořeny funkce pro jejich výpis. Program implementuje algoritmy
+  (4.1), (4.2) a (4.3) z opory předmětu Teoretická informatika (TIN). Opora je dostupná na adrese:
+  https://wis.fit.vutbr.cz/FIT/st/cfs.php.cs?file=%2Fcourse%2FTIN-IT%2Ftexts%2Fopora.pdf&cid=12941
+  
+  Vstup programu musí mít striktní formát dle zadání. Jediná podporovaná odchylka jsou mezery
+  na jednotlivých řádcích vstupu, které jsou při zpracování odstraněny (a,b ~ a, b ~ a , b). Vstup
+  musí obsahovat minimálně 4 řádky, jinak program skončí s chybou. Vychází to z definice gramatiky.
+  Veškteré porušení formátu vstupu je testovány v automatických testech popsaných níže.
+
 _________
 TESTOVÁNÍ
 
