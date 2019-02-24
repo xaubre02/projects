@@ -17,7 +17,7 @@ all: clean
 
 # zip
 zip:
-	zip ${ZIPFILE} ${SOURCE} README Makefile run_tests.sh tests
+	zip ${ZIPFILE} ${SOURCE} README Makefile run_tests.sh tests/*
 
 # cleanup
 clean:
@@ -29,7 +29,6 @@ run: all
 
 # run tests
 tests:
-	chmod +x ./run_tests.sh
 	./run_tests.sh
 
 .PHONY: tests
