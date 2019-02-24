@@ -1,0 +1,64 @@
+@import url('https://fonts.googleapis.com/css?family=Saira+Condensed');
+
+* {
+	/* použité písmo */
+    font-family: "Saira Condensed";
+    margin: 0;
+    padding: 0;
+}
+
+/* velikosti písma */
+h3         {font-size: 24px}
+p,span {font-size: 18px}
+footer   {font-size: 20px}
+
+/* velikosti obrázků */
+img {
+	width: 220px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	padding: 5px;
+}
+
+img:hover {
+	box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5);
+	outline: 0;
+}
+
+a:focus {
+	outline: 0;
+}
+
+body {
+    margin: auto;
+    margin-top: 60px;
+    width: 940px;
+    height: 264px;
+	/* barva pozadí */
+	background-image: linear-gradient(to right, rgba(200,200,200,0), rgba(200,200,200,1));
+}
+
+h3 {
+	margin-bottom: 7px;
+}
+
+.section{
+	margin-top: 42px;
+	text-align: justify;
+}
+
+.examples {
+	margin: 10px 0 10px 0;
+	font-weight: bold;
+	text-align: center;
+}
+
+.multiimage {
+	margin-top: 6px;
+	display: block;
+}
+
+footer {
+	margin: 30px 0 15px 0;
+	text-align: center;
+}
