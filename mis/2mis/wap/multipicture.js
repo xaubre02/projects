@@ -179,7 +179,7 @@ function createGallery() {
   gallery.style.display         = "none";
   gallery.style.position        = "fixed";
   gallery.style.zIndex          = "5";
-  gallery.style.padding         = "30px 0";
+  gallery.style.padding         = "0";
   gallery.style.top             = "0";
   gallery.style.left            = "0";
   gallery.style.width           = "100%";
@@ -208,6 +208,7 @@ function createGalleryContent() {
   content.style.margin          = "auto";
   content.style.display         = "inline-block";
   content.style.maxWidth        = "calc(100% - 60px)";
+  content.style.maxHeight       = "calc(100% - 60px)";
   
   // image counter
   counter.id               = "gallery_cntr";
@@ -222,6 +223,7 @@ function createGalleryContent() {
   image.id                 = "gallery_image";
   image.style.width        = "auto";
   image.style.maxWidth     = "100%";
+  image.style.maxHeight    = "100%";
 
   // image close button
   close.className = "exit_button";

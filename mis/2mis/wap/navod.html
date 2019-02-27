@@ -1,17 +1,31 @@
 <!DOCTYPE html>
 <html lang="cs">
-    <head>
-        <title>WAP 2018/2019 - Multiobrázek</title>
-        <meta charset="utf-8"/>
-		<meta name="author" content="Tomáš Aubrecht"/>
-        <meta name="description" content="Návod na použití multiobrázku do předmětu WAP"/>
-        <script src="multipicture.js"></script>  
-    </head>
-    <body>
-        <h1>Návod k použití multiobrázku</h1>
-		<h2>WAP 2018/2019</h2>
-    </body>
-	<footer>
-		<span>Ukázku skriptu naleznete na připravené <a href="demo.html">demo stránce</a>.</span>
-	</footer>
+  <head>
+    <title>WAP 2018/2019 - Multiobrázek</title>
+    <meta charset="utf-8"/>
+    <meta name="author" content="Tomáš Aubrecht"/>
+    <meta name="description" content="Návod na použití multiobrázku do předmětu WAP"/>
+    <script src="multipicture.js"></script>
+    <link rel='stylesheet' href='style.css' type='text/css'/>
+  </head>
+  <body>
+    <h1>Návod k použití multiobrázku - WAP 2018/2019</h1>
+    <h3>Zdrojový kód</h3>
+    <p>Zdrojový kód je opatřen komentáři, takže účel a princip jednotlivých funkcí by měl být zřetelný.</p>
+    
+    <h3>Činnost skriptu</h3>
+    <p>Jakmile se načte DOM struktura stránky, skript v rámci své inicializace si vytvoří pomocnou strukturu, která představuje galerii po rozkliknutí obrázku, a modifikuje aktuální dokument.</p>
+
+    <p>Po rozkliknutí obrázku překryje obsah stránky nově přidaný element, který obsahuje rozkliklý obrázek v jeho plné velikosti z odkazu. Na tomto obrázku jsou dále tlačítka pro listování mezi jednotlivými obrázky v sadě, tlačítko pro ukončení galerie a dále popisek zobrazující o kolikátý se jedná obrazek z celkového počtu obrázků v sadě.</p>
+
+    <p>Co se týče úprav samotného dokumentu, dojde k úpravě stylu hledaných elementů s požadovanou třídou (multiimage). Nalezne se celkový počet obrázků, které obsahuje a všechny kromě prvního skryje. Na první zároveň do pravého horního rohu umístí ikonu naznačující, že je zde více obrázků (pokud tomu opravdu tak je). U každého obrázku (kromě prvního) také vypočítá jeho polohu a přidá animace při přejíždění mezi jednotlivými obrázky.</p>
+    
+    <h3>Modifikace skriptu</h3>
+    <p>Je možné si upravit parametry daných obrázků, kde na začátku skriptu jsou definové globální proměnné, které slouží pro specifikaci <i>maximální výšky a šířky obrázků, času, jak dlouho je zobrazen náhled skrytých obrázků</i> a <i>třída tagu, podle které se vyhledávají elementy k úpravě</i>.</p>
+    <p>Pro úpravu stylu jednotlivých obrázků a jejich zobrazení je potřeba ve zdrojovém kódu upravit hodnoty jednotlivých atributů <i>style</i> atributu požadované části</p>
+  </body>
+  <footer>
+    <h3>DEMO</h3>
+    <span>Ukázku skriptu naleznete na připravené <a href="demo.html">demo stránce</a>.</span>
+  </footer>
 </html>
