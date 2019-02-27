@@ -1,164 +1,199 @@
+// global variables
+var multiImageClass = "multiimage";
+var multiImageSpanIndex;
+var imageIndex;
+
 // wait until the DOM is loaded
 document.addEventListener("DOMContentLoaded", function(event) {
-    adjustDocumentMultiImages('multiimage');
-	createPreview();
+  modifyHTML();
 });
 
 /**
- * Open the image preview.
+ * Modify the HTML source code.
  */
-function openPreview() {
-	document.getElementById('mi_preview').style.display = "block";
-	return false;
+function modifyHTML() {
+  createGallery();
+  modifyMultiImageSpans();
 }
 
 /**
- * Close the image preview.
+ * Open the image gallery.
  */
-function closePreview() {
-	document.getElementById('mi_preview').style.display = "none";
+function openGalery(imgIndex, spanIndex) {
+  // update global variables
+  multiImageSpanIndex = spanIndex;
+  imageIndex = imgIndex;
+  // select image and display the gallery
+  selectImage(0);
+  document.getElementById('mi_gallery').style.display = "block";
+  return false;
 }
 
 /**
- * Adjust the document multi-images.
+ * Close the image gallery.
  */
-function adjustDocumentMultiImages(className) {
-	var spans = document.getElementsByClassName(className);
-	for (var i = 0; i < spans.length; i++) {
-		processMultiImageSpan(spans[i]);
-	}
+function closeGalery() {
+  document.getElementById('mi_gallery').style.display = "none";
+}
+
+/**
+ * Modify all multi-image spans in the document.
+ */
+function modifyMultiImageSpans() {
+  var spans = document.getElementsByClassName(multiImageClass);
+  for (var i = 0; i < spans.length; i++) {
+    processMultiImageSpan(spans[i], i);
+  }
 }
 
 /**
  * Process the multi-image span. Display only the first image.
  */
-function processMultiImageSpan(span) {
-	// get all images in the current span
-	var images = span.getElementsByTagName("img");
-	// hide all images except the first one
-	for (var i = 1; i < images.length; i++) {
-		images[i].style.display = "none";
-	}
-}
+function processMultiImageSpan(span, spanIndex) {
+  // get all hrefs in the current span (<a> tag)
+  var hrefs = span.getElementsByTagName("a");
+  for (var i = 0; i < hrefs.length; i++) {
+    if (hrefs[i] === undefined) continue
+    
+    // hide all images except the first one
+    if (i > 0)
+      hrefs[i].style.display = "none";
 
-function changeImage() {
-	var img = document.getElementById("large_image");
-	
-	img.src = "https://www.sciencemag.org/sites/default/files/styles/article_main_large/public/images/cc_Giraffes_16x9.jpg?itok=dKmuVKO6";
+    // add onclick functionality
+    hrefs[i].setAttribute("onclick", "return openGalery(" + i + ", " + spanIndex + ")");
+    
+    // modify style of all images
+    var image = hrefs[i].getElementsByTagName("img")[0];
+    if (image !== undefined) {
+      image.style.width        = "200px";
+      image.style.padding      = "4px";
+      image.style.borderRadius = "4px";
+      image.style.border       = "1px solid #b3b3b3";
+      // mouse hover
+      image.onmouseover = function() {
+        this.style.boxShadow = "0 0 2px 1px rgba(100, 200, 255, 0.75)";
+      }
+      image.onmouseout = function() {
+        this.style.boxShadow = "0 0 0 0 rgba(0, 0, 0, 0)";
+      }
+    }
+  }
 }
 
 /**
- * Create an image preview.
+ * Create an image gallery.
  */
-function createPreview() {
-	var preview = document.createElement("div");  // preview element
-	var content = document.createElement("div");  // preview content
-	var close   = document.createElement("span"); // preview close button
-	// identificators
-	preview.id        = "mi_preview";
-	preview.className = "preview";
-	content.className = "preview_content";
+function createGallery() {
+	var gallery = document.createElement("div");  // gallery element
 
-	// preview style
-	preview.style.display = "none";
-	preview.style.position = "fixed";
-	preview.style.zIndex = "1";
-	preview.style.paddingTop = "100px";
-	preview.style.top = "0";
-	preview.style.left = "0";
-	preview.style.width = "100%";
-	preview.style.height = "100%";
-	preview.style.overflow = "auto";
-	preview.style.backgroundColor = "black";
+	// gallery
+  gallery.id                    = "mi_gallery";
+	gallery.style.display         = "none";
+	gallery.style.position        = "fixed";
+	gallery.style.zIndex          = "1";
+	gallery.style.padding         = "25px 25px";
+	gallery.style.top             = "0";
+	gallery.style.left            = "0";
+	gallery.style.width           = "100%";
+	gallery.style.height          = "100%";
+	gallery.style.overflow        = "auto";
+	gallery.style.backgroundColor = "rgba(0,0,0,0.85)";
+  gallery.style.textAlign       = "center";
+
+	gallery.appendChild(createGalleryContent());
+	document.body.appendChild(gallery);
+}
+
+/**
+ * Create an image slot in the gallery.
+ */
+function createGalleryContent() {
+  var content = document.createElement("div");  // gallery content
+	var counter = document.createElement("div");  // image counter
+	var image   = document.createElement("img");  // concrete image
+  var close   = document.createElement("div");  // image close button
+  
+  // content
+  //content.style.backgroundColor = "rgba(0,0,0,0.0)";
+	content.style.position        = "relative";
+  content.style.textAlign       = "center";
+	content.style.margin          = "auto";
+  content.style.display         = "inline-block";
+  content.style.maxWidth        = "75%";
+  
+	// image counter
+  counter.id               = "gallery_cntr";
+	counter.style.color      = "#f2f2f2";
+	counter.style.fontSize   = "16px";
+	counter.style.fontWeight = "bold";
+	counter.style.padding    = "8px 12px";
+	counter.style.position   = "absolute";
+	counter.style.top        = "0";
 	
-	// close button
-	close.className = "exit_button";
-	close.setAttribute("onclick", "closePreview()");
+	// image source
+	image.id                 = "gallery_image";
+  image.style.width        = "auto";
+	image.style.maxWidth     = "100%";
+	image.style.border       = "none";
+	image.style.borderRadius = "0";
+	image.style.padding      = "0";
+  image.style.margin       = "auto";
+  image.style.display      = "block";
+  image.style.position     = "relative";
+
+	image.onmouseover = function() {
+		this.style.boxShadow = "none";
+	}
+
+  // image close button
+  close.className = "exit_button";
+	close.setAttribute("onclick", "closeGalery()");
 	close.innerHTML = "&times;";
-	
-	close.style.color = "white";
-	close.style.position = "absolute";
-	close.style.top = "10px";
-	close.style.right = "40px";
-	close.style.fontSize = "50px";
+
+	close.style.color      = "white";
+	close.style.position   = "absolute";
+	close.style.top        = "-15px";
+	close.style.right      = "15px";
+	close.style.fontSize   = "42px";
 	close.style.fontWeight = "bold";
-	close.style.cursor = "pointer";
+	close.style.cursor     = "pointer";
 	close.style.transition = "0.4s ease";
-	// mouse movement
+  close.style.overflow   = "hidden";
+  close.style.height     = "50px";
+
 	close.onmouseover = function() {
 		this.style.color = "#999";
 	}
 	close.onmouseout = function() {
 		this.style.color = "white";
 	}
+  
+  // next/prev button
+	var next = document.createElement("a");
+	next.style.cursor       = "pointer";
+	next.style.position     = "absolute";
+	next.style.top          = "50%";
+	next.style.width        = "18px";
+	next.style.padding      = "16px";
+	next.style.marginTop    = "-50px";
+	next.style.color        = "white";
+	next.style.fontWeight   = "bold";
+	next.style.fontSize     = "20px";
+	next.style.transition   = "0.4s ease";
+  
+  var prev = next.cloneNode(); // clone element "next" with its style
 
-	
-	// content
-	content.style.position = "relative";
-	content.style.backgroundColor = "#fefefe";
-	content.style.margin = "auto";
-	content.style.padding = "0";
-	content.style.width = "90%";
-	content.style.maxWidth = "1200px";
-	
-	var next = document.createElement("a"); // next image button
-	next.innerHTML = "&#10095;";
-	next.style.cursor = "pointer";
-	next.style.position = "absolute";
-	next.style.right = "0";
-	next.style.top = "50%";
-	next.style.width = "18px";
-	next.style.padding = "16px";
-	next.style.marginTop = "-50px";
-	next.style.color = "white";
-	next.style.fontWeight = "bold";
-	next.style.fontSize = "20px";
-	next.style.transition = "0.4s ease";
+  next.innerHTML          = "&#10095;";
 	next.style.borderRadius = "3px 0 0 3px";
-	/*next.style.userSelect = "";
-	next.style. = "";
-	next.style. = "";*/
-	
-	
-	var prev = next.cloneNode(); // previous image button
-	prev.innerHTML = "&#10094;";
+	next.style.right        = "0";
+  next.setAttribute("onclick", "selectImage(+1)");
+  
+	prev.innerHTML          = "&#10094;";
 	prev.style.borderRadius = "0 3px 3px 0";
-	prev.style.left = "0";
-	
-	next.setAttribute("onclick", "changeImage()"); // TODO
-	prev.setAttribute("onclick", "closePreview()"); // TODO
-	// not working
-	// mouse movement
-	
-	// image caption
-	var caption = document.createElement("div");   // image caption (container)
-	var captionText = document.createElement("p"); // image caption
-	// caption container
-	caption.style.textAlign       = "center";
-	caption.style.backgroundColor = "black";
-	caption.style.padding         = "2px 16px";
-	caption.style.color           = "white";
-	// caption text
-	captionText.id = "image_caption";
-	caption.appendChild(captionText);
-	
-	//append everything to content
-	content.appendChild(createImageSlot());
-	content.appendChild(next);
-	content.appendChild(prev);
-	content.appendChild(caption);
-		
-	console.log(content.innerHTML);
-	
-	// append the rest
-	preview.appendChild(close);
-	preview.appendChild(content);
-	document.body.appendChild(preview);
-	
-	var captionText = document.getElementById("image_caption");
-	captionText.innerHTML = "Panda pičo";
-	
-	next.onmouseover = function() {
+	prev.style.left         = "0";
+  prev.setAttribute("onclick", "selectImage(-1)");
+	// mouse hover
+  next.onmouseover = function() {
 		this.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
 	}
 	next.onmouseout = function() {
@@ -171,42 +206,33 @@ function createPreview() {
 	prev.onmouseout = function() {
 		this.style.backgroundColor = "rgba(0, 0, 0, 0)";
 	}
+
+	// append everything (create hiearchy)
+  content.appendChild(image);
+  content.appendChild(counter);
+  content.appendChild(close);
+  content.appendChild(next);
+	content.appendChild(prev);
+  
+  return content;
 }
 
 /**
- * Create an image slot.
+ * Select an image to be displayed in the gallery.
  */
-function createImageSlot() {
-	var slot    = document.createElement("div");  // image slot
-	var counter = document.createElement("div");  // image counter
-	var image   = document.createElement("img");  // some concrete image
-	
-	//slot.style.display = "none";
-	
-	// image counter style
-	counter.textContent      = "1 / 1";
-	counter.style.color      = "#f2f2f2";
-	counter.style.fontSize   = "16px";
-	counter.style.fontWeight = "bold";
-	counter.style.padding    = "8px 12px";
-	counter.style.position   = "absolute";
-	counter.style.top        = "0";
-	
-	// image source
-	image.id = "large_image";
-	image.src = "http://m.wsj.net/video/20160906/20160906panda/20160906panda_1280x720.jpg";
-	image.style.width        = "100%";
-	image.style.border       = "none";
-	image.style.borderRadius = "0";
-	image.style.padding      = "0";
-	// mouse hover
-	image.onmouseover = function() {
-		this.style.boxShadow = "none";
-	}
-	
-	
-	slot.appendChild(counter);
-	slot.appendChild(image);
-	
-	return slot;
+function selectImage(offset) {
+  span = document.getElementsByClassName(multiImageClass)[multiImageSpanIndex];
+  aTags = span.getElementsByTagName("a");
+
+  // update image index
+  imageIndex += offset;
+  if (imageIndex > aTags.length - 1) {imageIndex = 0;}
+  else if (imageIndex < 0)           {imageIndex = aTags.length - 1;}
+  
+  var cntr  = document.getElementById("gallery_cntr");  // gallery image counter
+  var image = document.getElementById("gallery_image"); // gallery image
+
+  // link to the image full resolution
+  image.src = aTags[imageIndex].href;
+  cntr.textContent = (imageIndex + 1) + " / " + (aTags.length);
 }

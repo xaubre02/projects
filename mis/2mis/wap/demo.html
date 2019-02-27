@@ -6,7 +6,7 @@
 		<meta name="author" content="Tomáš Aubrecht"/>
         <meta name="description" content="Demo stránka k projektu do předmětu WAP"/>
         <link rel='stylesheet' href='style.css' type='text/css'/>
-        <script src="multipicture.js"></script>  
+        <!--<script src="multipicture.js"></script>-->
     </head>
     <body>
         <h1>Multiobrázek</h1>
@@ -15,20 +15,24 @@
 			<h3>Býložravci</h3>
 			<p><b>Býložravec</b> (herbivor) je živočich, který pojídá pouze či téměř výhradně rostliny nebo části rostlin. Býložravost se odborně nazývá herbivorie. Ve srovnání s masožravci mají býložravci zpravidla delší a složitější trávicí soustavu, v níž zpravidla žije značné množství symbiontů napomáhajících trávení celulózy (některé druhy bakterií a kvasinek). Trávicí soustava obsahuje také široké spektrum enzymů, jež umožňují trávení potravy. Býložravci jsou v ekologické terminologii označováni jako konzumenti 1. řádu [<a href="https://cs.wikipedia.org/wiki/B%C3%BDlo%C5%BEravec">zdroj</a>].</p>
 			<div class="examples">
-				<span>Zástupci</span>
+				<span>Zástupci</span><br>
 				<span class="multiimage">
-					<a>
-						<img src="http://m.wsj.net/video/20160906/20160906panda/20160906panda_1280x720.jpg" onclick="openPreview()" alt="Panda">
+					<a href="http://m.wsj.net/video/20160906/20160906panda/20160906panda_1280x720.jpg">
+						<img src="http://m.wsj.net/video/20160906/20160906panda/20160906panda_1280x720.jpg" alt="Panda">
+            <img id="icon" src="mark.png" alt="multiple">
 					</a>
-					<a href="https://www.sciencemag.org/sites/default/files/styles/article_main_large/public/images/cc_Giraffes_16x9.jpg?itok=dKmuVKO6">
+					<a id="child" href="https://www.sciencemag.org/sites/default/files/styles/article_main_large/public/images/cc_Giraffes_16x9.jpg?itok=dKmuVKO6">
 						<img src="https://www.sciencemag.org/sites/default/files/styles/article_main_large/public/images/cc_Giraffes_16x9.jpg?itok=dKmuVKO6" alt="Zebra">
 					</a>
-					<a href="https://bobcat.grahamdigital.com/65b544edae65d6ca8ae8f3fe0c0e339b3215bad2/crop-1280x720-000.jpg">
+					<a id="child2" href="https://bobcat.grahamdigital.com/65b544edae65d6ca8ae8f3fe0c0e339b3215bad2/crop-1280x720-000.jpg">
 						<img src="https://bobcat.grahamdigital.com/65b544edae65d6ca8ae8f3fe0c0e339b3215bad2/crop-1280x720-000.jpg" alt="Žirafa">
 					</a>
-					<a href="https://wallpaperplay.com/walls/full/b/6/0/268901.jpg">
+					<a id="child3" href="https://wallpaperplay.com/walls/full/b/6/0/268901.jpg">
 						<img src="https://wallpaperplay.com/walls/full/b/6/0/268901.jpg" alt="Kráva">
 					</a>
+          <a id="child4" href="https://thumbs-prod.si-cdn.com/5rjIIZyzLzVM-XmgpS_bBF_6gYQ=/800x600/filters:no_upscale()/https://public-media.si-cdn.com/filer/b5/89/b589c580-f347-47fd-a50e-eeda34b57f82/sheep.jpg">
+            <img src="https://thumbs-prod.si-cdn.com/5rjIIZyzLzVM-XmgpS_bBF_6gYQ=/800x600/filters:no_upscale()/https://public-media.si-cdn.com/filer/b5/89/b589c580-f347-47fd-a50e-eeda34b57f82/sheep.jpg" alt="Ovce">
+          </a>
 				</span>
 			</div>
 		</div>
@@ -39,7 +43,7 @@
 			<div class="examples">
 				<span>Zástupci</span>
 				<span class="multiimage">
-					<a onclick="return openPreview();" href="https://www.naturalworldsafaris.com/~/media/images/wildlife/bengal-tiger/nws-st-bengal-tiger-2.jpg">
+					<a href="https://www.naturalworldsafaris.com/~/media/images/wildlife/bengal-tiger/nws-st-bengal-tiger-2.jpg">
 						<img src="https://www.naturalworldsafaris.com/~/media/images/wildlife/bengal-tiger/nws-st-bengal-tiger-2.jpg" alt="Tygr">
 					</a>
 					<a href="https://ichef.bbci.co.uk/images/ic/1920x1080/p02pws03.jpg">
