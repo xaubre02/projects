@@ -1,0 +1,393 @@
+
+Signály
+=======
+
+- asynchronní pøeru¹ení èinnosti procesu
+
+- zdroje signálù jsou buï interní (dìlení nulou, poru¹ení ochrany pamìti...)
+  nebo externí (systém nebo jiný proces, u¾ivatel pøes ovladaè terminálu)
+
+- zpracování signálù:
+  a) pokud je proces pozastaven v pøeru¹itelném systémovém volání (dlouhodobé
+     blokování jako napø. wait(), nebo èekání na událost u pomalých zaøízení
+     jako napø. read() ze soketù), mù¾e být signál ihned zpracován a systémové
+     volání je násilnì pøeru¹eno s chybou (return -1, errno == EINTR) nebo
+     automaticky opìt restartováno
+  b) pokud se proces nachází v nepøeru¹itelném systémovém volání, pøíchod
+     se zaznamená a zpracování se provede pøi návratu ze systémového volání
+  c) pokud proces èeká na pøidìlení procesoru, pøíchod se zaznamená a
+     zpracování se provede a¾ kdy¾ proces dostane pøidìlen procesor
+  d) pokud proces právì bì¾í, pøíchod se zaznamená a zpracování se provede
+     a¾ pøi pøechodu procesu do systémové fáze (systémové volání, odebrání
+     procesoru, výpadek pamì»ové stránky)
+  => signál mù¾e být zpracován kdykoli, v nejhor¹ím pøípadì i uprostøed
+     instrukce!
+
+- zpracování signálù: ignorování, u¾ivatelská procedura, standardní
+  (ignorování, pozastavení procesu nebo ukonèení bez coredumpu / s coredumpem)
+
+- po provedení funkce fork() se dìdí v¹echna nastavení zpracování signálù
+
+- po provedení funkce exec() se v¹echna nastavení zpracování signálù, která
+  zpùsobují vyvolání u¾ivatelské procedury, zmìní na standardní nastavení,
+  a ostatní nastavení se dìdí
+
+Rozhraní signal()
+-----------------
+
+#include <signal.h>
+void (*signal(int sig, void (*func)(int)))(int);
+
+- nastavení èísla signálu sig na zpracování func, kde func je buï SIG_DFL
+  (standardní), SIG_IGN (ignorování) nebo ukazatel na u¾ivatelskou funkci
+
+- výsledkem volání je buï pùvodní zpracování signálu nebo chyba SIG_ERR (-1)
+  s promìnnou errno nastavenou na pøíèinu chyby
+
+- pøi zpracování signálu se v parametru pøedává èíslo zpracovávaného
+  signálu
+
+- pøed vyvoláním u¾ivatelské funkce zpracování signálu systém obnoví pro
+  tento signál standardní zpracování; pokud mají být dal¹í signály zpracovány
+  shodnou funkcí, musí funkce sama obnovit nastavení zpracování signálu
+
+- je-li násilnì pøeru¹eno systémové volání, v¾dy konèí chybou (return -1,
+  errno == EINTR) a má-li být zaji¹tìna spolehlivá funkce programu, musí
+  být systémové volání zopakováno nebo musí být provedena jiná odpovídající
+  akce
+
+- v obsluze je mo¾né pou¾ívat pouze reentrantní funkce - norma ISO C
+  zaruèuje reentrantnost pouze pro funkci signal() a u globálních
+  promìnných je zaruèen konzistentní stav pouze pro typ sig_atomic_t
+
+- pokud pøijde nový signál v dobì od zahájení zpracování signálu
+  do nastavení zpracování zpìt na vlastní funkci, je signál zpracován
+  standardní obsluhou, co¾ mù¾e zpùsobit pøeru¹ení programu
+
+- po dobu zpracování signálu není pøíchod shodného signálu blokován,
+  tak¾e obsluha mù¾e být v daný okam¾ik vyvolána nìkolikanásobnì
+
+- v BSD systémech bylo obnovování standardní obsluhy signálù zru¹eno a
+  po dobu provádìní obsluhy signálu je zpracování shodných signálù
+  blokováno; u BSD od verze 4.2 jsou systémová volání restartována, ale
+  u star¹ích verzí a ostatních systémù se systémová volání ukonèují chybou
+
+- ostatní systémy zavedly odpovídající nové rozhraní
+  void (*bsd_signal(int sig, void (*func)(int)))(int)
+  s restartováním systémových volání
+
+- v BSD systémech a následnì i v ostatních systémech bylo zavedeno rozhraní
+  int siginterrupt(int sig, int flag),
+  kde je-li flag roven nule, bude pøi zpracování signálu sig systémové
+  volání restartováno, jinak bude ukonèeno chybou
+
+=> funkce signal() by nemìla být pou¾ívána, jeliko¾ její sémantika
+  není pevnì daná
+
+- existují je¹tì dal¹í rozhraní (také nepou¾ívat)
+
+Rohraní podle normy POSIX
+-------------------------
+
+#include <signal.h>
+int sigaction(int sig, const struct sigaction *act, struct sigaction *oact);
+
+- sig je èíslo signálu, pro který se nastavuje zpracování
+
+- act je adresa struktury sigaction, která definuje zpracování signálu; je-li
+  NULL, nastavení se nemìní
+
+- na adresu oact se ulo¾í pøedchozí nastavení zpracování signálu; je-li NULL,
+  pøedchozí nastavení se neukládá
+
+- pokud probìhne nastavení úspì¹nì, vrátí se 0; pøi chybì se vrátí -1 a errno
+  je nastaveno na odpovídající chybový kód
+
+struct sigaction {
+  void (*sa_handler)();	/* o¹etøující funkce */
+  sigset_t sa_mask;	/* blokované signály pøi zpracování */
+  int sa_flags;		/* pøíznaky zpracování */
+  void (*sa_sigaction)(int, siginfo_t *, void *);
+			/* o¹etøující funkce (XPG4E, POSIX 1003.1b) */
+}
+
+- sa_handler je adresa o¹etøující funkce void fce(int sig) nebo SIG_IGN
+  (ignorování) nebo SIG_DFL (standardní obsluha)
+
+- sa_mask je mno¾ina doèasnì blokovaných signálù jen po dobu zpracování
+  signálu sig
+
+- sa_flags jsou pøíznaky zpracování (POSIX definuje jen SA_NOCLDSTOP):
+
+  SA_NOCLDSTOP - jen pro SIGCHLD - SIGCHLD bude generován jen pøi ukonèení
+    synovského procesu; v opaèném pøípadì je SIGCHLD generován i pøi
+    pozastavení synovského procesu
+
+  SA_ONSTACK - pokud je nastaven alternativní zásobník pøes sigaltstack(),
+    bude daný signál doruèen a zpracován na alternativním zásobníku
+
+  SA_RESTART - volání jádra systému pøeru¹ené zpracováním signálu bude
+    restartováno a neskonèí chybou EINTR; mezi ovlivnìná systémová volání
+    patøí open(), read(), write(), sendto(), recvfrom(), sendmsg() a recvmsg()
+    pro komunikaèní kanál nebo pomalé zaøízení jako terminál (ale nikoli pro
+    bì¾ný soubor) nebo wait() a ioctl()
+
+  SA_NOCLDWAIT - jen pro SIGCHLD - pøi ukonèení synovských procesù systém
+    nevytváøí zombie stavy; pokud otcovský proces èeká na dokonèení synovského
+    procesu, operace èeká na ukonèení v¹ech synovských procesù a pak skonèí
+    s chybou ECHILD
+
+  SA_NODEFER - signál není automaticky blokován pøi jeho zpracování
+
+  SA_RESETHAND - pøed vyvoláním zpracování signálu je zpracování obnoveno
+    na SIG_DFL
+
+  SA_SIGINFO - zpracování signálu je urèeno parametrem sa_sigaction:
+    void fce(int signo, siginfo_t *info, void *context);
+
+- zpracování signálù neobnovuje zpracování zpìt na standardní
+
+- blokované signály po dobu zpracování signálu - je to sjednocení mno¾in:
+
+  - mno¾ina sa_mask
+  - zpracovávaný signál sig
+  - mno¾ina trvale blokovaných signálù sigprocmask()
+
+- po ukonèení zpracování signálu je blokována opìt jen mno¾ina trvale
+  blokovaných signálù sigprocmask()
+
+- v obsluze signálu lze volat pouze reentrantní funkce, POSIX zaruèuje jen:
+
+  _exit(), abort(), access(), alarm(), cfgetispeed(), cfgetospeed(),
+  cfsetispeed(), cfsetospeed(), chdir(), chmod(), chown(), close(), creat(),
+  dup(), dup2(), execle(), execve(), exit(), fcntl(), fork(), fstat(),
+  getegid(), geteuid(), getgid(), getgroups(), getpgrp(), getpid(), getppid(),
+  getuid(), kill(), link(), longjmp(), lseek(), mkdir(), mkfifo(), open(),
+  pathconf(), pause(), pipe(), read(), rename(), rmdir(), setgid(), setpgid(),
+  setsid(), setuid(), sigaction(), sigaddset(), sigdelset(), sigemptyset(),
+  sigfillset(), sigismember(), signal(), sigpending(), sigprocmask(),
+  sigsuspend(), sleep(), stat(), sysconf(), tcdrain(), tcflow(), tcflush(),
+  tcgetattr(), tcgetpgrp(), tcsendbreak(), tcsetattr(), tcsetpgrp(), time(),
+  times(), umask(), uname(), unlink(), utime(), wait(), waitpid(), write()
+
+- ale pozor na funkce, které mìní globální hodnotu errno: mù¾e-li být
+  zpracování signálu vyvoláno po funkci, která nastavuje errno, ale pøed
+  testem na tuto hodnotu, zpracování signálu nesmí volat ¾ádné funkce, které
+  errno také mìní, nebo musí na zaèátku obsah errno uschovat a na konci
+  zpracování pak obnovit
+
+- typy signálù - POSIX (v Unixech jich bývá mnohem více): 
+
+  SIGABRT  coredump   havarijní ukonèení procesu - viz abort()
+  SIGALRM  ukonèení   vypr¹ení èasovaèe - viz alarm()
+  SIGFPE   coredump   chyba pøi aritmetické operaci (dìlení nulou, pøeteèení)
+  SIGHUP   ukonèení   pøeru¹ení terminálové linky, ukonèení spojení
+  SIGILL   coredump   provedení nesprávné nebo nedovolené instrukce
+  SIGINT   ukonèení   interaktivní pøeru¹ení èinnosti procesu
+  SIGKILL  ukonèení   zru¹ení procesu - nelze zpracovat, ani ignorovat
+  SIGPIPE  ukonèení   zápis do roury, kterou v¹ak nikdo neète
+  SIGQUIT  coredump   interaktivní ukonèení procesu
+  SIGSEGV  coredump   adresace nepøístupného úseku pamìti
+  SIGTERM  ukonèení   programové ukonèení procesu
+  SIGUSR1  ukonèení   u¾ivatelsky definovaný signál 1
+  SIGUSR2  ukonèení   u¾ivatelsky definovaný signál 2
+
+  SIGCHLD  ignorován  pozastavení nebo ukonèení synovského procesu
+  SIGCONT  ignorován  pokraèování bìhu procesu, pokud byl proces pozastaven
+  SIGSTOP  zastavení  pozastavení procesu - nelze zpracovat, ani ignorovat
+  SIGTSTP  zastavení  interaktivní pozastavení procesu
+  SIGTTIN  zastavení  proces v pozadí po¾aduje ètení z terminálu
+  SIGTTOU  zastavení  proces v pozadí po¾aduje zápis na terminál
+
+  ukonèení - ukonèení procesu
+  coredump - ukonèení procesu s coredumpem (tj. obsah pamìti a stavu procesu
+    je ulo¾en do souboru)
+  zastavení - pozastavení procesu
+  ignorován - ignorování signálu
+
+#include <signal.h>
+int sigemptyset(sigset_t *set);
+int sigfillset(sigset_t *set);
+int sigaddset(sigset_t *set, int signo);
+int sigdelset(sigset_t *set, int signo);
+int sigismember(sigset_t *set, int signo);
+
+- práce s mno¾inou signálù sigset_t:
+  sigemptyset() - inicializace na prázdnou mno¾inu;
+  sigfillset() - inicializace na mno¾inu v¹ech signálù;
+  sigaddset() - pøidání signálu signo;
+  sigdelset() - ubrání signálu signo;
+  sigismember() - test, zda je signál signo v mno¾inì signálù set
+
+- pøi chybì funkce vrací -1, jinak 0 a u sigismember() také 1
+
+#include <signal.h>
+int sigprocmask(int how, const sigset_t *set, sigset_t *oset);
+
+- definuje mno¾inu trvale blokovaných signálù
+
+- set je mno¾ina nastavovaných signálù; je-li NULL, mno¾ina blokovaných
+  signálù se nemìní
+
+- na adresu oset se ulo¾í pøedchozí nastavení; je-li NULL, pøedchozí stav
+  se neukládá
+
+- how urèuje zpùsob zmìny:
+  SIG_SETMASK - nastavení podle mno¾iny set
+  SIG_BLOCK - pøidání blokovaných signálù podle mno¾iny set
+  SIG_UNBLOCK - ubrání blokovaných signálù podle mno¾iny set
+
+- pøi fork() a exec() se blokované signály nemìní
+
+- signály SIGKILL a SIGSTOP nelze zachytit; pokus o jejich blokování
+  je ignorován
+
+- jsou-li voláním sigprocmask() odblokovány nìkteré pøipravené signály,
+  alespoò jeden je pøed návratem ze sigprocmask() zpracován
+
+- pokud pøijde více signálù stejného typu, jeho¾ zpracování je zablokováno,
+  po odblokování je bì¾nì zpracování jen jednou a ostatní jsou zapomenuty;
+  zpracování v¹ech výskytù zaruèují a¾ signály reálného èasu (POSIX 1003.1b)
+
+- tato funkce umo¾òuje vytváøet kritické sekce chránìné proti asynchronnímu
+  zpracování nìkterých signálù
+
+#include <signal.h>
+int sigpending(sigset_t *set);
+
+- na adresu set se ulo¾í mno¾ina zablokovaných èekajících signálù
+
+#include <signal.h>
+int sigaltstack(const stack_t *ss, stack_t *oss);
+
+struct stack_t {
+  void *ss_sp;		/* adresa zásobníku */
+  size_t ss_size;	/* velikost zásobníku */
+  int ss_flags;         /* pøíznaky */
+}
+
+- nastavení alternativního zásobníku pro zpracování signálù
+
+- ss urèuje nový zásobník; je-li NULL, zásobník není zmìnìn
+
+- na adresu oss je ulo¾eno pøedchozí nastavení zásobníku; je-li NULL,
+  pøedchozí nastavení se neulo¾í
+
+- ss_flags jsou pøíznaky:
+  SS_DISABLE - pou¾ívání zásobníku pro zpracování signálù je zablokováno
+  SS_ONSTACK - jen pøi získání pøedchozího nastavení - je-li tento pøíznak
+    nastaven, alternativní zásobník je právì pou¾íván
+
+- je-li zásobník právì pou¾íván, pokus o jeho zmìnu skonèí s chybou EPERM
+
+#include <signal.h>
+int kill(pid_t pid, int sig);
+
+- programové zaslání signálu procesu
+
+- pid je èíslo procesu, kterému má být signál sig zaslán:
+  pid > 0  - signál je zaslán procesu s èíslem pid
+  pid = 0  - signál je zaslán v¹em procesùm stejné skupiny
+  pid = -1 - signál je zaslán v¹em procesùm, kterým má proces právo
+             tento signál zaslat
+  pid < -1 - signál je zaslán v¹em procesùm skupiny pid
+
+#include <signal.h>
+int raise(int sig);
+
+- proces za¹le signál sám sobì
+
+#include <stdlib.h>
+void abort(void);
+
+- proces za¹le signál SIGABRT sám sobì
+
+#include <unistd.h>
+int pause(void);
+
+- èekání na pøíchod signálu
+
+#include <signal.h>
+int sigsuspend(sigset_t *sigmask);
+
+- èekání na pøíchod signálu
+
+- sigmask je mno¾ina doèasnì blokovaných signálù po dobu èekání na pøíchod
+  signálu
+
+Ukázky
+------
+
+- Sdílená promìnná, která není typu sig_atomic_t, se v obluze mìní
+  a v hlavním programu ète:
+
+  ©patnì:
+
+	void catcher(int sig)
+	{
+		ch++;
+	}
+
+	...
+	printf("%c\n", ch);
+	...
+
+  Správnì:
+
+	void catcher(int sig)
+	{
+		ch++;
+	}
+
+	...
+	/* set je mno¾ina signálù aktivujících catcher() */
+	sigprocmask(SIG_BLOCK, &set, NULL);
+	printf("%c\n", ch);
+	sigprocmask(SIG_UNBLOCK, &set, NULL);
+	...
+
+- Vzájemná synchronizace dvou procesù pomocí signálù:
+
+  ©patnì:
+
+	* Proces 1 (pid1):			* Proces 2 (pid2):
+
+	...					...
+	kill(pid2, SIGUSR1);		->	sigsuspend(&empty_set);
+	sigsuspend(&empty_set);		<-	kill(pid1, SIGUSR1);
+	...					...
+
+  Správnì:
+
+	* Oba procesy:
+
+	void catcher_usr1(int sig)
+	{
+		signaled = 1;
+	}
+
+	* Proces 1 (pid1):
+	
+	...
+	sigprocmask(SIG_BLOCK, &sigusr1_set, NULL);
+	signaled = 0;
+	kill(pid2, SIGUSR1);
+	while (!signaled)
+		sigsuspend(&empty_set);
+	sigprocmask(SIG_UNBLOCK, &sigusr1_set, NULL);
+	...
+
+	...
+	sigprocmask(SIG_BLOCK, &sigusr1_set, NULL);
+	while (!signaled)
+		sigsuspend(&empty_set);
+	kill(pid1, SIGUSR1);
+	signaled = 0;
+	sigprocmask(SIG_UNBLOCK, &sigusr1_set, NULL);
+	...
+
+Pøíklad
+-------
+
+- Viz example.c
+
