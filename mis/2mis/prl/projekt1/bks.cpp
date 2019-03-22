@@ -1,8 +1,8 @@
 /* -----------------------
- * Předmět: PRL 2018/2019
- * Projekt: Bucket sort
- * Datum:   2019-03-07
- * Autor:   Tomáš Aubrecht
+ * Subject: PRL 2018/2019
+ * Project: Bucket sort
+ * Date:    2019-03-07
+ * Author:  Tomas Aubrecht
  * Login:   xaubre02
  * ----------------------- */
 
@@ -63,9 +63,9 @@ void Node::sendVector(int_vec &vec, int to) {
     }
 }
 
-void Node::printValues(int_vec &vec, bool input) {
+void Node::printValues(int_vec &vec, bool one_line) {
     // print the vector on one line
-    if (input) {
+    if (one_line) {
         for (int i = 0; i < vec.size() - 1; i++) {
             cout << vec[i] << " ";
         }
@@ -88,7 +88,7 @@ void Node::readValues(int_vec &vec, std::string filename) {
     }
 }
 
-void bucketSort(int mpi_rank, int mpi_size) {
+void bucketSort(std::string filename, int mpi_rank, int mpi_size) {
     // initialize tree node
     Node node(mpi_rank, mpi_size);
     
@@ -99,7 +99,7 @@ void bucketSort(int mpi_rank, int mpi_size) {
     // root node
     if (node.isRoot()) {
         // read values from the file and print them on one line
-        node.readValues(vector1, INPUT_FILE);
+        node.readValues(vector1, filename);
         node.printValues(vector1, true);
         
         int val_count  = vector1.size();                   // total count of values
@@ -158,6 +158,12 @@ void bucketSort(int mpi_rank, int mpi_size) {
     }
 }
 
+/**
+ * Main function
+ * @param argc number of input arguments
+ * @param argv list of arguments
+ * @return sucess flag
+ */
 int main(int argc, char* argv[]) {
     int mpi_rank;
     int mpi_size;
@@ -168,7 +174,7 @@ int main(int argc, char* argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     
     // bucket sort
-    bucketSort(mpi_rank, mpi_size);
+    bucketSort(INPUT_FILE, mpi_rank, mpi_size);
 
     MPI_Finalize();
     return EXIT_SUCCESS;
