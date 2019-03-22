@@ -23,17 +23,16 @@ fi
 if [ $values -eq 1 ]; then
     procs=1
 else
-    procs=`echo "2 * l($values) / l(2) - 1" | bc -l`
-    # zaokrouhlení nahoru
-    procs=`echo $procs | awk '{print ($0-int($0)>0)?int($0)+1:int($0)}'`
+    # počet listových procesorů je mocnina 2
+    procs=`python -c "from math import ceil, log, sqrt; m=pow(2,ceil(log(log($values,2),2))); print(int(2*m-1));"`
 fi
 
 # vytvoření souboru numbers
 dd if=/dev/random bs=1 count=$values of=numbers > /dev/null 2>&1
 
 # překlad a spuštění
-#mpicc --prefix /usr/local/share/OpenMPI bks.cpp -o bks -lm
-#mpirun --prefix /usr/local/share/OpenMPI -np $processors bks
+mpic++ --prefix /usr/local/share/OpenMPI bks.cpp -o bks
+mpirun --prefix /usr/local/share/OpenMPI -np $procs bks
 
 # vyčištění
 rm -rf bks numbers
