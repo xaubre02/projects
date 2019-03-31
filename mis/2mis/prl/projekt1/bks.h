@@ -6,7 +6,13 @@
  * Login:   xaubre02
  * ----------------------- */
 
+#ifndef _BKS_H_
+#define _BKS_H_
+
+#define MEASURE_PERFORMANCE false // performance measurement
+
 #include <mpi.h>
+#include <time.h>
 #include <vector>
 #include <string>
 #include <algorithm>
@@ -143,3 +149,12 @@ public:
  * @param mpi_size total number of processors
  */
 void bucketSort(std::string filename, int mpi_rank, int mpi_size);
+
+/**
+ * Calculate the difference between start and end time of the sorting and print the result.
+ * @param start start time
+ * @param end end time
+ */
+void calculate_performance(timespec start, timespec end);
+
+#endif

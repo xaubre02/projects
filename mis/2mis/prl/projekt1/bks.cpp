@@ -6,8 +6,6 @@
  * Login:   xaubre02
  * ----------------------- */
 
-//#define MEASURE_PERFORMANCE  // performance measurement
-
 #define INPUT_FILE    "numbers"  // input file
 #define TAG_COUNT     (0)        // sending total count of values
 #define TAG_VALUE     (1)        // sending a single value
@@ -82,11 +80,16 @@ void Node::printValues(int_vec &vec, bool one_line) {
 }
 
 void Node::readValues(int_vec &vec, std::string filename) {
-    char c;
+    int byte;
     // read the values from the file
-    ifstream fin(filename.c_str(), ifstream::binary);
-    while (fin.get(c)) {
-        vec.push_back((int)c);
+    ifstream fin(filename.c_str(), ios::in | ios::binary);
+    while (fin.good()) {
+        byte = fin.get();
+        // end of the file
+        if (byte == -1) {
+            break;
+        }
+        vec.push_back(byte);
     }
 }
 
@@ -98,15 +101,27 @@ void bucketSort(std::string filename, int mpi_rank, int mpi_size) {
     int_vec vector2; // values from the right child
     int_vec merged;  // merged values of both children
     
+    // timestamps
+    timespec start;
+    timespec end;
+
     // root node
     if (node.isRoot()) {
         // read values from the file and print them on one line
         node.readValues(vector1, filename);
-        node.printValues(vector1, true);
+
+        if (!MEASURE_PERFORMANCE){
+            node.printValues(vector1, true);
+        }
         
         int val_count  = vector1.size();                   // total count of values
         int leaves     = (mpi_size + 1) / 2;               // number of leaf nodes
         int bucket_cap = ceil((double)val_count / leaves); // bucket capacity
+
+        // start measuring the time
+        if (MEASURE_PERFORMANCE){
+            clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &start);
+        }
 
         if (leaves > 1) {
             // split and send the values to the leaves
@@ -133,7 +148,9 @@ void bucketSort(std::string filename, int mpi_rank, int mpi_size) {
         // if leaf node is also the root node -> there is only one node
         if (node.isRoot()) {
             node.sortVector(vector1);
-            node.printValues(vector1);
+            if (!MEASURE_PERFORMANCE){
+                node.printValues(vector1);
+            }
         }
         else {
             // receive values from the root
@@ -152,12 +169,34 @@ void bucketSort(std::string filename, int mpi_rank, int mpi_size) {
         node.mergeVectors(vector1, vector2, merged);
         // if the node is root, print the values, otherwise send the vector to parent
         if (node.isRoot()) {
-            node.printValues(merged);
+            if (!MEASURE_PERFORMANCE){
+                node.printValues(merged);
+            }
         }
         else {
             node.sendVector(merged, node.parent());
         }
     }
+    // calculate and print the measured time
+    if (MEASURE_PERFORMANCE && node.isRoot()){
+        clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &end);
+        calculate_performance(start, end);
+    }
+}
+
+void calculate_performance(timespec start, timespec end) {
+    timespec temp;
+    if ((end.tv_nsec-start.tv_nsec) < 0) {
+        temp.tv_sec = end.tv_sec - start.tv_sec - 1;
+        temp.tv_nsec = 1000000000 + end.tv_nsec - start.tv_nsec;
+    }
+    else {
+        temp.tv_sec = end.tv_sec - start.tv_sec;
+        temp.tv_nsec = end.tv_nsec - start.tv_nsec;
+    }
+
+    // print the result
+    cout << "Sorting time: " << temp.tv_sec << "s, " << temp.tv_nsec << "ns" << endl;
 }
 
 /**
