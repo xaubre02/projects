@@ -6,6 +6,8 @@
  * Login:   xaubre02
  * ----------------------- */
 
+//#define MEASURE_PERFORMANCE  // performance measurement
+
 #define INPUT_FILE    "numbers"  // input file
 #define TAG_COUNT     (0)        // sending total count of values
 #define TAG_VALUE     (1)        // sending a single value
@@ -14,7 +16,7 @@
 #include <math.h>
 #include <fstream>
 #include <iostream>
- 
+
 using namespace std;
 
 void Node::calcParentRank(int mpi_size) {
@@ -134,7 +136,7 @@ void bucketSort(std::string filename, int mpi_rank, int mpi_size) {
             node.printValues(vector1);
         }
         else {
-            // receive values from the parent
+            // receive values from the root
             node.recvVector(vector1, 0);
             // sort the values
             node.sortVector(vector1);
