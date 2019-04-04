@@ -3,7 +3,7 @@
 **************
 ***********************************
 - Project: Hybrid P2P chat network
-- Module:  Protocol
+- Module:  Communication Protocol
 - Date:    2019-04-01
 - Author:  Tomas Aubrecht
 - Login:   xaubre02
@@ -12,7 +12,7 @@
 """
 
 import json
-import codec
+import modules.codec as codec
 
 
 class Message:
