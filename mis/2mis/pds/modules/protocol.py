@@ -33,8 +33,12 @@ class Message:
 
     def __init__(self, data):
         """Message contructor."""
-        # codec
-        self.codec = codec.Bencodec
+        self.dic = dict()            # dictionary
+        self.codec = codec.Bencodec  # codec
+
+        # bytes-like object
+        if isinstance(data, bytes):
+            data = data.decode('utf-8')
 
         # decode first
         if not isinstance(data, dict):
@@ -67,13 +71,12 @@ class Message:
 
     def _sort_and_store(self, dic) -> None:
         """Sort and store the given dictionary."""
-        self.dic = dict()
         for key in sorted(dic):
             self.dic[key] = dic[key]
 
-    def encode(self) -> str:
-        """Return an encoded Message in bencode."""
-        return self.codec.encode(self.dic)
+    def encode(self, encoding='utf-8') -> bytes:
+        """Return an encoded Message in bencode in bytes-like object."""
+        return bytes(self.codec.encode(self.dic).encode(encoding))
 
     @property
     def valid(self) -> bool:

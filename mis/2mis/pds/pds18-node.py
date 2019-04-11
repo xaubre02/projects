@@ -12,7 +12,7 @@
 """
 
 import argparse
-from modules.node import Node
+from modules.units import Node
 
 
 def main():

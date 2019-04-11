@@ -3,7 +3,7 @@
 **************
 ***********************************
 - Project: Hybrid P2P chat network
-- Module:  __init__.py
+- Module:  __init__
 - Date:    2019-04-01
 - Author:  Tomas Aubrecht
 - Login:   xaubre02
@@ -11,7 +11,7 @@
 **************
 """
 
-from .node import Node
-from .peer import Peer
+from .units import Node
+from .units import Peer
 from .codec import Bencodec
 from .protocol import Message

@@ -12,7 +12,7 @@
 """
 
 import argparse
-from modules.peer import Peer
+from modules.units import Peer
 
 
 def main():
