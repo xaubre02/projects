@@ -1,8 +1,8 @@
 # --------------------------
-# Předmět: POS 2018/2019
+# Predmet: POS 2018/2019
 # Projekt: ticket algoritmus
-# Datum:   2019-03-07
-# Autor:   Tomáš Aubrecht
+# Datum:   2019-04-07
+# Autor:   Tomas Aubrecht
 # Login:   xaubre02
 # --------------------------
 
