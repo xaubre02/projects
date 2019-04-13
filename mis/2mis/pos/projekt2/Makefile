@@ -1,13 +1,13 @@
 # --------------------------
 # Predmet: POS 2018/2019
-# Projekt: ticket algoritmus
-# Datum:   2019-04-07
+# Projekt: shell
+# Datum:   2019-04-13
 # Autor:   Tomas Aubrecht
 # Login:   xaubre02
 # --------------------------
 
-SOURCE=projekt1.c
-TARGET=program
+SOURCE=projekt2.c
+TARGET=shell
 CC=gcc
 CFLAGS=-Wall -Wextra -pedantic
 
