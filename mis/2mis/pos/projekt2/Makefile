@@ -9,7 +9,7 @@
 SOURCE=projekt2.c
 TARGET=shell
 CC=gcc
-CFLAGS=-Wall -Wextra -pedantic
+CFLAGS=-Wall -Wextra -pedantic -g -O
 
 # compilation
 all: clean

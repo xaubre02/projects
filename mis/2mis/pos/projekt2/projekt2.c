@@ -8,18 +8,25 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <stdbool.h>
 #include <errno.h>
-#include <unistd.h>
 #include <string.h>
 #include <pthread.h>
 #include <ctype.h>
+#include <signal.h>
+#include <fcntl.h>
+
 
 #define MAX_INPUT_LEN 512      // accept 512 symbols INCLUDING '\n'
+#define OPEN_FLAGS O_CREAT | O_WRONLY | O_TRUNC, 0666 | S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH // flags for opening files
 
 /* Global variables */
 volatile bool live = true;     // run the shell until the live flag is set to false
 char buff[MAX_INPUT_LEN + 1];  // input buffer
+pid_t curpid = -1;             // current process running in foreground
 
 pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
@@ -44,18 +51,6 @@ enum parser_states {           // states of the parser
     ps_output,
     ps_output_cont
 };
-
-void print_parsed(struct program_t *program) {
-    printf("\n--------------------\nBACKGROUND: %d\n", program->background);
-    printf("ARGC: %d\n", program->argc);
-    printf("INPUT: %s\n", program->input);
-    printf("OUTPUT: %s\n", program->output);
-    printf("ARGUMENTS: ");
-    for (unsigned i = 0; i < program->argc; i++) {
-        printf("%s ", program->args[i]);
-    }
-    printf("\n------------------------\n");
-}
 
 /* Initialize program_t variables. */
 void init_program(struct program_t *program) {
@@ -102,6 +97,82 @@ void clear_program(struct program_t *program) {
     }
 
     program->valid = true;
+}
+
+/* Execute a program. */
+void exec_program(struct program_t *program) {
+    // fork
+    pid_t pid;
+    if ((pid = fork()) < 0) {
+        fprintf(stderr, "Chyba! Nepodarilo se vytvorit novy proces.\n");
+        return;
+    }
+    // parent
+    else if (pid > 0) {
+        // wait for child process running in foreground
+        if (!program->background) {
+            curpid = pid;
+            waitpid(pid, NULL, 0);
+            curpid = -1;
+        }
+    }
+    // child
+    else {
+        // ignore interrupts
+        if (program->background) {
+            struct sigaction sigign;
+
+            sigign.sa_flags = 0;
+            sigemptyset(&sigign.sa_mask);
+            sigign.sa_handler = SIG_IGN;
+            sigaction(SIGINT, &sigign, NULL);
+        }
+
+        // I/O processing
+        int input = -1;
+        if (program->input) {
+            input = open(program->input, O_RDONLY);
+            if (input == -1) {
+                fprintf(stderr, "Chyba! Nepodarilo se otevrit soubor '%s'\n", program->input);
+                exit(-1);
+            }
+            if (dup2(input, STDIN_FILENO) == -1) {
+                fprintf(stderr, "Chyba! Nepodarilo se duplikovat soubor '%s'\n", program->input);
+                close(input);
+                exit(-1);
+            }
+        }
+
+        int output = -1;
+        if (program->output) {
+            output = open(program->output, OPEN_FLAGS);
+            if (output == -1) {
+                fprintf(stderr, "Chyba! Nepodarilo se otevrit soubor '%s'\n", program->output);
+                if (program->input) close(input);
+                exit(-1);
+            }
+            if (dup2(output, STDOUT_FILENO) == -1) {
+                fprintf(stderr, "Chyba! Nepodarilo se duplikovat soubor '%s'\n", program->output);
+                close(output);
+                if (program->input) close(input);
+                exit(-1);
+            }
+        }
+
+        // program execution
+        if (execvp(program->args[0], program->args) < 0) { // execvp works with PATH variable
+            fprintf(stderr, "Chyba! Nepodarilo se provest pozadovany prikaz.\n");
+            // close I/O and exit
+            if (program->input) close(input);
+            if (program->output) close(output);
+            exit(-1);
+        }
+
+        // close I/O and exit
+        if (program->input) close(input);
+        if (program->output) close(output);
+        exit(0);
+    }
 }
 
 /* Store a string. */
@@ -222,9 +293,17 @@ void parse_buffer(struct program_t *program) {
                 break;
             
             case ps_input:
-                if (c == '>' || c == '<' || c == '&' || i == blen - 1) { // already set or not specified
+                if (c == '>' || c == '<' || c == '&') { // already set or not specified
                     program->valid = false;
                     break;
+                }
+                else if (i == blen - 1) {
+                    if (isspace(c)) { // not specified
+                        program->valid = false;
+                        break;
+                    }
+                    spos = i;
+                    store_string(&(program->input), spos, epos);
                 }
                 else if (!isspace(c)) {
                     spos = i;
@@ -265,9 +344,17 @@ void parse_buffer(struct program_t *program) {
                 break;
 
             case ps_output:
-                if (c == '>' || c == '<' || c == '&' || i == blen - 1) { // already set or not specified
+                if (c == '>' || c == '<' || c == '&') { // already set or not specified
                     program->valid = false;
                     break;
+                }
+                else if (i == blen - 1) {
+                    if (isspace(c)) { // not specified
+                        program->valid = false;
+                        break;
+                    }
+                    spos = i;
+                    store_string(&(program->output), spos, epos);
                 }
                 else if (!isspace(c)) {
                     spos = i;
@@ -328,6 +415,38 @@ void cond_signal() {
     pthread_mutex_unlock(&mtx);
 }
 
+/* Handle the interrupts. */
+void handle_sigint() {
+    // no running process
+    if (curpid == -1) {
+        printf("\n$ ");
+        fflush(stdout);
+        return;
+    }
+
+    if (!kill(curpid, SIGINT)) {
+        printf("\n");
+    }
+}
+
+/* Handle the termination of child processes. */
+void handle_sigchld() {
+    int stat;
+    pid_t pid = wait(&stat);
+    // no running process
+    if (pid == -1) {
+        fflush(stdout);
+        return;
+    }
+
+    do {
+        printf("\nProces (PID=%d) bezici na pozadi dokoncen.\n", pid);
+        printf("$ ");
+        fflush(stdout);
+    }
+    while((pid = wait(&stat)) > 0);
+}
+
 /* Input processing routine. */
 void *input_routine(void* args) {
     (void) args;
@@ -337,7 +456,7 @@ void *input_routine(void* args) {
         printf("$ ");
         fflush(stdout);
         // get input
-        bytes = read(0, buff, MAX_INPUT_LEN + 1);
+        bytes = read(STDIN_FILENO, buff, MAX_INPUT_LEN + 1);
         if (bytes <= MAX_INPUT_LEN) {
             // empty command
             if (buff[0] == '\n') {
@@ -386,14 +505,14 @@ void *comnd_routine(void* args) {
             break;
         }
 
+        // parse the buffer
         parse_buffer(&program);
 
+        // execute the program
         if (program.valid)
-            // execute the program
-            print_parsed(&program);
-        else {
-            fprintf(stderr, "Chyba! Nespecifikovany ci opakujici se argumenty programu.\n");
-        }
+            exec_program(&program);
+        else
+            fprintf(stderr, "Chyba! Nespecifikovane ci opakujici se argumenty programu.\n");
 
         // clear the program
         clear_program(&program);
@@ -407,7 +526,23 @@ void *comnd_routine(void* args) {
 
 /* Main function. */
 int main(void) {
+    // initialize signal handling
+    struct sigaction sigint;
+    struct sigaction sigchld;
 
+    sigint.sa_handler = handle_sigint;
+    sigchld.sa_handler = handle_sigchld;
+
+    sigint.sa_flags = 0;
+    sigchld.sa_flags = 0;
+
+    sigemptyset(&sigint.sa_mask);
+    sigemptyset(&sigchld.sa_mask);
+
+    sigaction(SIGINT, &sigint, NULL);
+    sigaction(SIGCHLD, &sigchld, NULL);
+
+    // initialize threads
     pthread_t thrd_input; // input processing thread
     pthread_t thrd_comnd; // command processing thread
 
