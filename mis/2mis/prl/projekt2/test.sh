@@ -17,7 +17,7 @@ procs=`python -c "print(len('$1') * 2 - 2);"`
 
 # překlad a spuštění
 mpic++ --prefix /usr/local/share/OpenMPI vuv.cpp -o vuv
-mpirun --prefix /usr/local/share/OpenMPI -np $procs vuv
+mpirun --prefix /usr/local/share/OpenMPI -np $procs vuv $1
 
 # vyčištění
 rm -rf vuv
