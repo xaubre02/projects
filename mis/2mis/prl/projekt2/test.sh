@@ -13,7 +13,7 @@ if [ $# != 1 ]; then
 fi
 
 # počet procesorů
-procs=`python -c "print(len('$1') * 2 - 2);"`
+procs=`python -c "print((len('$1') * 2 - 2) if len('$1') > 1 else 1);"`
 
 # překlad a spuštění
 mpic++ --prefix /usr/local/share/OpenMPI vuv.cpp -o vuv
