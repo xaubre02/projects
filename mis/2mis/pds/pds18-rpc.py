@@ -11,7 +11,9 @@
 **************
 """
 
+import sys
 import argparse
+from modules import RPC
 
 
 def main():
@@ -22,8 +24,8 @@ def main():
     req_args.add_argument('--command', metavar='<command>', help='Command for the specified peer/node.', required=True)
 
     exc_args = parser.add_mutually_exclusive_group(required=True)
-    exc_args.add_argument('--node', help='Connect to the node.')
-    exc_args.add_argument('--peer', help='Connect to the peer.')
+    exc_args.add_argument('--node', action='store_const', dest='dest', const=RPC.SOCKET_NODE, help='Connect to the node.')
+    exc_args.add_argument('--peer', action='store_const', dest='dest', const=RPC.SOCKET_PEER, help='Connect to the peer.')
 
     opt_args = parser.add_argument_group('Optional arguments')
     opt_args.add_argument('--reg-ipv4', metavar='<IPv4>', help='IPv4 address of the registration node.')
@@ -35,8 +37,11 @@ def main():
     # parse arguments
     args = parser.parse_args()
 
-    # parse arguments
-    args = parser.parse_args()
+    # initialize the rpc
+    rpc = RPC(args.dest, args.id)
+
+    # send a command
+    sys.exit(rpc.send_command(args.command))
 
 
 if __name__ == '__main__':

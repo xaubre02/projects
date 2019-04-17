@@ -13,5 +13,6 @@
 
 from .units import Node
 from .units import Peer
+from .units import RPC
 from .codec import Bencodec
 from .protocol import Message

@@ -82,3 +82,17 @@ class Message:
     def valid(self) -> bool:
         """Return True if the message is valid, False otherwise."""
         return self._valid
+
+
+class Command:
+    """RPC command."""
+
+    # enumeration of supported commands
+    # type : command <required parameters>
+    COMMAND_TYPE = {
+
+    }
+
+    def __init__(self):
+        """Command contructor."""
+        pass

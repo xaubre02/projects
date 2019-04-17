@@ -11,11 +11,62 @@
 **************
 """
 
+import os
 import sys
 import socket
 import signal
 import threading
 from .protocol import Message
+
+
+class UnitRPC:
+    """RPC interface."""
+
+    # exceptions
+    class BindError(Exception):
+        """RPC socket bind error."""
+        def __init__(self, msg):
+            super().__init__('RPC socket error: ' + msg)
+
+    SOCKET_PREFIX = 'xaubre02_pds18'  # unique prefix for naming the socket
+    SOCKET_DIR = '/tmp'               # socket directory
+
+    # destionations
+    SOCKET_NODE = 'node'              # node
+    SOCKET_PEER = 'peer'              # peer
+
+    def __init__(self):
+        """Initialize the RPC interface."""
+        self._socket_rpc = None  # TODO socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        self._socket_rpc_name = None
+
+    def __del__(self):
+        """Object destructor. Free all resources used by this unit."""
+        if self._socket_rpc is not None:
+            self._socket_rpc.close()
+
+    def rpc_init_socket_name(self, unit, unit_id) -> None:
+        """Create a socket name from the given type of unit and it's ID."""
+        self._socket_rpc_name = '{}_{}_{}'.format(UnitRPC.SOCKET_PREFIX, unit, unit_id)
+
+    def rpc_bind_socket(self):
+        """Bind the RPC socket."""
+        # socket name has to be initialized
+        if self._socket_rpc_name is None:
+            raise UnitRPC.BindError('uninitialized socket name')
+
+        # check if socket exists
+        file = os.path.join(self.SOCKET_PREFIX, self._socket_rpc_name)
+        if os.path.exists(file):
+            raise UnitRPC.BindError('socket already exists')
+
+    def rpc_send_msg(self, msg) -> None:
+        """Send a message."""
+        pass
+
+    def rpc_recv_msg(self) -> None:
+        """Receive a message."""
+        pass
 
 
 class UnitUDP:
@@ -90,7 +141,7 @@ class UnitUDP:
                 timer.cancel()
 
 
-class Node(UnitUDP):
+class Node(UnitUDP, UnitRPC):
     """Node of the hybrid P2P chat network."""
 
     def __init__(self, nid, ipv4, port):
@@ -101,6 +152,10 @@ class Node(UnitUDP):
         self._socket_reg.settimeout(0)
 
         self._peers = list()  # list of connected peers
+
+        # initialize RPC socket
+        self.rpc_init_socket_name(self.SOCKET_NODE, nid)
+        self.rpc_bind_socket()
 
     def operate(self) -> None:
         """Start the node functionality."""
@@ -161,7 +216,7 @@ class Node(UnitUDP):
             peer.stop_timer()
 
 
-class Peer(UnitUDP):
+class Peer(UnitUDP, UnitRPC):
     """Peer of the hybrid P2P chat network."""
 
     # HELLO transaction ID
@@ -189,6 +244,10 @@ class Peer(UnitUDP):
         self._socket_chat = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._socket_chat.bind((self.chat_ipv4, self.chat_port))
         self._socket_chat.settimeout(0)
+
+        # initialize RPC socket
+        self.rpc_init_socket_name(self.SOCKET_NODE, pid)
+        self.rpc_bind_socket()
 
     @property
     def username(self) -> str:
@@ -338,3 +397,27 @@ class PeerRecord:
         """Stop the validity timer."""
         if self._timer is not None and self._timer.is_alive():
             self._timer.cancel()
+
+
+class RPC(UnitRPC):
+    """RPC class."""
+
+    def __init__(self, dest_unit, dest_id):
+        """Initialize the RPC."""
+        super().__init__()
+
+        # initialize RPC socket name
+        #self.rpc_init_socket_name(dest_unit, dest_id)
+
+        print(self._socket_rpc_name)
+        try:
+            self.rpc_bind_socket()
+        except UnitRPC.BindError as ex:
+            print(str(ex))
+        # try to connect to the created socket
+        # try:
+        # self._socket_rpc.connect(sock_name)
+
+    def send_command(self, command, **kwargs):
+        """Send a command."""
+        pass
