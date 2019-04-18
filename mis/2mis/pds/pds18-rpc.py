@@ -11,7 +11,6 @@
 **************
 """
 
-import sys
 import argparse
 from modules import RPC
 
@@ -41,7 +40,14 @@ def main():
     rpc = RPC(args.dest, args.id)
 
     # send a command
-    sys.exit(rpc.send_command(args.command))
+    args = vars(args)
+    rpc.send_command(command=args['command'],
+                     dest=args['dest'],
+                     message=args['message'],
+                     msg_from=args['from'],
+                     msg_to=args['to'],
+                     reg_ipv4=args['reg_ipv4'],
+                     reg_port=args['reg_port'])
 
 
 if __name__ == '__main__':

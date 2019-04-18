@@ -44,7 +44,7 @@ class Bencodec:
             return 'd{}e'.format(contents)
 
     @staticmethod
-    def decode(data):
+    def decode(data, encoding='utf-8'):
         """Decode the data from bencode."""
 
         def parse_head(head):
@@ -79,7 +79,7 @@ class Bencodec:
                 length = head[:pos]  # string length
                 try:
                     length = int(length)
-                except Exception:
+                except Exception as ex:
                     return None, None
 
                 # not enought characters
@@ -138,6 +138,10 @@ class Bencodec:
             # unknown format
             else:
                 return None, None
+
+        # bytes-like object
+        if isinstance(data, bytes):
+            data = data.decode(encoding)
 
         # process the data
         decoded, data = parse_head(data)

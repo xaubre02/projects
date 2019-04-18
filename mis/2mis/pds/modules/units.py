@@ -16,7 +16,7 @@ import sys
 import socket
 import signal
 import threading
-from .protocol import Message
+from .protocol import Message, Command
 
 
 class UnitRPC:
@@ -38,26 +38,26 @@ class UnitRPC:
     def __init__(self):
         """Initialize the RPC interface."""
         self._socket_rpc = None  # TODO socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
-        self._socket_rpc_name = None
+        self._socket_rpc_file = None
 
     def __del__(self):
         """Object destructor. Free all resources used by this unit."""
         if self._socket_rpc is not None:
             self._socket_rpc.close()
 
-    def rpc_init_socket_name(self, unit, unit_id) -> None:
+    def rpc_init_socket_file(self, unit, unit_id) -> None:
         """Create a socket name from the given type of unit and it's ID."""
-        self._socket_rpc_name = '{}_{}_{}'.format(UnitRPC.SOCKET_PREFIX, unit, unit_id)
+        sock_name = '{}_{}_{}'.format(UnitRPC.SOCKET_PREFIX, unit, unit_id)
+        self._socket_rpc_file = os.path.join(UnitRPC.SOCKET_DIR, sock_name)
 
     def rpc_bind_socket(self):
         """Bind the RPC socket."""
         # socket name has to be initialized
-        if self._socket_rpc_name is None:
+        if self._socket_rpc_file is None:
             raise UnitRPC.BindError('uninitialized socket name')
 
         # check if socket exists
-        file = os.path.join(self.SOCKET_PREFIX, self._socket_rpc_name)
-        if os.path.exists(file):
+        if os.path.exists(self._socket_rpc_file):
             raise UnitRPC.BindError('socket already exists')
 
     def rpc_send_msg(self, msg) -> None:
@@ -154,7 +154,7 @@ class Node(UnitUDP, UnitRPC):
         self._peers = list()  # list of connected peers
 
         # initialize RPC socket
-        self.rpc_init_socket_name(self.SOCKET_NODE, nid)
+        self.rpc_init_socket_file(self.SOCKET_NODE, nid)
         self.rpc_bind_socket()
 
     def operate(self) -> None:
@@ -246,7 +246,7 @@ class Peer(UnitUDP, UnitRPC):
         self._socket_chat.settimeout(0)
 
         # initialize RPC socket
-        self.rpc_init_socket_name(self.SOCKET_NODE, pid)
+        self.rpc_init_socket_file(self.SOCKET_NODE, pid)
         self.rpc_bind_socket()
 
     @property
@@ -407,17 +407,28 @@ class RPC(UnitRPC):
         super().__init__()
 
         # initialize RPC socket name
-        #self.rpc_init_socket_name(dest_unit, dest_id)
+        self.dest = dest_unit
+        self.rpc_init_socket_file(dest_unit, dest_id)
 
-        print(self._socket_rpc_name)
-        try:
-            self.rpc_bind_socket()
-        except UnitRPC.BindError as ex:
-            print(str(ex))
         # try to connect to the created socket
         # try:
-        # self._socket_rpc.connect(sock_name)
+        # self._socket_rpc.connect(self.rpc_init_socket_file)
 
-    def send_command(self, command, **kwargs):
+    def send_command(self, **params) -> None:
         """Send a command."""
-        pass
+        # process the given command
+        cmd = Command(params)
+        if not cmd.valid:
+            # supported commands
+            supp = Command.get_supported_commands(self.dest)
+            # invalid command for a peer
+            if self.dest == UnitRPC.SOCKET_PEER:
+                print('Error: invalid command for a peer\n{}'.format(supp), file=sys.stderr)
+            # invalid command for a node
+            elif self.dest == UnitRPC.SOCKET_NODE:
+                print('Error: invalid command for a node\n{}'.format(supp), file=sys.stderr)
+            # invalid command (should not happen)
+            else:
+                print('Error: invalid command', file=sys.stderr)
+
+            sys.exit(1)
