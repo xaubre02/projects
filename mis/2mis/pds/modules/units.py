@@ -37,13 +37,17 @@ class UnitRPC:
 
     def __init__(self):
         """Initialize the RPC interface."""
-        self._socket_rpc = None  # TODO socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+        self._socket_rpc = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         self._socket_rpc_file = None
 
     def __del__(self):
         """Object destructor. Free all resources used by this unit."""
+        print('deleting UNITRPC')
         if self._socket_rpc is not None:
             self._socket_rpc.close()
+        
+        if os.path.exists(self._socket_rpc_file):
+            os.remove(self._socket_rpc_file)
 
     def rpc_init_socket_file(self, unit, unit_id) -> None:
         """Create a socket name from the given type of unit and it's ID."""
@@ -59,6 +63,8 @@ class UnitRPC:
         # check if socket exists
         if os.path.exists(self._socket_rpc_file):
             raise UnitRPC.BindError('socket already exists')
+        
+        self._socket_rpc.bind(self._socket_rpc_file)
 
     def rpc_send_msg(self, msg) -> None:
         """Send a message."""
@@ -101,6 +107,7 @@ class UnitUDP:
 
     def __del__(self):
         """Object destructor. Free all resources used by this unit."""
+        print('deleting UnitUDP')
         if self._socket_reg is not None:
             self._socket_reg.close()
 
@@ -146,16 +153,24 @@ class Node(UnitUDP, UnitRPC):
 
     def __init__(self, nid, ipv4, port):
         """Node constructor."""
-        super().__init__(nid, ipv4, port)
+        UnitUDP.__init__(self, nid, ipv4, port)  # call UnitUDP constructor
+        UnitRPC.__init__(self)                   # call UnitRPC constructor
+
         # bind socket and set to non-blocking
-        self._socket_reg.bind((self.reg_ipv4, self.reg_port))
-        self._socket_reg.settimeout(0)
+        try:
+            self._socket_reg.bind((self.reg_ipv4, self.reg_port))
+            self._socket_reg.settimeout(0)
+        except OSError:
+            self._error('port already used')
 
         self._peers = list()  # list of connected peers
 
         # initialize RPC socket
-        self.rpc_init_socket_file(self.SOCKET_NODE, nid)
-        self.rpc_bind_socket()
+        try:
+            self.rpc_init_socket_file(self.SOCKET_NODE, nid)
+            self.rpc_bind_socket()
+        except UnitRPC.BindError:
+            self._error('username already used')
 
     def operate(self) -> None:
         """Start the node functionality."""
