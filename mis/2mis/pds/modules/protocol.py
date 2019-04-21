@@ -42,9 +42,8 @@ class Message:
         # check the message
         self._valid = self._isvalid(data)
 
-        # sort the dictionary by key
         if self.valid:
-            self._sort_and_store(data)
+            self.dic = data
 
     def __getitem__(self, key):
         """Return an item by the given key."""
@@ -62,11 +61,6 @@ class Message:
 
         # given type has to have the same keys as defined by the protocol
         return set(list(dic.keys())) == set(self.MESSAGE_TYPE[dic['type']]) and len(list(dic.keys())) == len(self.MESSAGE_TYPE[dic['type']])
-
-    def _sort_and_store(self, dic) -> None:
-        """Sort and store the given dictionary."""
-        for key in sorted(dic):
-            self.dic[key] = dic[key]
 
     def encode(self, encoding='utf-8') -> bytes:
         """Return an encoded Message in bencode in bytes-like object."""
@@ -103,12 +97,8 @@ class Command:
         if not isinstance(data, dict):
             data = codec.Bencodec.decode(data)
 
-        # check the command
-        self._valid = self._isvalid(data)
-
-        # sort the dictionary by key
-        if self.valid:
-            self._sort_and_store(data)
+        # parse and store the command
+        self._valid = self._parse(data)
 
     def __getitem__(self, key):
         """Return an item by the given key."""
@@ -118,8 +108,11 @@ class Command:
         """Return the string representation of the Command (JSON)."""
         return json.dumps(self.dic)
 
-    def _isvalid(self, dic) -> bool:
-        """Check whether the command is valid or not."""
+    def _parse(self, dic) -> bool:
+        """Parse the command, check whether it is valid or not and store it."""
+        # temporary dictionary
+        tmp = dict()
+
         # invalid dictionary or unknown command type
         if dic is None or 'command' not in dic or dic['command'] not in Command.COMMAND_TYPE:
             return False
@@ -139,20 +132,19 @@ class Command:
             # store values
             else:
                 if val is not None:
-                    self.dic[key] = val
+                    tmp[key] = val
 
         # missing parameter
         for par in self.COMMAND_TYPE[dic['command']][1]:
             if dic.get(par, None) is None:
                 return False
 
+        # sort and store the given dictionary
+        for key in sorted(tmp):
+            self.dic[key] = dic[key]
+
         # everything is OK
         return True
-
-    def _sort_and_store(self, dic) -> None:
-        """Sort and store the given dictionary."""
-        for key in sorted(dic):
-            self.dic[key] = dic[key]
 
     @property
     def valid(self) -> bool:

@@ -96,14 +96,14 @@ class Bencodec:
                 lst = []  # empty list
                 head = head[1:]  # strip the first letter
                 while len(head) > 0:
+                    if head.startswith('e'):  # end of the list
+                        return lst, head[1:]
+
                     item, head = parse_head(head)
                     if item is None or head == '':  # an error occured or missing end of the list
                         return None, None
                     else:
                         lst.append(item)
-
-                    if head.startswith('e'):  # end of the list
-                        return lst, head[1:]
 
             # dictionary
             elif head.startswith('d'):
@@ -112,6 +112,13 @@ class Bencodec:
                 odd = True  # flag to indicate a key or a value of the key
                 key = None  # key
                 while len(head) > 0:
+                    if head.startswith('e'):  # end of the list
+                        # parsed a key without the value -> error
+                        if not odd:
+                            return None, None
+                        else:
+                            return dic, head[1:]
+
                     item, head = parse_head(head)
                     if item is None or head == '':  # an error occured or missing end of the dict
                         return None, None
@@ -127,13 +134,6 @@ class Bencodec:
 
                         # toggle flag
                         odd = not odd
-
-                    if head.startswith('e'):  # end of the list
-                        # parsed a key without the value -> error
-                        if not odd:
-                            return None, None
-                        else:
-                            return dic, head[1:]
 
             # unknown format
             else:
