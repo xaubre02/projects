@@ -19,7 +19,7 @@ class Message:
     """Peer to Peer protocol communication message."""
 
     # enumeration of supported communication message types
-    # type : content (type and TID is implicit)
+    # type : <required parameters>
     MESSAGE_TYPE = {
         'hello':      ['type', 'txid', 'username', 'ipv4', 'port'],
         'getlist':    ['type', 'txid'],
@@ -30,6 +30,13 @@ class Message:
         'ack':        ['type', 'txid'],
         'error':      ['type', 'txid', 'verbose']
     }
+
+    # timers
+    ACK_WAIT = 2         # wait time for ACK messages
+    PERIOD_UPDATES = 4   # UPDATE message period
+    PERIOD_HELLOS = 10   # HELLO message period
+    TIMEOUT_UPDATE = 12  # node went down
+    TIMEOUT_HELLO = 30   # peer went down
 
     def __init__(self, data):
         """Message contructor."""

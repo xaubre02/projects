@@ -20,20 +20,19 @@ import threading
 from .protocol import Message, Command
 
 
-# TODO: make txid unique for each message
 class UnitRPC:
     """RPC interface."""
 
-    # exceptions
+    # exception
     class BindError(Exception):
         """RPC socket bind error."""
         def __init__(self, msg):
             super().__init__('RPC socket error: ' + msg)
 
     SOCKET_PREFIX = 'xaubre02_pds18'  # unique prefix for naming the socket
-    SOCKET_DIR = 'C:/Users/nxf42810/desktop'  # '/tmp'               # socket directory
+    SOCKET_DIR = '/tmp'               # socket directory
 
-    # destionations
+    # targets
     SOCKET_NODE = 'node'              # node
     SOCKET_PEER = 'peer'              # peer
 
@@ -44,9 +43,10 @@ class UnitRPC:
 
     def __del__(self):
         """Object destructor. Free all resources used by this unit."""
+        # close socket
         if self._socket_rpc is not None:
             self._socket_rpc.close()
-        
+        # delete socket file
         if os.path.exists(self._socket_rpc_file):
             os.remove(self._socket_rpc_file)
 
@@ -63,25 +63,17 @@ class UnitRPC:
 
         # check if socket exists
         if os.path.exists(self._socket_rpc_file):
-            raise UnitRPC.BindError('socket already exists')
+            raise UnitRPC.BindError('ID already exists')
         
         self._socket_rpc.bind(('127.0.0.1', port))  # self._socket_rpc_file)
         self._socket_rpc.settimeout(0)
-
-    def rpc_send_msg(self, msg) -> None:
-        """Send a message."""
-        pass
-
-    def rpc_recv_msg(self) -> None:
-        """Receive a message."""
-        pass
 
 
 class UnitUDP(UnitRPC):
     """Base class for other UDP communication units."""
 
     # size of the buffer on the receiving side
-    RECV_BUFFER = 1024
+    RECV_BUFFER = 4096
 
     def __init__(self, unit, uid, reg_ipv4, reg_port):
         """Base constructor."""
@@ -116,7 +108,7 @@ class UnitUDP(UnitRPC):
         # catch SIGINT signal
         signal.signal(signal.SIGINT, self._sigint_handler)
 
-        # initialize RPC socket
+        # initialize RPC socket TODO: todo
         try:
             self.rpc_init_socket_file(unit, uid)
             if unit == self.SOCKET_NODE:
@@ -125,7 +117,7 @@ class UnitUDP(UnitRPC):
                 port = 12347
             self.rpc_bind_socket(port)
         except UnitRPC.BindError:
-            self._error('username already used')
+            self._error('{}\'s ID already used'.format(unit))
 
         # initialize RPC command receiver
         self.rpc_receiver = threading.Thread(target=self.recv_commands)
@@ -142,28 +134,11 @@ class UnitUDP(UnitRPC):
 
     def get_txid(self) -> int:
         """Get the txid and increment it."""
-        self._locks['txid'].acquire()
+        self._locks['txid'].acquire()  # lock
         tmp = self._txid
         self._txid = (self._txid + 1) % 65535  # txid is ushort
-        self._locks['txid'].release()
+        self._locks['txid'].release()  # unlock
         return tmp
-
-    def recv_commands(self) -> None:
-        """Receive commands from the RPC application."""
-        while self._run:
-            try:
-                data, addr = self._socket_rpc.recvfrom(UnitUDP.RECV_BUFFER)
-                cmnd = Command(data)
-                if not cmnd.valid:
-                    self._notify('invalid RPC command received: {}'.format(str(data)), warning=True)
-                else:
-                    self.process_command(cmnd)
-            except BlockingIOError:
-                continue
-
-    @abc.abstractmethod
-    def process_command(self, cmnd) -> None:
-        """Process a command from RPC application."""
 
     @property
     def uid(self) -> str:
@@ -188,7 +163,7 @@ class UnitUDP(UnitRPC):
 
     @staticmethod
     def _notify(msg, warning=False) -> None:
-        """Print a warning to console and exit with status -1."""
+        """Print a warning to console and continue with the program execution."""
         prefix = 'Warning' if warning else 'Notice'
         print('{}: {}'.format(prefix, msg), file=sys.stderr)
 
@@ -209,6 +184,15 @@ class UnitUDP(UnitRPC):
                      'txid': txid})
         sock.sendto(m.encode(), addr)
 
+    @staticmethod
+    def send_error_msg(sock, txid, verbose, addr) -> None:
+        """Send an error message."""
+        # Error message
+        m = Message({'type': 'error',
+                     'txid': txid,
+                     'verbose': verbose})
+        sock.sendto(m.encode(), addr)
+
     def create_timer(self, name, duration, timeout_msg) -> None:
         """Wait for the acknowledge for the given transaction ID."""
         def notify():
@@ -217,6 +201,23 @@ class UnitUDP(UnitRPC):
 
         self._timers[name] = threading.Timer(duration, notify)
         self._timers[name].start()
+
+    @abc.abstractmethod
+    def process_command(self, cmnd) -> None:
+        """Process a command from RPC application."""
+
+    def recv_commands(self) -> None:
+        """Receive commands from the RPC application."""
+        while self._run:
+            try:
+                data, addr = self._socket_rpc.recvfrom(UnitUDP.RECV_BUFFER)
+                cmnd = Command(data)
+                if not cmnd.valid:
+                    self._notify('invalid RPC command received: {}'.format(str(data)), warning=True)
+                else:
+                    self.process_command(cmnd)
+            except BlockingIOError:
+                continue
 
 
 class Node(UnitUDP):
@@ -247,7 +248,7 @@ class Node(UnitUDP):
         lst = dict()
         index = 0
         for peer in self._peers:
-            # get only peers registered to the secified address
+            # get only peers registered to the secified node(address)
             if node_ipv4 is not None and node_port is not None and (peer.node_ipv4 != node_ipv4 or peer.node_port != node_port):
                 continue
 
@@ -271,7 +272,7 @@ class Node(UnitUDP):
             if key in keys:
                 continue
 
-            # save record
+            # save record with all peers registered to this node
             db[key] = self.get_peer_list(peer.node_ipv4, peer.node_port)
 
         return db
@@ -295,9 +296,11 @@ class Node(UnitUDP):
                         p.stop_timer()
                         self._peers.remove(p)
                         self._notify('{} has disconnected'.format(invalid_peer))
+            # HELLO timeout
             else:
                 self._notify('{} has disconnected'.format(invalid_peer.username))
                 self._peers.remove(invalid_peer)
+            self.synchronize()  # inform other nodes
 
         while self._run:
             try:
@@ -307,6 +310,9 @@ class Node(UnitUDP):
                 mess = Message(data)
                 if not mess.valid:
                     self._notify('invalid message received: {}'.format(str(data)), warning=True)
+                    self._locks['sock_reg'].acquire()
+                    self.send_error_msg(self._socket_reg, 0, 'couldn\'t decode the message: {}'.format(str(data)), addr)
+                    self._locks['sock_reg'].release()
                 else:
                     # ack message
                     if mess['type'] == 'ack':
@@ -316,10 +322,9 @@ class Node(UnitUDP):
                             timer.cancel()
                     # update message
                     elif mess['type'] == 'update':
-                        # do not accept update messages
-                        if not self._accepting:
-                            continue
-                        self.process_update(mess['db'], addr)
+                        # node is accepting update messages
+                        if self._accepting:
+                            self.process_update(mess['db'], addr)
                     # hello message
                     elif mess['type'] == 'hello':
                         peer = PeerRecord(mess['username'], mess['ipv4'], mess['port'], self.reg_ipv4, self.reg_port, invalidate)
@@ -336,34 +341,43 @@ class Node(UnitUDP):
                                 peer.start_timer()
                                 self._peers.append(peer)
                                 self._notify('new peer has connected: {}'.format(peer.username))
+                                self.synchronize()  # inform other nodes
                         # invalid peer record
                         else:
-                            err = Message({
-                                'type': 'error',
-                                'txid': 421,
-                                'verbose': peer.error
-                            })
+                            self._locks['sock_reg'].acquire()
+                            self.send_error_msg(self._socket_reg, mess['txid'], 'invalid peer data', addr)
+                            self._locks['sock_reg'].release()
                     # getlist
                     elif mess['type'] == 'getlist':
                         # answer only to peers registered to this node
                         if self.is_my_peer(addr):
-                            # acknowledge the message
-                            self.acknowledge_msg(self._socket_reg, mess['txid'], addr)
-
-                            # send the peer list
+                            # message
+                            txid = self.get_peer_list()
                             m = Message({'type': 'list',
                                          'txid': mess['txid'],
-                                         'peers': self.get_peer_list()})
+                                         'peers': txid})
+                            self._locks['sock_reg'].acquire()
+                            # acknowledge the message
+                            self.acknowledge_msg(self._socket_reg, mess['txid'], addr)
+                            # send the peer list
                             self._socket_reg.sendto(m.encode(), addr)
+                            self._locks['sock_reg'].release()
 
                             # wait for list acknowledge
-                            self.create_timer(str(mess['txid']), 2, 'peer did not acknowledge list message')
-
+                            self.create_timer(str(mess['txid']), Message.ACK_WAIT, 'peer did not acknowledge LIST message with TXID={}'.format(str(txid)))
+                    # disconnect
+                    elif mess['type'] == 'disconnect':
+                        self.process_disconnect(addr)
+                        # acknowledge the disconnect
+                        self._locks['sock_reg'].acquire()
+                        self.acknowledge_msg(self._socket_reg, mess['txid'], addr)
+                        self._locks['sock_reg'].release()
+                    # an error received
+                    elif mess['type'] == 'error':
+                        self._notify('an error message received: {}'.format(mess['verbose']), warning=True)
+                    # unknown message
                     else:
-                        print("Received message: ", end='')
-                        print(mess, end='')
-                        print(' from: ', end='')
-                        print(addr)
+                        self._notify('unsupported message type received: {}'.format(mess['type']), warning=True)
             # no datagrams available
             except BlockingIOError:
                 self._locks['sock_reg'].release()
@@ -376,7 +390,7 @@ class Node(UnitUDP):
         for peer in self._peers:
             peer.stop_timer()
 
-    def print_nodes(self):
+    def print_nodes(self) -> None:
         """Print all known neighbors."""
         print('\n{:<16}  {:<5}'.format('IPv4', 'Port'))
         print('-' * 23)
@@ -384,20 +398,20 @@ class Node(UnitUDP):
             print('{:<16}  {:<5d}'.format(node.ipv4, node.port))
         print()
 
-    def print_peers(self):
+    def print_peers(self) -> None:
         """Print all known peers."""
-        print('\n{:<24}  {:<16}  {:<5}  {}'.format('Username', 'IPv4', 'Port', 'Authoritative'))
-        print('-' * 65)
+        print('\n{:<24}  {:<16}  {:<5}  {:<13}  {}'.format('Username', 'IPv4', 'Port', 'Authoritative', 'Registrar'))
+        print('-' * 81)
         for peer in self._peers:
             # authoritative records
             if peer.node_ipv4 == self.reg_ipv4 and peer.node_port == self.reg_port:
                 auth = 'YES'
             else:
                 auth = 'NO'
-            print('{:<24}  {:<16}  {:<5d}  {}'.format(peer.username, peer.ipv4, peer.port, auth))
+            print('{:<24}  {:<16}  {:<5d}  {:<13}  {}:{:d}'.format(peer.username, peer.ipv4, peer.port, auth, peer.node_ipv4, peer.node_port))
         print()
 
-    def process_update(self, db, addr):
+    def process_update(self, db, addr) -> None:
         """Process the database from UPDATE message."""
         def invalidate(node):
             """Remove a node from the database."""
@@ -406,9 +420,15 @@ class Node(UnitUDP):
             # stop sending updates
             if self._timers[timer_key].is_alive():
                 self._timers[timer_key].cancel()
+            # remove all peers registered to this address
+            for p_old in self._peers:
+                # remove peer
+                if p_old.node_ipv4 == addr[0] and p_old.node_port == addr[1]:
+                    self._peers.remove(p_old)
+            # remove the node itself
             self._nodes.remove(node)
 
-        def parse_key(k):
+        def parse_key(k) -> (str, int):
             """Parse the database key."""
             pos = k.find(',')
             return k[0:pos], int(k[pos+1:])
@@ -429,9 +449,13 @@ class Node(UnitUDP):
         # update timer
         self._nodes[self._nodes.index(nr)].update()
 
+        sync = False
+        old = list()
+
         # remove all records from this node
         for peer in self._peers:
             if peer.node_ipv4 == nr.ipv4 and peer.node_port == nr.port:
+                old.append(peer)
                 self._peers.remove(peer)
 
         for key, val in db.items():
@@ -439,18 +463,27 @@ class Node(UnitUDP):
             ipv4, port = parse_key(key)
             # ignore records from this node
             if self.reg_ipv4 == ipv4 and self.reg_port == port:
-                for _, peer in val.items():
-                    p = PeerRecord(peer['username'], peer['ipv4'], peer['port'], nr.ipv4, nr.port, None)
-                    self._peers.append(p)
+                continue
             # authorative update records
             elif nr.ipv4 == ipv4 and nr.port == port:
-                pass
-            # non-authorative update records -> connect to the specified node
+                for _, peer in val.items():
+                    # append a new peer
+                    p = PeerRecord(peer['username'], peer['ipv4'], peer['port'], nr.ipv4, nr.port, None)
+                    self._peers.append(p)
+                    if p not in old:
+                        sync = True  # synchronization needed
+            # non-authorative update records
             else:
-                self.connect_and_maintain(ipv4, port)
+                # connect to the specified node if did not in the past already
+                if NodeRecord(ipv4, port, None) not in self._nodes:
+                    self.connect_and_maintain(ipv4, port)
 
-    def connect_and_maintain(self, ipv4, port):
-        """connect to the specified node."""
+        # synchronize
+        if sync:
+            self.synchronize()
+
+    def connect_and_maintain(self, ipv4, port) -> None:
+        """Connect to the specified node and maintain the connection."""
         def send_update():
             """Send the UPDATE message to a node every 4 seconds."""
             # update message
@@ -463,33 +496,49 @@ class Node(UnitUDP):
                 self._socket_reg.sendto(m.encode(), (ipv4, port))
             except Exception as ex:
                 self._notify('failed to send the UPDATE message: {}'.format(str(ex)), warning=True)
-
             self._locks['sock_reg'].release()
 
-            # repeat the function
-            self._timers['{}:{:d}'.format(ipv4, port)] = threading.Timer(4, send_update)
-            self._timers['{}:{:d}'.format(ipv4, port)].start()
+            # repeat the function (use timer)
+            key = '{}:{:d}'.format(ipv4, port)
+            if self._timers[key].is_alive():
+                self._timers[key].cancel()
+
+            self._timers[key] = threading.Timer(Message.PERIOD_UPDATES, send_update)
+            self._timers[key].start()
 
         send_update()
 
-    def disconnect(self):
+    def disconnect(self) -> None:
         """Disconnect from the current network."""
         # set accepting flag to false
         self._accepting = False
-
-    def synchronize(self):
-        """Synchronize the database with other nodes."""
-        db = self.get_database()
-        # send updates to all known neighbors
+        # inform all nodes
         for node in self._nodes:
-            # send update
-            m = Message({'type': 'update',
-                         'txid': self.get_txid(),
-                         'db': db})
+            txid = self.get_txid()
+            m = Message({'type': 'disconnect',
+                         'txid': txid})
 
+            # send disconnect message
             self._locks['sock_reg'].acquire()
-            self._socket_reg.sendto(m.encode(), (node.reg_ipv4, node.reg_port))
+            self._socket_reg.sendto(m.encode(), (node.ipv4, node.port))
             self._locks['sock_reg'].release()
+
+            # wait for the ACK for 2 secs
+            self.create_timer(str(txid), Message.ACK_WAIT, 'disconnect with TXID={:d} not acknowledged'.format(txid))
+
+    def process_disconnect(self, addr) -> None:
+        """Process the DISCONNECT message."""
+        # remove the node
+        for node in self._nodes:
+            if node.ipv4 == addr[0] and node.port == addr[1]:
+                node.invalidate()
+                break
+
+    def synchronize(self) -> None:
+        """Synchronize the database with other nodes."""
+        # send updates to all known neighbors and restart the update timers ~ connect_and_maintain() function
+        for node in self._nodes:
+            self.connect_and_maintain(node.ipv4, node.port)
 
     def process_command(self, cmnd) -> None:
         """Process a command from RPC application."""
@@ -534,14 +583,14 @@ class Peer(UnitUDP):
         self._username = username     # username
         self._chat_ipv4 = chat_ipv4   # chat IPv4 address
         self._chat_port = chat_port   # chat port
-        self._peers = None
+        self._peers = None            # local peer database
 
         # socket initialization (init, bind and set to non-blocking)
         self._socket_chat = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._socket_chat.bind((self.chat_ipv4, self.chat_port))
         self._socket_chat.settimeout(0)
 
-        # socket lock
+        # threads syns. mechanisms
         self._locks['sock_chat'] = threading.Lock()
         self._got_list = threading.Event()
 
@@ -588,7 +637,7 @@ class Peer(UnitUDP):
             self._locks['sock_chat'].release()
 
             # repeat the function
-            self._timers['hello'] = threading.Timer(10, send_hello)
+            self._timers['hello'] = threading.Timer(Message.PERIOD_HELLOS, send_hello)
             self._timers['hello'].start()
 
         # initialize
@@ -602,7 +651,9 @@ class Peer(UnitUDP):
                          'ipv4': '0',
                          'port': 0})
 
+        self._locks['sock_reg'].acquire()
         self._socket_reg.sendto(hello.encode(), (self.reg_ipv4, self.reg_port))
+        self._locks['sock_reg'].release()
 
     def operate(self) -> None:
         """Start the peer functionality."""
@@ -611,14 +662,24 @@ class Peer(UnitUDP):
 
         while self._run:
             try:
+                self._locks['sock_chat'].acquire()
                 data, addr = self._socket_chat.recvfrom(UnitUDP.RECV_BUFFER)
+                self._locks['sock_chat'].release()
                 mess = Message(data)
                 if not mess.valid:
                     self._notify('invalid message received {}'.format(str(data)), warning=True)
+                    self._locks['sock_chat'].acquire()
+                    self.send_error_msg(self._socket_chat, 0, 'couldn\'t decode the message: {}'.format(str(data)), addr)
+                    self._locks['sock_chat'].release()
                 else:
                     # message received
                     if mess['type'] == 'message':
+                        # print the message
                         print('{}:> {}'.format(mess['from'], mess['message']))
+                        # acknowledge the message
+                        self._locks['sock_chat'].acquire()
+                        self.acknowledge_msg(self._socket_chat, mess['txid'], addr)
+                        self._locks['sock_chat'].release()
                     # ack received
                     elif mess['type'] == 'ack':
                         timer = self._timers.get(str(mess['txid']), None)
@@ -626,16 +687,20 @@ class Peer(UnitUDP):
                             timer.cancel()
                     # list received
                     elif mess['type'] == 'list':
-                        # TODO: what to do if the list message will not be received or received before getlist ack
-                        self._peers = mess['peers']
-                        self._got_list.set()  # synchronize
                         # acknowledge the message
                         self.acknowledge_msg(self._socket_reg, mess['txid'], addr)
+                        self._peers = mess['peers']
+                        self._got_list.set()  # synchronize
+                    # an error received
+                    elif mess['type'] == 'error':
+                        self._notify('an error message received: {}'.format(mess['verbose']), warning=True)
+                    # unknown message
                     else:
-                        print(str(mess))
+                        self._notify('unsupported message type received: {}'.format(mess['type']), warning=True)
 
             # no datagrams available
             except BlockingIOError:
+                self._locks['sock_chat'].release()
                 continue
 
     def print_peers(self) -> None:
@@ -659,7 +724,7 @@ class Peer(UnitUDP):
         print()
 
     def get_list(self) -> None:
-        """Get a list of currently connected peers and print the list."""
+        """Get a list of currently connected peers."""
         txid = self.get_txid()
         m = Message({'type': 'getlist',
                      'txid': txid})
@@ -671,9 +736,9 @@ class Peer(UnitUDP):
         self._locks['sock_chat'].release()
 
         # wait for the acknowledge for 2 secs
-        self.create_timer(str(txid), 2, 'getlist not acknowledged')
-        # wait until the list is received (3 sec)
-        self._got_list.wait(timeout=2)
+        self.create_timer(str(txid), Message.ACK_WAIT, 'getlist not acknowledged (TXID={:d})'.format(txid))
+        # wait until the list is received (max 3 sec)
+        self._got_list.wait(timeout=3)
 
     def get_addr_by_username(self, username) -> (str, int):
         """Get the address of the given username."""
@@ -698,11 +763,12 @@ class Peer(UnitUDP):
 
     def send_message(self, msg_from, msg_to, msg) -> None:
         """Send a message to an user."""
+        # get peers
+        self.get_list()
+
         # different usernames (from RPC and peer's)
         if self.username != msg_from:
             self._notify('different peer username vs. RPC command username: \'{}\' vs. \'{}\''.format(self.username, msg_from))
-        # get peers
-        self.get_list()
 
         # get the user's address
         addr = self.get_addr_by_username(msg_to)
@@ -711,13 +777,19 @@ class Peer(UnitUDP):
             return
 
         # construct the message
+        txid = self.get_txid()
         m = Message({'type': 'message',
-                     'txid': self.get_txid(),
+                     'txid': txid,
                      'from': msg_from,
                      'to': msg_to,
                      'message': msg})
 
+        # wait for the acknowledge for 2 secs
+        self.create_timer(str(txid), Message.ACK_WAIT, 'unable to deliver the message with TXID={:d} (not acknowledged)'.format(txid))
+
+        self._locks['sock_chat'].acquire()
         self._socket_chat.sendto(m.encode(), addr)
+        self._locks['sock_chat'].release()
 
     def reconnect(self, ipv4, port) -> None:
         """Disconnect from the current node and connect to a new one."""
@@ -726,6 +798,8 @@ class Peer(UnitUDP):
             self._timers['hello'].cancel()
         # disconnect from the current node
         self.disconnect()
+        # clear local database
+        self._peers = None
         # change address
         self._reg_ipv4 = ipv4
         self._reg_port = port
@@ -757,14 +831,13 @@ class NodeRecord:
 
     def __init__(self, ipv4, port, invalidate):
         """Record constructor."""
-        self._ipv4 = str(ipv4)
-        self._port = port
-        self._err = ''
-        self._inv_func = invalidate
-        self._timer = None
+        self._ipv4 = str(ipv4)       # node's IPv4 address
+        self._port = port            # node's port
+        self._inv_func = invalidate  # invalidating function
+        self._timer = None           # validity timer
 
     def __eq__(self, other) -> bool:
-        """Equality function."""
+        """NodeRecord equality function."""
         return self.ipv4 == other.ipv4 and \
                self.port == other.port
 
@@ -777,13 +850,17 @@ class NodeRecord:
         """Restart the validity timer."""
         # validity timer (12 seconds)
         self.stop_timer()
-        self._timer = threading.Timer(12, self._inv_func, args=[self])
+        self._timer = threading.Timer(Message.TIMEOUT_UPDATE, self._inv_func, args=[self])
         self._timer.start()
 
     def stop_timer(self) -> None:
         """Stop the validity timer."""
         if self._timer is not None and self._timer.is_alive():
             self._timer.cancel()
+
+    def invalidate(self) -> None:
+        """Invalidate the NodeRecord."""
+        self._inv_func(self)
 
     @property
     def ipv4(self) -> str:
@@ -801,17 +878,16 @@ class PeerRecord:
 
     def __init__(self, username, ipv4, port, node_ipv4, node_port, invalidate):
         """Record constructor."""
-        self._username = username
-        self._ipv4 = str(ipv4)
-        self._port = port
-        self._node_ipv4 = node_ipv4
-        self._node_port = node_port
-        self._err = ''
-        self._inv_func = invalidate
-        self._timer = None
+        self._username = username     # peer's username
+        self._ipv4 = str(ipv4)        # peer's chat IPv4 address
+        self._port = port             # peer's chat port
+        self._node_ipv4 = node_ipv4   # peer's IPv4 address of its registration node
+        self._node_port = node_port   # peer's port of its registration node
+        self._inv_func = invalidate   # invaliding function when the timer runs out
+        self._timer = None            # validity timer
 
     def __eq__(self, other) -> bool:
-        """Equality function."""
+        """PeerRecord equality function."""
         return self.username == other.username and \
                self.ipv4 == other.ipv4 and \
                self.port == other.port and \
@@ -843,11 +919,6 @@ class PeerRecord:
         """Return the peer's registration node port."""
         return self._node_port
 
-    @property
-    def error(self) -> str:
-        """Return the error message."""
-        return self._err
-
     def is_valid(self) -> bool:
         """Return True if the record is valid, False otherwise."""
         # check the IP address
@@ -867,7 +938,7 @@ class PeerRecord:
         return True
 
     def update(self, peer) -> None:
-        """Update the peer record."""
+        """Update the peer record and restart its timer."""
         self._username = peer.username
         self._ipv4 = peer.ipv4
         self._port = peer.port
@@ -878,7 +949,7 @@ class PeerRecord:
         """Restart the validity timer."""
         # validity timer (30 seconds)
         self.stop_timer()
-        self._timer = threading.Timer(30, self._inv_func, args=[self])
+        self._timer = threading.Timer(Message.TIMEOUT_HELLO, self._inv_func, args=[self])
         self._timer.start()
 
     def stop_timer(self) -> None:
@@ -922,4 +993,4 @@ class RPC(UnitRPC):
 
             sys.exit(1)
 
-        self._socket_rpc.send(cmd.encode())
+        self._socket_rpc.send(cmd.encode())  # TODO: sendto(cmd.encode(), self._socket_rpc_file)

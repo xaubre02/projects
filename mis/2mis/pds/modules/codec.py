@@ -38,6 +38,7 @@ class Bencodec:
         # dictionary
         elif isinstance(data, dict):
             contents = ''
+            # sort keys
             for key in sorted(data):
                 contents += '{}{}'.format(Bencodec.encode(key), Bencodec.encode(data[key]))
 
