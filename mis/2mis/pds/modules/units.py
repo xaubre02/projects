@@ -38,7 +38,7 @@ class UnitRPC:
 
     def __init__(self):
         """Initialize the RPC interface."""
-        self._socket_rpc = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self._socket_rpc = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         self._socket_rpc_file = None
 
     def __del__(self):
@@ -46,16 +46,13 @@ class UnitRPC:
         # close socket
         if self._socket_rpc is not None:
             self._socket_rpc.close()
-        # delete socket file
-        if os.path.exists(self._socket_rpc_file):
-            os.remove(self._socket_rpc_file)
 
     def rpc_init_socket_file(self, unit, unit_id) -> None:
         """Create a socket name from the given type of unit and it's ID."""
         sock_name = '{}_{}_{}'.format(UnitRPC.SOCKET_PREFIX, unit, unit_id)
         self._socket_rpc_file = os.path.join(UnitRPC.SOCKET_DIR, sock_name)
 
-    def rpc_bind_socket(self, port):
+    def rpc_bind_socket(self):
         """Bind the RPC socket."""
         # socket name has to be initialized
         if self._socket_rpc_file is None:
@@ -63,9 +60,10 @@ class UnitRPC:
 
         # check if socket exists
         if os.path.exists(self._socket_rpc_file):
+            self._socket_rpc_file = None
             raise UnitRPC.BindError('ID already exists')
         
-        self._socket_rpc.bind(('127.0.0.1', port))  # self._socket_rpc_file)
+        self._socket_rpc.bind(self._socket_rpc_file)
         self._socket_rpc.settimeout(0)
 
 
@@ -79,6 +77,9 @@ class UnitUDP(UnitRPC):
         """Base constructor."""
         super().__init__()
 
+        # receiver socket declaration
+        self.rpc_receiver = None
+
         # check if the registration IP address is valid
         try:
             socket.inet_aton(reg_ipv4)
@@ -88,6 +89,11 @@ class UnitUDP(UnitRPC):
         except OSError:
             self._socket_reg = None
             self._error('invalid registration IPv4 address')
+
+        # check the port
+        if not (0 <= reg_port <= 65535):
+            self._socket_reg = None
+            self._error('invalid port value: out of range <0,65535>')
 
         self._uid = uid            # unit ID
         self._reg_ipv4 = reg_ipv4  # registration IPv4 address
@@ -108,14 +114,10 @@ class UnitUDP(UnitRPC):
         # catch SIGINT signal
         signal.signal(signal.SIGINT, self._sigint_handler)
 
-        # initialize RPC socket TODO: todo
+        # initialize RPC socket
         try:
             self.rpc_init_socket_file(unit, uid)
-            if unit == self.SOCKET_NODE:
-                port = 12345 if uid == 'node1' else 12346
-            else:
-                port = 12347
-            self.rpc_bind_socket(port)
+            self.rpc_bind_socket()
         except UnitRPC.BindError:
             self._error('{}\'s ID already used'.format(unit))
 
@@ -130,7 +132,12 @@ class UnitUDP(UnitRPC):
             self._socket_reg.close()
 
         # RPC receiver
-        self.rpc_receiver.join()
+        if self.rpc_receiver is not None:
+            self.rpc_receiver.join()
+        
+        # delete socket file
+        if self._socket_rpc_file is not None and os.path.exists(self._socket_rpc_file):
+            os.remove(self._socket_rpc_file)
 
     def get_txid(self) -> int:
         """Get the txid and increment it."""
@@ -155,10 +162,10 @@ class UnitUDP(UnitRPC):
         """Return the registration port of this unit."""
         return self._reg_port
 
-    @staticmethod
-    def _error(msg) -> None:
+    def _error(self, msg) -> None:
         """Print an error to console and exit with status -1."""
         print('Error: {}'.format(msg), file=sys.stderr)
+        self._run = False
         sys.exit(-1)
 
     @staticmethod
@@ -203,6 +210,10 @@ class UnitUDP(UnitRPC):
         self._timers[name].start()
 
     @abc.abstractmethod
+    def operate(self) -> None:
+        """Start the unit functionality."""
+
+    @abc.abstractmethod
     def process_command(self, cmnd) -> None:
         """Process a command from RPC application."""
 
@@ -225,6 +236,9 @@ class Node(UnitUDP):
 
     def __init__(self, nid, ipv4, port):
         """Node constructor."""
+        self._nodes = list()  # list of neighbors
+        self._peers = list()  # list of connected peers
+
         super().__init__(UnitUDP.SOCKET_NODE, nid, ipv4, port)  # call UnitUDP constructor
 
         # bind socket and set to non-blocking
@@ -233,9 +247,6 @@ class Node(UnitUDP):
             self._socket_reg.settimeout(0)
         except OSError:
             self._error('port already used')
-
-        self._nodes = list()  # list of neighbors
-        self._peers = list()  # list of connected peers
 
         self._accepting = True  # accepting UPDATE msgs flag
 
@@ -308,6 +319,10 @@ class Node(UnitUDP):
                 self._locks['sock_reg'].acquire()
                 data, addr = self._socket_reg.recvfrom(UnitUDP.RECV_BUFFER)
                 self._locks['sock_reg'].release()
+                # ignore messages from itself
+                if addr[0] == self.reg_ipv4 and addr[1] == self.reg_port:
+                    continue
+
                 mess = Message(data)
                 if not mess.valid:
                     self._notify('invalid message received: {}'.format(str(data)), warning=True)
@@ -485,6 +500,10 @@ class Node(UnitUDP):
 
     def connect_and_maintain(self, ipv4, port) -> None:
         """Connect to the specified node and maintain the connection."""
+        # do not connect to itself
+        if ipv4 == self.reg_ipv4 and port == self.reg_port:
+            return
+
         def send_update():
             """Send the UPDATE message to a node every 4 seconds."""
             # update message
@@ -501,7 +520,7 @@ class Node(UnitUDP):
 
             # repeat the function (use timer)
             key = '{}:{:d}'.format(ipv4, port)
-            if self._timers[key].is_alive():
+            if key in self._timers and self._timers[key].is_alive():
                 self._timers[key].cancel()
 
             self._timers[key] = threading.Timer(Message.PERIOD_UPDATES, send_update)
@@ -513,11 +532,17 @@ class Node(UnitUDP):
         """Disconnect from the current network."""
         # set accepting flag to false
         self._accepting = False
+
         # inform all nodes
         for node in self._nodes:
             txid = self.get_txid()
             m = Message({'type': 'disconnect',
                          'txid': txid})
+
+            # stop sending updates
+            timer_key = '{}:{:d}'.format(node.ipv4, node.port)
+            if self._timers[timer_key].is_alive():
+                self._timers[timer_key].cancel()
 
             # send disconnect message
             self._locks['sock_reg'].acquire()
@@ -526,6 +551,16 @@ class Node(UnitUDP):
 
             # wait for the ACK for 2 secs
             self.create_timer(str(txid), Message.ACK_WAIT, 'disconnect with TXID={:d} not acknowledged'.format(txid))
+            
+            # stop validity timer
+            node.stop_timer()
+
+            # remove all peers registered to this address
+            for peer in self._peers:
+                if peer.node_ipv4 == node.ipv4 and peer.node_port == node.port:
+                    self._peers.remove(peer)
+            # remove the node
+            self._nodes.remove(node)
 
     def process_disconnect(self, addr) -> None:
         """Process the DISCONNECT message."""
@@ -568,7 +603,12 @@ class Peer(UnitUDP):
 
     def __init__(self, pid, username, chat_ipv4, chat_port, reg_ipv4, reg_port):
         """Peer constructor."""
-        super().__init__(UnitUDP.SOCKET_PEER, pid, reg_ipv4, reg_port)  # call UnitUDP constructor
+        # declaration
+        self._socket_chat = None
+        self._got_list = None
+
+        # call UnitUDP constructor
+        super().__init__(UnitUDP.SOCKET_PEER, pid, reg_ipv4, reg_port)
 
         # check if the chat IP address is valid
         try:
@@ -577,14 +617,16 @@ class Peer(UnitUDP):
             if chat_ipv4.isdigit():
                 raise OSError
         except OSError:
-            self._socket_chat = None
-            self._socket_msgs = None
-            self._error('invalid chat address')
+            self._error('invalid chat IPv4 address')
 
         self._username = username     # username
         self._chat_ipv4 = chat_ipv4   # chat IPv4 address
         self._chat_port = chat_port   # chat port
         self._peers = None            # local peer database
+
+        # check the port
+        if not (0 <= chat_port <= 65535):
+            self._error('invalid port value: out of range <0,65535>')
 
         # socket initialization (init, bind and set to non-blocking)
         self._socket_chat = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -612,12 +654,13 @@ class Peer(UnitUDP):
 
     def __del__(self):
         """Object destructor. Free all resources used by peer."""
-        self.disconnect()
-        super().__del__()
         if self._socket_chat is not None:
+            self.disconnect()
             self._socket_chat.close()
-
-        self._got_list.clear()
+        
+        super().__del__()
+        if self._got_list is not None:
+            self._got_list.clear()
 
     def connect_and_maintain(self) -> None:
         """Connect to a node in the P2P network and maintain the connection."""
@@ -862,6 +905,7 @@ class NodeRecord:
 
     def invalidate(self) -> None:
         """Invalidate the NodeRecord."""
+        self.stop_timer()
         self._inv_func(self)
 
     @property
@@ -972,9 +1016,11 @@ class RPC(UnitRPC):
         self.rpc_init_socket_file(dest_unit, dest_id)
 
         # try to connect to the created socket
-        # try:
-        # self._socket_rpc.connect(self.rpc_init_socket_file)
-        self._socket_rpc.connect(('127.0.0.1', 12345))
+        try:
+            self._socket_rpc.connect(self._socket_rpc_file)
+        except Exception:
+            print('Error: unable to connect to the specified {}'.format(self.dest), file=sys.stderr)
+            sys.exit(1)
 
     def send_command(self, **params) -> None:
         """Send a command."""
