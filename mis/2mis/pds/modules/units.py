@@ -241,7 +241,7 @@ class Node(UnitUDP):
 
     def __del__(self):
         """Object destructor. Call all parents destructors."""
-        self.disconnect(wait_ack=False)
+        self.disconnect()
         super().__del__()
 
     def get_peer_list(self, node_ipv4=None, node_port=None) -> dict:
@@ -509,7 +509,7 @@ class Node(UnitUDP):
 
         send_update()
 
-    def disconnect(self, wait_ack=True) -> None:
+    def disconnect(self) -> None:
         """Disconnect from the current network."""
         # set accepting flag to false
         self._accepting = False
@@ -525,8 +525,7 @@ class Node(UnitUDP):
             self._locks['sock_reg'].release()
 
             # wait for the ACK for 2 secs
-            if wait_ack:  # wait_ack is False only when the SIGINT is caught
-                self.create_timer(str(txid), Message.ACK_WAIT, 'disconnect with TXID={:d} not acknowledged'.format(txid))
+            self.create_timer(str(txid), Message.ACK_WAIT, 'disconnect with TXID={:d} not acknowledged'.format(txid))
 
     def process_disconnect(self, addr) -> None:
         """Process the DISCONNECT message."""
@@ -613,6 +612,7 @@ class Peer(UnitUDP):
 
     def __del__(self):
         """Object destructor. Free all resources used by peer."""
+        self.disconnect()
         super().__del__()
         if self._socket_chat is not None:
             self._socket_chat.close()
