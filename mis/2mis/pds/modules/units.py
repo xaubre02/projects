@@ -437,9 +437,13 @@ class Node(UnitUDP):
             if self._timers[timer_key].is_alive():
                 self._timers[timer_key].cancel()
             # remove all peers registered to this address
+            peers_to_remove = list()
             for p_old in self._peers:
                 # remove peer
                 if p_old.node_ipv4 == addr[0] and p_old.node_port == addr[1]:
+                    peers_to_remove.append(p_old)
+            for p_old in peers_to_remove:
+                if p_old in self._peers:
                     self._peers.remove(p_old)
             # remove the node itself
             self._nodes.remove(node)
@@ -468,10 +472,14 @@ class Node(UnitUDP):
         sync = False
         old = list()
 
+        to_remove = list()
         # remove all records from this node
         for peer in self._peers:
             if peer.node_ipv4 == nr.ipv4 and peer.node_port == nr.port:
                 old.append(peer)
+        
+        for peer in to_remove:
+            if peer in self._peers:
                 self._peers.remove(peer)
 
         for key, val in db.items():
@@ -485,7 +493,8 @@ class Node(UnitUDP):
                 for _, peer in val.items():
                     # append a new peer
                     p = PeerRecord(peer['username'], peer['ipv4'], peer['port'], nr.ipv4, nr.port, None)
-                    self._peers.append(p)
+                    if p not in self._peers:
+                        self._peers.append(p)
                     if p not in old:
                         sync = True  # synchronization needed
             # non-authorative update records
@@ -533,6 +542,7 @@ class Node(UnitUDP):
         # set accepting flag to false
         self._accepting = False
 
+        to_remove = list()
         # inform all nodes
         for node in self._nodes:
             txid = self.get_txid()
@@ -555,11 +565,19 @@ class Node(UnitUDP):
             # stop validity timer
             node.stop_timer()
 
+            peers_to_remove = list()
             # remove all peers registered to this address
             for peer in self._peers:
                 if peer.node_ipv4 == node.ipv4 and peer.node_port == node.port:
+                    peers_to_remove.append(peer)
+
+            for peer in peers_to_remove:
+                if peer in self._peers:
                     self._peers.remove(peer)
-            # remove the node
+            # add to remove the node
+            to_remove.append(node)
+
+        for node in to_remove:
             self._nodes.remove(node)
 
     def process_disconnect(self, addr) -> None:
@@ -586,7 +604,16 @@ class Node(UnitUDP):
             self.print_peers()
         # connect
         elif cmnd['command'] == 'connect':
-            self.connect_and_maintain(cmnd['reg_ipv4'], cmnd['reg_port'])
+            self._accepting = True
+            # update message
+            m = Message({'type': 'update',
+                         'txid': self.get_txid(),
+                         'db': self.get_database()})
+
+            self._locks['sock_reg'].acquire()
+            self._socket_reg.sendto(m.encode(), (cmnd['reg_ipv4'], cmnd['reg_port']))
+            self._locks['sock_reg'].release()
+
         # disconnect
         elif cmnd['command'] == 'disconnect':
             self.disconnect()
@@ -813,7 +840,7 @@ class Peer(UnitUDP):
 
         # different usernames (from RPC and peer's)
         if self.username != msg_from:
-            self._notify('different peer username vs. RPC command username: \'{}\' vs. \'{}\''.format(self.username, msg_from))
+            self._notify('different peer username vs. RPC command username: \'{}\' vs. \'{}\''.format(self.username, msg_from), warning=True)
 
         # get the user's address
         addr = self.get_addr_by_username(msg_to)
