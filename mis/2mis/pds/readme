@@ -1,0 +1,86 @@
+This file contains information about implemented chat network, its features and its usage.
+
+==================== NODE ====================
+Node daemon of the hybrid P2P chat network.
+
+usage: pds18-node.py [-h] --id <node ID> --reg-ipv4 <IPv4> --reg-port <port>
+
+optional arguments:
+  -h, --help         show help and exit
+
+Required arguments:
+  --id <node ID>     Unique ID of the node on one host.
+  --reg-ipv4 <IPv4>  IPv4 address of this registration node.
+  --reg-port <port>  Port of this registration node. Allowed range: <0,65535>
+
+Limitations/behaviour:
+  After the node received command DISCONNECT, the node is not accepting UPDATE messages anymore,
+  so no other node can connect to this one. Connection can be established after the command CONNECT.
+  Then the node will accept UPDATE messages and other nodes can connect. In other words, command
+  DISCONNECT will disconnect the node from network and is unreachable until the node receives
+  command CONNECT.
+
+
+
+==================== PEER ====================
+Peer daemon of the hybrid P2P chat network.
+
+usage: pds18-peer.py [-h] --id <peer ID> --username <user> --chat-ipv4 <IPv4>
+                     --chat-port <port> --reg-ipv4 <IPv4> --reg-port <port>
+
+optional arguments:
+  -h, --help          show help and exit
+
+Required arguments:
+  --id <peer ID>      Unique ID of the peer on one host.
+  --username <user>   Unique username identifying this peer in the chat room.
+  --chat-ipv4 <IPv4>  IPv4 address for the chat room connectivity.
+  --chat-port <port>  Port for the chat room connectivity. Allowed range: <0,65535>
+  --reg-ipv4 <IPv4>   IPv4 address of the registration node.
+  --reg-port <port>   Port of the registration node. Allowed range: <0,65535>
+
+
+  
+==================== RPC =====================
+RPC of the hybrid P2P chat network. Used to control nodes and peers on the same workstation.
+
+usage: pds18-rpc.py [-h] --id <app ID> --command <command> (--node | --peer)
+                    [--reg-ipv4 <IPv4>] [--reg-port <port>]
+                    [--from <username1>] [--to <username2>]
+                    [--message <message>]
+
+optional arguments:
+  -h, --help           show help and exit
+  --node               Connect to the node.
+  --peer               Connect to the peer.
+
+Required arguments:
+  --id <app ID>        Unique ID of the peer/node on one host.
+  --command <command>  Command for the specified peer/node.
+
+Optional arguments:
+  --reg-ipv4 <IPv4>    IPv4 address of the registration node.
+  --reg-port <port>    Port of the registration node. Allowed range: <0,65535>
+  --from <username1>   User who will send a message.
+  --to <username2>     User who will receive a message.
+  --message <message>  A message to be send to the specified user.
+
+Limitations/behaviour:
+  RPC checks whether user specified all required arguments for specified command, then
+  tries to connect to the specified node or peer, send the command and exits. RPC will not print
+  any messages/status nor waits for the response. RPC simply sends a command and doesn't care 
+  what will happen. All information and outputs are printed on the node and peer side.
+
+Supported commands:
+  --peer --command message --from <username1> --to <username2> --message <content>
+  --peer --command reconnect --reg-ipv4 <IP> --reg-port <port>
+  --peer --command getlist
+  --peer --command peers'
+
+  --node --command connect --reg-ipv4 <IP> --reg-port <port>
+  --node --command disconnect
+  --node --command neighbors
+  --node --command database
+  --node --command sync
+
+  Read the documentation for more details.
