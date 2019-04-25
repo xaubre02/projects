@@ -85,43 +85,11 @@ Pro realizaci komunikace byly naimplementovány dvě třídy: Message, která za
 Pro kódování a dekódování obsahu zpráv a příkazů zde byla implementována třída Bencodec zajišťující tento proces dle specifikace popsané v TODO:(odkaz na kapitolu Bencoding v zadání).
 
 
-Uzel
-----
-Funkcionalita daemona registračního uzlu je dostupná v rámci spustitelného souboru pds18-node.py, který při spuštění používá následující argumenty:
-
-./pds18-node.py [-h] --id <node ID> --reg-ipv4 <IPv4> --reg-port <port>, kde
-
-  -h, --help         zobrazující nápovědu
-je volitelný argument a
-
-  --id <node ID>     specifikující unikátní identifikátor instance registračního uzlu,
-  --reg-ipv4 <IPv4>  specifikující IPv4 adresu tohoto registračního uzlu a
-  --reg-port <port>  specifikující port tohoto registračního uzlu
-jsou argumenty povinné.
-
-
-Peer
-----
-Funkcionalita peer daemona je dostupná v rámci spustitelného souboru pds18-peer.py, který při spuštění používá následující argumenty:
-
-./pds18-peer.py [-h] --id <peer ID> --username <user> --chat-ipv4 <IPv4>
-                --chat-port <port> --reg-ipv4 <IPv4> --reg-port <port>, kde
-
-  -h, --help         zobrazující nápovědu
-je volitelný argument a
-
-  --id <node ID>      specifikující unikátní identifikátor instance peera,
-  --username <user>   specifikující unikátní uživatelské jméno identifikující tohoto peera v rámci chatu,
-  --chat-ipv4 <IPv4>  specifikující IPv4 adresu, na které peer naslouchá a přijímá zprávy,
-  --chat-port <port>  specifikující port, na kterém peer naslouchá a přijímá zprávy,
-  --reg-ipv4 <IPv4>   specifikující IPv4 adresu registračního uzlu a
-  --reg-port <port>   specifikující port registračního uzlu
-jsou argumenty povinné.
-
-
+Architektura
+------------
 RPC
 ---
-Pro komunikaci mezi RPC aplikací a jednotlivými uzly či peery se používají unixové sockety. Každý uzel a peer si při inicializaci vytvoří unikátní jméno socketu, které se má následující podobu: "xaubre02_pds18_<jednotka>_<ID>", kde jednotka je 'node' nebo 'peer', které označuje, zdali se jedná o uzel či peera, a ID je identifikátor, který si uživatel zvolí při spuštění uzlu či peera. Adresář, kde se socket vytvoří, je /tmp/. Pokud takový socket již existuje, uzel či node skončí s chybou informující uživatele, že si má zvolit jiný identifikátor. V opačném případě si daná aplikace vytvoří nový socket, na kterém čeká na příchozí RPC příkazy. Uzel a peer si po ukončení automaticky smažou jimi vytvořený socket pro RPC komunikaci.
+Pro komunikaci mezi RPC aplikací a jednotlivými uzly či peery se používají unixové sockety. Pro tento účel zde bylo naimplementováno rozhraní UnitRPC. Toto rozhraní poskytuje metody, pomocí kterých si každý uzel a peer si při inicializaci vytvoří unikátní jméno socketu, které se má následující podobu: "xaubre02_pds18_<jednotka>_<ID>", kde jednotka je 'node' nebo 'peer', které označuje, zdali se jedná o uzel či peera, a ID je identifikátor, který si uživatel zvolí při spuštění uzlu či peera. Adresář, kde se socket vytvoří, je /tmp/. Pokud takový socket již existuje, uzel či node skončí s chybou informující uživatele, že si má zvolit jiný identifikátor. V opačném případě si daná aplikace vytvoří nový socket, na kterém čeká na příchozí RPC příkazy. Uzel a peer si po ukončení automaticky smažou jimi vytvořený socket pro RPC komunikaci.
 
 Spuštění RPC aplikace je následující:
 ./pds18-rpc.py [-h] --id <ID> --command <příkaz> (--node | --peer)
@@ -144,7 +112,7 @@ jsou argumenty povinné a
 
 jsou argumenty volitelné.
     
-RPC aplikace si z uživatelem zadaných argumentů zkontroluje, zdali specifikoval všechny argumenty potřebné pro daný příkaz. Pokud ne, informuje o tom uživatele, zobrazí mu veškeré podporované příkazy a jejich formát a skončí s chybou. V opačném případě se pokusí připojit na požadovaný socket cíle, jehož jméno bylo vytvořeno ze vstupních argumentů stejným způsobem, jako je uvedeno výše. Pokud se nepodaří připojit na daný socket, opět o tom informuje uživatele a skončí s chybou. V opačném případě zakóduje příkaz stejným způsobem jako zprávy předávané mezi uzly a peery, tedy pomocí bencoding, a tento příkaz odešle a skončí, přičemž již nečeká na odpověď a ani nic dále nevypisuje. Veškeré výpisy probíhají na straně uzlů a peerů. Pokud uzel příjme zprávu náležící peerovi, tak ji ignoruje, obdobně peer ignoruje zprávy adresované uzlu.
+RPC aplikace implementuje rozhraní UnitRPC. Svou činnost zahajuje kontrolou uživatelem zadaných argumentů, zdali specifikoval všechny potřebné argumenty pro daný příkaz. Pokud ne, informuje o tom uživatele, zobrazí mu veškeré podporované příkazy a jejich formát a skončí s chybou. V opačném případě se pokusí připojit na požadovaný socket cíle, jehož jméno bylo vytvořeno ze vstupních argumentů stejným způsobem, jako je uvedeno výše. Pokud se nepodaří připojit na daný socket, opět o tom informuje uživatele a skončí s chybou. V opačném případě zakóduje příkaz stejným způsobem jako zprávy předávané mezi uzly a peery, tedy pomocí bencoding, a tento příkaz odešle a skončí, přičemž již nečeká na odpověď a ani nic dále nevypisuje. Veškeré výpisy probíhají na straně uzlů a peerů. Pokud uzel příjme zprávu náležící peerovi, tak ji ignoruje, obdobně peer ignoruje zprávy adresované uzlu.
 
 Seznam podporovaných příkazů pro peera:
   --peer --command message --from <username1> --to <username2> --message <obsah>, který se pokusí odeslat chat zprávu
@@ -157,6 +125,56 @@ Seznam podporovaných příkazů pro uzel:
   --node --command neighbors, který zobrazí seznam aktuálních sousedů registračního uzlu
   --node --command database, který zobrazí aktuální databázi peerů a jejich mapování
   --node --command sync, který vynutí synchronizaci DB s uzly, se kterými uzel aktuálně sousedí
+
+
+UnitUDP
+-------
+Pro zajištění komunikace pomocí UDP transportního protokolu zde byla implementována abstraktní třída UnitUDP. Tato třída implementuje rozhraní UnitRPC pro podporu RPC komunikace. Samotná třída poskytuje metody pro: inicializaci komunikace, získání unikátního transakčního identifikátoru (txid), potvrzování zpráv, odesílání zpráv typu ERROR, příjem RPC příkazů(běžící v samostatném vlákně), tisk informací a zpracování signálů. Při zachycení signálu SIGINT se nastaví příznak běhu aplikace v nekonečných smyčkách na hodnotu False, zastaví se veškeré časovače a uvolní se naalokované zdroje. UnitUDP dále obsahuje dvě abstraktní metody, které musí být implementovány třidami dědících tuto abstraktní třídu. Tyto metody představují zahájení činnosti dané aplikace a zpracování přijatých RPC příkazů. Další funkcionalita, kterou tato třída poskytuje, je vytváření časovačů a jejich ukládání do slovníku. Tyto časovače fungují tak, že po vypršení stanoveného časového limitu se vytvoří vlákno, které provede funkci, která byla předána časovači při jeho vytvoření. Časovače se využívají například při čekání na potvrzení zprávy.
+
+
+Uzel
+----
+Uzel dědí výše zmíněnou abstraktní třídu UnitUDP.
+Funkcionalita daemona registračního uzlu je dostupná v rámci spustitelného souboru pds18-node.py, který při spuštění používá následující argumenty:
+
+./pds18-node.py [-h] --id <node ID> --reg-ipv4 <IPv4> --reg-port <port>, kde
+
+  -h, --help         zobrazující nápovědu
+je volitelný argument a
+
+  --id <node ID>     specifikující unikátní identifikátor instance registračního uzlu,
+  --reg-ipv4 <IPv4>  specifikující IPv4 adresu tohoto registračního uzlu a
+  --reg-port <port>  specifikující port tohoto registračního uzlu
+jsou argumenty povinné.
+
+
+Peer
+----
+Peer taktéž dědí abstraktní třídu UnitUDP. Tato třída zajišťuje vytvoření samostatně běžícího vlákna, ve kterém peer čeká na příchod příkazů od RPC aplikace. Po přijetí příkazu jej dekóduje. Pokud se jedná o příkaz určený pro uzel, tak jej ignoruje a pokud se nepodaří příkaz dekódovat vůbec, tak o tom informuje zprávou na standartní chybový výstup a čeká na další příkaz. V opačném případě zahájí provedení daného příkazu. 
+V případě příkazu: 
+getlist - realizováno pomocí operace getlist(), kde odešle svému registračnímu uzlu zprávu GETLIST a spustí si časovač pro přijetí potvrzení této zprávy, po obdržení potvrzení čeká maximálně 3 vteřiny na zprávu LIST, kde pokud zpráva nedorazí, resetuje svůj stav a čeká na další příkaz
+message - provede operaci getlist(), zkontroluje, zdali obsahuje cílového uživatele a pokud ano, odešle mu danou zprávu a spustí si časovač čekající na potvrzení přijetí zprávy. V opačném případě informuje na standartní chybový výstup o nenalezení daného uživatele v síti. Peer také provede kontrolu shodu jmen odesílatele specifikovaného v příkazu a uživatelského jména specifikovaného při spuštění peera. Pokud se neshodují, vypíše chybu.
+peers - provede operaci getlist() a získaný seznam vytiskne
+reconnect - zastaví časovač odesílající HELLO zprávy, odešle svému registračnímu uzlu zprávu HELLO s nulovou IP adresou a portem indikující odpojení peera, změní IP adresu a port svého registračního uzlu na adresu specifikovanou v příkazu, odstraní si lokální databázi uživatelů a opět spustí časovač odesílající HELLO zprávy, nyní však na nový uzel.
+
+Souběžně s čekáním na RPC příkazy peer po své inicializaci a kontrole vstupních argumentů zahajuje svou činnost připojením se ke specifikovanému registračnímu uzlu a vytvořením si časovače, který pravidelně odesílá zprávu HELLO na daný uzel každých 10 sekund. Následně vstupuje do nekonečné smyčky, která je přerušena až s příchodem signálu SIGINT, který je zachycen a zpracován pomocí metody v abstraktní třídě UnitUDP. V této smyčce přijímá na svém UDP socketu určeném pro chat veškeré příchozí zprávy. Tyto zprávy nejprve dekóduje a v případě chyby v průběhu dekódování odešle na adresu, ze které chybná zpráva přišla, zprávu ERROR informující odesílatele o chybě a čeká na příchod další zprávy. Pokud je zpráva úspěšně dekódována, zpracuje ji na základě jejího typu. Pokud se jedná o zprávu typu ACK, zastaví časovač pro dané potvrzení. Pokud potvrzení nedorazí a časovač vyprší, aplikace vypíše chybu na stderr. Pokud se jedná o zprávu typu MESSAGE nebo ERROR, vypíše jejich obsah na standartní či chybový výstup a zprávu MESSAGE potvrdí a pokud se jedná o zprávu typu LIST, tak si uloží její obsah do lokální databáze a tuto zprávu potvrdí.
+Před ukončením aplikace odešle svému registračnímu uzlu zprávu HELLO s nulovou IP adresou a portem indikující odpojení peera.
+
+Funkcionalita peer daemona je dostupná v rámci spustitelného souboru pds18-peer.py, který při spuštění používá následující argumenty:
+
+./pds18-peer.py [-h] --id <peer ID> --username <user> --chat-ipv4 <IPv4>
+                --chat-port <port> --reg-ipv4 <IPv4> --reg-port <port>, kde
+
+  -h, --help         zobrazující nápovědu
+je volitelný argument a
+
+  --id <node ID>      specifikující unikátní identifikátor instance peera,
+  --username <user>   specifikující unikátní uživatelské jméno identifikující tohoto peera v rámci chatu,
+  --chat-ipv4 <IPv4>  specifikující IPv4 adresu, na které peer naslouchá a přijímá zprávy,
+  --chat-port <port>  specifikující port, na kterém peer naslouchá a přijímá zprávy,
+  --reg-ipv4 <IPv4>   specifikující IPv4 adresu registračního uzlu a
+  --reg-port <port>   specifikující port registračního uzlu
+jsou argumenty povinné.
 
 
 
