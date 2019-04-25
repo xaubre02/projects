@@ -81,3 +81,61 @@ Supported commands:
   --node --command sync
 
   Read the documentation for more details.
+
+
+
+================== TESTING ===================
+Testing with:
+
+xbedna62 : Bednařík David
+xbarto87 : Bartoš Stanislav
+
+
+Sequence of commands:
+
+ 1. pds18-node.py --id node0 --reg-ipv4 147.229.176.19 --reg-port 50000
+ 2. pds18-node.py --id node1 --reg-ipv4 147.229.176.19 --reg-port 50001
+ 3. pds18-peer.py --id peer0 --username xaubre02 --chat-ipv4 147.229.176.19 --chat-port 60000 --reg-ipv4 147.229.176.19 --reg-port 50000              
+ 4. pds18-peer.py --id peer1 --username xaubre03 --chat-ipv4 147.229.176.19 --chat-port 60001 --reg-ipv4 147.229.176.19 --reg-port 50000
+ 5. pds18-rpc.py --id node1 --node --command connect --reg-ipv4 147.229.176.19 --reg-port 50000
+ 6. pds18-rpc.py --id node0 --node --command neighbors
+ 7. pds18-rpc.py --id node1 --node --command neighbors
+ 8. pds18-rpc.py --id node0 --node --command database
+ 9. pds18-rpc.py --id node1 --node --command database
+10. pds18-rpc.py --id peer0 --peer --command message --message "Ahoj" --from xaubre02 --to xaubre03
+11. pds18-rpc.py --id peer1 --peer --command message --message "Nazdar" --from xaubre03 --to xaubre02
+12. pds18-rpc.py --id peer0 --peer --command reconnect --reg-ipv4 147.229.176.19 --reg-port 50001
+13. pds18-rpc.py --id node0 --node --command database
+14. pds18-rpc.py --id node1 --node --command database
+15. pds18-rpc.py --id peer0 --peer --command message --message "funguje to.." --from xaubre02 --to xaubre03
+16. pds18-rpc.py --id peer1 --peer --command message --message "spis ne.." --from xaubre03 --to xaubre02
+17. pds18-rpc.py --id node1 --node --command connect --reg-ipv4 147.229.93.117 --reg-port 12000                      (Bartoš Stanislav)
+18. pds18-rpc.py --id node0 --node --command neighbors
+19. pds18-rpc.py --id node1 --node --command neighbors
+20. pds18-rpc.py --id peer0 --peer --command message --message "Ahoj" --from xaubre02 --to xbarto87
+21. pds18-rpc.py --id peer1 --peer --command reconnect --reg-ipv4 147.229.176.19 --reg-port 6500                     (Bednařík David)
+22. pds18-rpc.py --id peer1 --peer --command message --message "Ahoj" --from xaubre03 --to xaubre02
+23. SIGINT on peer0
+24. pds18-rpc.py --id node0 --node --command database
+25. pds18-rpc.py --id node1 --node --command database
+26. pds18-rpc.py --id peer1 --peer --command message --message "Ahoj" --from xaubre03 --to xaubre02
+27. pds18-rpc.py --id node0 --node --command disconnect
+28. pds18-rpc.py --id node0 --node --command connect --reg-ipv4 147.229.93.117 --reg-port 12000
+29. pds18-rpc.py --id node0 --node --command database
+30. pds18-rpc.py --id node1 --node --command database
+31. SIGINT on peer1
+32. SIGINT on node1
+33. pds18-peer.py --id peer1 --username xaubre03 --chat-ipv4 147.229.176.19 --chat-port 60001 --reg-ipv4 147.229.176.19 --reg-port 50000
+34. pds18-rpc.py --id peer1 --peer --command peers
+35. pds18-node.py --id node2 --reg-ipv4 147.229.176.19 --reg-port 50002
+36. pds18-node.py --id node3 --reg-ipv4 147.229.176.19 --reg-port 50003
+37. pds18-peer.py --id peer2 --username xaubre04 --chat-ipv4 147.229.176.19 --chat-port 60002 --reg-ipv4 147.229.176.19 --reg-port 50002              
+38. pds18-peer.py --id peer3 --username xaubre05 --chat-ipv4 147.229.176.19 --chat-port 60003 --reg-ipv4 147.229.176.19 --reg-port 50003
+39. pds18-rpc.py --id node3 --node --command connect --reg-ipv4 147.229.176.19 --reg-port 50000
+40. pds18-rpc.py --id node0 --node --command database
+41. pds18-rpc.py --id node2 --node --command database
+42. pds18-rpc.py --id node3 --node --command database
+43. pds18-rpc.py --id node0 --node --command neighbors
+44. pds18-rpc.py --id node2 --node --command neighbors
+45. pds18-rpc.py --id node3 --node --command neighbors
+
