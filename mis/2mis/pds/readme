@@ -49,18 +49,15 @@ usage: pds18-rpc.py [-h] --id <app ID> --command <command> (--node | --peer)
                     [--from <username1>] [--to <username2>]
                     [--message <message>]
 
-optional arguments:
-  -h, --help           show help and exit
-  --node               Connect to the node.
-  --peer               Connect to the peer.
-
 Required arguments:
   --id <app ID>        Unique ID of the peer/node on one host.
   --command <command>  Command for the specified peer/node.
+  --node or --peer     Connect to the node or peer.
 
 Optional arguments:
+  -h, --help           Show help and exit.
   --reg-ipv4 <IPv4>    IPv4 address of the registration node.
-  --reg-port <port>    Port of the registration node. Allowed range: <0,65535>
+  --reg-port <port>    Port of the registration node. Allowed range: <0,65535>.
   --from <username1>   User who will send a message.
   --to <username2>     User who will receive a message.
   --message <message>  A message to be send to the specified user.

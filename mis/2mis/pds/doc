@@ -78,52 +78,85 @@ Je zcela na autorovi projektu, jaký způsob implementace RPC zvolí (např. zad
 
 IMPLEMENTACE
 ============
+Protokol
+--------
+Pro realizaci komunikace byly naimplementovány dvě třídy: Message, která zajišťuje kódování a dekódování zpráv zasílaných mezi uzly a peery, a Protocol, která zajišťuje kódování a dekódování RPC příkazů mezi RPC aplikací a uzly a peery. Obě tyto třídy pracují na stejném principu využívající JSON syntaxe a bencode kódování, kde se liší pouze v seznamu podporovaných příkazů/zpráv a jejich povinných parametrů. Při inicializaci přijímají jako vstupní parametr slovník specifikující daný příkaz/zprávu nebo jejich zakódovanou podobu, kterou dekódují. Tento vstup je následně zkontrolován, zdali odpovídá komunikačnímu protokolu. Po inicializaci je potřeba kontrolovat, zdali je daný příkaz či zpráva validní.
+
+Pro kódování a dekódování obsahu zpráv a příkazů zde byla implementována třída Bencodec zajišťující tento proces dle specifikace popsané v TODO:(odkaz na kapitolu Bencoding v zadání).
+
+
 Uzel
 ----
-Funkcionalita daemona registračního uzlu bude dostupná v rámci spustitelného souboru pds18-node, který při spuštění používá následující argumenty:
+Funkcionalita daemona registračního uzlu je dostupná v rámci spustitelného souboru pds18-node.py, který při spuštění používá následující argumenty:
 
-                       
-./pds18-node --id <identifikátor> --reg-ipv4 <IP> --reg-port <port>
+./pds18-node.py [-h] --id <node ID> --reg-ipv4 <IPv4> --reg-port <port>, kde
 
-    --id je unikátní identifikátor instance peera pro případy, kdy je potřeba rozlišit mezi nimi v rámci jednoho hosta (operačního systému), na kterém běží
+  -h, --help         zobrazující nápovědu
+je volitelný argument a
+
+  --id <node ID>     specifikující unikátní identifikátor instance registračního uzlu,
+  --reg-ipv4 <IPv4>  specifikující IPv4 adresu tohoto registračního uzlu a
+  --reg-port <port>  specifikující port tohoto registračního uzlu
+jsou argumenty povinné.
 
 
 Peer
 ----
-Funkcionalita peer daemona bude dostupná v rámci spustitelného souboru pds18-peer, která při spuštění používá následující argumenty:
+Funkcionalita peer daemona je dostupná v rámci spustitelného souboru pds18-peer.py, který při spuštění používá následující argumenty:
 
-                       
-./pds18-peer --id <identifikátor> --username <user> --chat-ipv4 <IP> --chat-port <port> --reg-ipv4 <IP> --reg-port <port>
+./pds18-peer.py [-h] --id <peer ID> --username <user> --chat-ipv4 <IPv4>
+                --chat-port <port> --reg-ipv4 <IPv4> --reg-port <port>, kde
 
-    --id je unikátní identifikátor instance peera pro případy, kdy je potřeba rozlišit mezi nimi v rámci jednoho hosta (operačního systému), na kterém běží
-    --username je unikátní uživatelské jméno identifikující tohoto peera v rámci chatu;
-    --chat-ipv4 a --chat-port je IP adresa a port, na kterém peer naslouchá a přijímá zprávy od ostatních peerů či nodů;
-    --reg-ipv4 a --reg-port je IP adresa a port registračního uzlu, na který peer bude: 1) pravidelně zasílat HELLO zprávy; a 2) odesílat dotazy GETLIST k zjištění aktuálního mapování.
+  -h, --help         zobrazující nápovědu
+je volitelný argument a
+
+  --id <node ID>      specifikující unikátní identifikátor instance peera,
+  --username <user>   specifikující unikátní uživatelské jméno identifikující tohoto peera v rámci chatu,
+  --chat-ipv4 <IPv4>  specifikující IPv4 adresu, na které peer naslouchá a přijímá zprávy,
+  --chat-port <port>  specifikující port, na kterém peer naslouchá a přijímá zprávy,
+  --reg-ipv4 <IPv4>   specifikující IPv4 adresu registračního uzlu a
+  --reg-port <port>   specifikující port registračního uzlu
+jsou argumenty povinné.
 
 
 RPC
 ---
-Očekává se následující spuštění tohoto programu:
+Pro komunikaci mezi RPC aplikací a jednotlivými uzly či peery se používají unixové sockety. Každý uzel a peer si při inicializaci vytvoří unikátní jméno socketu, které se má následující podobu: "xaubre02_pds18_<jednotka>_<ID>", kde jednotka je 'node' nebo 'peer', které označuje, zdali se jedná o uzel či peera, a ID je identifikátor, který si uživatel zvolí při spuštění uzlu či peera. Adresář, kde se socket vytvoří, je /tmp/. Pokud takový socket již existuje, uzel či node skončí s chybou informující uživatele, že si má zvolit jiný identifikátor. V opačném případě si daná aplikace vytvoří nový socket, na kterém čeká na příchozí RPC příkazy. Uzel a peer si po ukončení automaticky smažou jimi vytvořený socket pro RPC komunikaci.
 
-                       
-./pds18-rpc --id <identifikátor> <"--peer"|"--node"> --command <příkaz> --<parametr1> <hodnota_parametru1> ...
+Spuštění RPC aplikace je následující:
+./pds18-rpc.py [-h] --id <ID> --command <příkaz> (--node | --peer)
+               [--reg-ipv4 <IPv4>] [--reg-port <port>]
+               [--from <username1>] [--to <username2>]
+               [--message <zpráva>],
 
-    --id obsahuje identifikátor instance peera či uzlu, kterému se má RPC příkaz zaslat
-    --peer či --node určuje, jestli se jedná o příkaz pro instanci peera či registračního uzlu
-    --command a seznam parametrů určují příkaz a parametry vztahující se k danému RPC volání
+kde
+  --id <ID>           specifikující jedinečný identifikátor instance,
+  --command <příkaz>  specifikující RPC příkaz a
+  --node nebo --peer  specifikující cíl příkazu
+jsou argumenty povinné a 
 
+  -h, --help           zobrazující nápovědu,
+  --reg-ipv4 <IPv4>    specifikující IPv4 adresu registračního uzlu,
+  --reg-port <port>    specifikující port registračního uzlu,
+  --from <username1>   specifikující odesílatele,
+  --to <username2>     specifikující adresáta a
+  --message <message>  specifikující danou zprávu pro uživatele
 
-Je povinnost implementovat následující příkazy s těmito parametry:
+jsou argumenty volitelné.
+    
+RPC aplikace si z uživatelem zadaných argumentů zkontroluje, zdali specifikoval všechny argumenty potřebné pro daný příkaz. Pokud ne, informuje o tom uživatele, zobrazí mu veškeré podporované příkazy a jejich formát a skončí s chybou. V opačném případě se pokusí připojit na požadovaný socket cíle, jehož jméno bylo vytvořeno ze vstupních argumentů stejným způsobem, jako je uvedeno výše. Pokud se nepodaří připojit na daný socket, opět o tom informuje uživatele a skončí s chybou. V opačném případě zakóduje příkaz stejným způsobem jako zprávy předávané mezi uzly a peery, tedy pomocí bencoding, a tento příkaz odešle a skončí, přičemž již nečeká na odpověď a ani nic dále nevypisuje. Veškeré výpisy probíhají na straně uzlů a peerů. Pokud uzel příjme zprávu náležící peerovi, tak ji ignoruje, obdobně peer ignoruje zprávy adresované uzlu.
 
-    --peer --command message --from <username1> --to <username2> --message <zpráva>, který se pokusí odeslat chat zprávu
-    --peer --command getlist, který vynutí aktualizaci seznamu v síti známých peerů, tj. odešle zprávu GETLIST a nechá si ji potvrdit
-    --peer --command peers, který zobrazí aktuální seznam peerů v síti, tj. peer si s node vymění zprávy GETLIST a LIST, přičemž obsah zprávy LIST vypíše
-    --peer --command reconnect --reg-ipv4 <IP> --reg-port <port>, který se odpojí od současného registračního uzlu (nulové HELLO) a připojí se k uzlu specifikovaném v parametrech
-    --node --command database, který zobrazí aktuální databázi peerů a jejich mapování
-    --node --command neighbors, který zobrazí seznam aktuálních sousedů registračního uzlu
-    --node --command connect --reg-ipv4 <IP> --reg-port <port>, který se pokusí navázat sousedství s novým registračním uzlem
-    --node --command disconnect, který zruší sousedství se všemi uzly (stáhne z jejich DB své autoritativní záznamy) a odpojí node od sítě
-    --node --command sync, která vynutí synchronizaci DB s uzly, se kterými node aktuálně sousedí
+Seznam podporovaných příkazů pro peera:
+  --peer --command message --from <username1> --to <username2> --message <obsah>, který se pokusí odeslat chat zprávu
+  --peer --command reconnect --reg-ipv4 <IP> --reg-port <port>, který se odpojí od současného registračního uzlu (nulové HELLO) a připojí se k uzlu specifikovaném v argumentech
+  --peer --command getlist, který vynutí aktualizaci seznamu v síti známých peerů, tj. odešle zprávu GETLIST a nechá si ji potvrdit
+  --peer --command peers, který zobrazí aktuální seznam peerů v síti, tj. peer si s node vymění zprávy GETLIST a LIST, přičemž obsah zprávy LIST vypíše
+Seznam podporovaných příkazů pro uzel:
+  --node --command connect --reg-ipv4 <IP> --reg-port <port>, který se pokusí navázat sousedství s novým registračním uzlem
+  --node --command disconnect, který zruší sousedství se všemi uzly a odpojí uzel od sítě
+  --node --command neighbors, který zobrazí seznam aktuálních sousedů registračního uzlu
+  --node --command database, který zobrazí aktuální databázi peerů a jejich mapování
+  --node --command sync, který vynutí synchronizaci DB s uzly, se kterými uzel aktuálně sousedí
 
 
 
