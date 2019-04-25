@@ -1,0 +1,139 @@
+ÚVOD
+====
+Cílem tohoto projektu bylo naprogramovat peer-to-peer registrační uzel a chatovacího peera, ze kterých bude výsledná síť tvořena. Uzel i peer fungují jako nezávislí daemoni, kteří běží neustále a kteří po obdržení RPC pokynu vykonají nějakou akci, a proto bylo potřeba dodat i separátní RPC program, díky kterému by bylo možné uzly i peery ovládat a následně projekt uniformě testovat.
+Jazyk zvolený pro implementaci je Python a cílová platforma je referenční virtuální stroj pro tento předmět, na kterém běží operační systém Ubuntu. TODO: jaká verze
+Po naimplementování všech potřebných aplikací bylo potřeba provést validační a verifikační testování kompatibility s dalšími spolužáky a dosažené výsledky zdokumentovat.
+TODO: zminit python a sloucit s jiz napsanym uvodem
+
+
+ZADÁNÍ
+======
+Protokol
+--------
+Peeři i uzly používají jednoduchý komunikační protokol sestávající se z níže uvedených zpráv. Všechny zprávy mezi dvěma peery, dvěma uzly, či peerem a uzlem jsou přenášeny skrz UDP. Všechny zprávy mají JSON syntaxi, kde poviným atributem je TODO:kurziva("type"), který specifikuje typ zprávy. Před přenosem v UDP je obsah zprávy bencodován. Protože UDP negarantuje doručení, tak k potvrzení se používá zpráva ACK, která v sobě nese odkaz na jedinečný transakční identifikátor zprávy TODO:kurziva(txid), kterou potvrzuje. Pokud dojde při zpracování libovolné zprávy k chybě, odpovídá protistrana zprávou ERROR, která kromě identifikátoru transakce obsahuje i slovní popis problému, ke kterému došlo. Zprávy HELLO, UPDATE a ERROR není potřeba pomocí ACK potvrzovat. Na potvrzení ACK čekat maximálně 2 vteřiny, poté nejprve zresetovat stav zpracování související s nepotvrzenou zprávou a posléze ohlásit chybu na stderr (která by ale neměla v ideálním případě vést k pádu programu, jen notifikovat uživatele o tom, co se děje). Obecně lze zprávy mimo očekávaný stav protokolu zahazovat. Za účelem rozlišení ke které GETLIST zprávě LIST patří může odesilatel navazující LIST zopakovat TXID z předchozí GETLIST zprávy od příjemce.
+
+Protokol podporuje následující zprávy:
+
+HELLO := {"type":"hello", "txid":<ushort>, "username":"<string>", "ipv4":"<dotted_decimal_IP>", "port": <ushort>}                       
+                       
+GETLIST := {"type":"getlist", "txid":<ushort>}                       
+                       
+LIST := {"type":"list", "txid":<ushort>, "peers": {<PEER_RECORD*>}}                       
+PEER_RECORD := {"<ushort>":{"username":"<string>", "ipv4":"<dotted_decimal_IP>", "port": <ushort>}}                       
+                       
+MESSAGE := {"type":"message", "txid":<ushort>, "from":"<string>", "to":"<string>", "message":"<string>"}                       
+                       
+UPDATE := {"type":"update", "txid":<ushort>, "db": {<DB_RECORD*>}}                       
+DB_RECORD := {"<dotted_decimal_IP>,<ushort_port>":{<PEER_RECORD*>}}                       
+                       
+DISCONNECT := {"type":"disconnect", "txid":<ushort>}                       
+                       
+ACK := {"type":"ack", "txid":<ushort>}                       
+                       
+ERROR := {"type":"error", "txid":<ushort>, "verbose": "<string>"}
+
+
+Bencoding
+---------
+Bencode je kódování používané pro sdílení souborů, pro ukládání a přenos volně strukturovaných dat. 
+Bencoding se nejčastěji používá v torrent souborech. Bencoding je součástí samotné specifikace BitTorrent. Tyto soubory metadat jsou jednoduše kódované slovníky.
+
+Podporuje čtyři různé typy hodnot a to:
+
+bajtové řetězce: Bajtový řetězec (posloupnost bajtů) je kódována jako <délka>:<obsah>. Délka řetězce je kódována v desítkové soustavě. Například řetězec "projekt" by byl kódován jako 7:projekt.
+
+celá čísla: Celé číslo je kódováno jako i<celé číslo kódované v ASCII v desetítkové soustavě> e. Nuly na začátku čísla nejsou povoleny a záporná nula není též povolena. Číslo 42 by tedy bylo kódováno jako i42e a číslo 0 jako i0e.
+
+seznamy: Seznam hodnot je kódován jako l<obsah>e, kde obsah se skládá z kódovaných prvků seznamu v daném pořadí a tyto prvky jsou zřetězeny. Seznam obsahující řetězec "projekt" a číslo 42 bude kódován jako l7:projekti42ee.
+
+slovníky neboli asociativní pole: Slovník je kódován jako d<obsah>e. Každý prvky slovníku je zakódován jako klíč bezprostředně následovaný jeho hodnotou. Všechny klíče musí být bajtové řetězce a musí se zobrazovat v lexikografickém pořadí. Slovník, který spojuje hodnoty 42 a "projekt" s klíči "key1" a "key2" (jinými slovy {"key1": "projekt", "key2": 42}), bude zakódován následujícím způsobem: d4:key17:projekt4:key2i42ee.
+
+Nejsou zde žádná omezení ohledně toho, jaké hodnoty mohou být uloženy v těchto seznamech a slovnících. Obvykle obsahují jiné seznamy a slovníky a to umožňuje kódování libovolně složitých datových struktur.
+
+Ukázka zprávy HELLO a jejího zakódování:
+zpráva HELLO := {"type":"hello", "txid":123, "username":"xlogin00", "ipv4": "192.0.2.1", "port": 34567}
+zakódovaná zpráva HELLO := "d4:ipv49:192.0.2.14:porti34567e4:txidi123e4:type5:hello8:username8:xlogin00e"
+
+Uzel
+----
+Registrační uzel si udržuje aktuální databázi peerů, které se k němu zaregistrovali. S příchodem každé HELLO zprávy aktualizuje údaje v této databázi pro daného peera. V případě přijetí HELLO zprávy s nulovými údaji (IP adresa, port) odebírá peera (resp. uživatele specifikovaného v parametru username) z databáze, stejně tak ve chvíli, kdy od peera neuslyší žádnou HELLO zprávu po dobu delší než 30 vteřin.
+
+Registrační uzly si udržují přehled o peerech existujících v síti v rámci databáze. Na dotazy GETLIST jen od svých peerů odpovídá uzel zprávami LIST, ve kterých jsou všechna dostupná mapování uživatelských jmen peerů a jejich IP adresami a porty (tzn. všech peerů v síti). Interně je registrační uzel schopen v této databázi rozlišit mezi svými peery (které se k němu registrují) a cizími (které se registrují k jiným uzlům). Za účelem tohoto rozlišení má každý záznam v databázi kromě údajů o mapování peera i IP adresu uzlu, který tohoto peera registruje.
+
+Registrační uzel je schopen vytvořit si sousedství s jiným uzlem a vyměnit si informace ve svých databázích peerů. V rámci synchronizace databází si uzly ad-hoc (tj. na základě změny mapování peera) či pravidelně (tj. nejpozději 4 vteřiny od poslední synchronizace) zasílají UPDATE zprávy. V UPDATE zprávě zasílá uzel stav své databáze peerů. Ze své podstaty UPDATE zpráva obsahuje dva typy záznamů - autoritativní (záznamy o těch peerech, kteří se k danému uzlu registrují) a neautoritativní (záznamy o peerech zaregistrovaných k jiným uzlům a které jsou pouze zprostředkované). Při přijetí a zpracování UPDATE zprávy uzel aktualizuje ve své databázi jen autoritativní záznamy od sousedního uzlu. Z neautoritativních záznamů je tento registrační uzel schopen zjistit IP adresu dalšího uzlu a vytvořit si s ním v případě potřeby nové sousedství. Takto mezi registračními uzly vzniká full-mesh síť. V případě odpojení uzlu od sítě odesílá všem svým sousedům zprávu DISCONNECT, kterou dává pokyn k odstranění záznamů z databáze peerů, pro které je autoritativní. K odstranění selektivního záznamu v databázi dojde také v případě, že uzel neuslyší od autoritativního uzlu žádnou novou UPDATE zprávu po dobu delší než 12 vteřin.
+
+
+Peer
+----
+Po spuštění se peer připojí k právě jednomu registračnímu uzlu pomocí zprávy HELLO. Ve zprávě HELLO posílá svoje uživatelské jméno (které ostatní používají při zasílání chatových zpráv), IP adresu a port, na kterém peer naslouchá k příjmu chatových zpráv od ostatních. Následně peer zprávu HELLO se stejnými parametry zasílá registračnímu uzlu každých 10 sekund pro udržení spojení. Při ukončení aplikace peer odesílá HELLO zprávu s nulovou IP adresou a nulovým číslem portu, čímž uzlu indikuje, že se odregistrovává ze sítě.
+
+Když chce peer odeslat chatovou zprávu jinému peerovi, tak požádá svůj registrační uzel o aktuální údaje jiného peera pomocí zprávy GETLIST. Odpovědí na tuto zprávu je zpráva LIST, která obsahuje mapování mezi uživatelskými jmény a IP adresami a porty jak peerů zaregistrovaných k tomuto uzlu, tak i peerů zaregistrovaných k jiným uzlům, se kterými je peerův registrační uzel propojen. Pokud odesílající peer neobdrží ve zprávě LIST údaje o příjemci (jeho IP adresa a port), pak není schopen chatovou zprávu odeslat a odmítne takový pokyn. Pro přenos chatu je vytvořeno ad-hoc spojení mezi peery (od odesílajícího na IP a port příjemce), kde se chatová data přenáší ve zprávě MESSAGE. Chatovací zprávy se vypisují v rámci činnosti na stdout, diagnostické informace pak na stderr.
+
+
+RPC
+---
+Je zcela na autorovi projektu, jaký způsob implementace RPC zvolí (např. zadání na stdout, pipe, telnetování příkazů). Aby však bylo možné projekt uniformě testovat, je potřeba dodat i separátní program pds18-rpc. Všechny implementované programy mohou vytvářet dočasné soubory za účelem předávání informací RPC aplikaci. Nicméně všechny dočasné soubory musí být po ukončení programu mazaný tak, aby v souborovém systému nezustaval nepořádek. RPC příkazy by měly být atomické (tzn. dělají jednu věc, typicky odesílají jednu zprávu) a jsou zde pro účely opravování, ale i skriptování chování aplikace. Nicméně implementované aplikace by měly fungovat sami bez sebe i bez jakékoli intervence ze strany RPC.
+
+
+
+IMPLEMENTACE
+============
+Uzel
+----
+Funkcionalita daemona registračního uzlu bude dostupná v rámci spustitelného souboru pds18-node, který při spuštění používá následující argumenty:
+
+                       
+./pds18-node --id <identifikátor> --reg-ipv4 <IP> --reg-port <port>
+
+    --id je unikátní identifikátor instance peera pro případy, kdy je potřeba rozlišit mezi nimi v rámci jednoho hosta (operačního systému), na kterém běží
+
+
+Peer
+----
+Funkcionalita peer daemona bude dostupná v rámci spustitelného souboru pds18-peer, která při spuštění používá následující argumenty:
+
+                       
+./pds18-peer --id <identifikátor> --username <user> --chat-ipv4 <IP> --chat-port <port> --reg-ipv4 <IP> --reg-port <port>
+
+    --id je unikátní identifikátor instance peera pro případy, kdy je potřeba rozlišit mezi nimi v rámci jednoho hosta (operačního systému), na kterém běží
+    --username je unikátní uživatelské jméno identifikující tohoto peera v rámci chatu;
+    --chat-ipv4 a --chat-port je IP adresa a port, na kterém peer naslouchá a přijímá zprávy od ostatních peerů či nodů;
+    --reg-ipv4 a --reg-port je IP adresa a port registračního uzlu, na který peer bude: 1) pravidelně zasílat HELLO zprávy; a 2) odesílat dotazy GETLIST k zjištění aktuálního mapování.
+
+
+RPC
+---
+Očekává se následující spuštění tohoto programu:
+
+                       
+./pds18-rpc --id <identifikátor> <"--peer"|"--node"> --command <příkaz> --<parametr1> <hodnota_parametru1> ...
+
+    --id obsahuje identifikátor instance peera či uzlu, kterému se má RPC příkaz zaslat
+    --peer či --node určuje, jestli se jedná o příkaz pro instanci peera či registračního uzlu
+    --command a seznam parametrů určují příkaz a parametry vztahující se k danému RPC volání
+
+
+Je povinnost implementovat následující příkazy s těmito parametry:
+
+    --peer --command message --from <username1> --to <username2> --message <zpráva>, který se pokusí odeslat chat zprávu
+    --peer --command getlist, který vynutí aktualizaci seznamu v síti známých peerů, tj. odešle zprávu GETLIST a nechá si ji potvrdit
+    --peer --command peers, který zobrazí aktuální seznam peerů v síti, tj. peer si s node vymění zprávy GETLIST a LIST, přičemž obsah zprávy LIST vypíše
+    --peer --command reconnect --reg-ipv4 <IP> --reg-port <port>, který se odpojí od současného registračního uzlu (nulové HELLO) a připojí se k uzlu specifikovaném v parametrech
+    --node --command database, který zobrazí aktuální databázi peerů a jejich mapování
+    --node --command neighbors, který zobrazí seznam aktuálních sousedů registračního uzlu
+    --node --command connect --reg-ipv4 <IP> --reg-port <port>, který se pokusí navázat sousedství s novým registračním uzlem
+    --node --command disconnect, který zruší sousedství se všemi uzly (stáhne z jejich DB své autoritativní záznamy) a odpojí node od sítě
+    --node --command sync, která vynutí synchronizaci DB s uzly, se kterými node aktuálně sousedí
+
+
+
+TESTOVÁNÍ
+=========
+TODO...
+
+
+
+REFERENCE
+=========
+Zadání:  wis.fit.vutbr.cz: TODO:kurziva(Hromadný projekt - Hybridní chatovací P2P síť). [Online; navštíveno 1.04.2019]. URL https://wis.fit.vutbr.cz/FIT/st/course-sl.php.cs?id=685650&item=72486&cpa=1
+Bencode: Wikipedia.org: TODO:kurziva(Bencode). [Online; navštíveno 1.04.2019]. URL https://en.wikipedia.org/wiki/Bencode
