@@ -469,14 +469,11 @@ class Node(UnitUDP):
         # update timer
         self._nodes[self._nodes.index(nr)].update()
 
-        sync = False
-        old = list()
-
         to_remove = list()
         # remove all records from this node
         for peer in self._peers:
             if peer.node_ipv4 == nr.ipv4 and peer.node_port == nr.port:
-                old.append(peer)
+                to_remove.append(peer)
         
         for peer in to_remove:
             if peer in self._peers:
@@ -495,17 +492,11 @@ class Node(UnitUDP):
                     p = PeerRecord(peer['username'], peer['ipv4'], peer['port'], nr.ipv4, nr.port, None)
                     if p not in self._peers:
                         self._peers.append(p)
-                    if p not in old:
-                        sync = True  # synchronization needed
             # non-authorative update records
             else:
                 # connect to the specified node if did not in the past already
                 if NodeRecord(ipv4, port, None) not in self._nodes:
                     self.connect_and_maintain(ipv4, port)
-
-        # synchronize
-        if sync:
-            self.synchronize()
 
     def connect_and_maintain(self, ipv4, port) -> None:
         """Connect to the specified node and maintain the connection."""
@@ -963,9 +954,7 @@ class PeerRecord:
         """PeerRecord equality function."""
         return self.username == other.username and \
                self.ipv4 == other.ipv4 and \
-               self.port == other.port and \
-               self.node_ipv4 == other.node_ipv4 and \
-               self.node_port == other.node_port
+               self.port == other.port
 
     @property
     def username(self) -> str:
@@ -1015,6 +1004,9 @@ class PeerRecord:
         self._username = peer.username
         self._ipv4 = peer.ipv4
         self._port = peer.port
+        self._node_ipv4 = peer.node_ipv4
+        self._node_port = peer.node_port
+
         # restart timer
         self.start_timer()
 
