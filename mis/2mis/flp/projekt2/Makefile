@@ -12,7 +12,8 @@ ZIPFILE=flp-log-xaubre02.zip
 
 # compilation
 all: clean
-	swipl -q -g start -c ${SOURCE} -o ${TARGET}
+	swipl -q -g start -o ${TARGET} -c ${SOURCE}
+	rm -rf *.out
 
 # zip
 zip:
