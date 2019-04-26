@@ -1,0 +1,71 @@
+------------------------
+Předmět: FLP 2018/2019
+Projekt: simplify-bkg
+Datum:   2019-02-16
+Autor:   Tomáš Aubrecht
+Login:   xaubre02
+------------------------
+
+_____
+POPIS
+
+  Program provádí na základě vstupních parametrů kontrolu a výpis vstupní gramatiky, odstranění
+  symbolů, které nelze derivovat na řetězec pouze z terminálních symbolů či prázdný řetězec nebo
+  provádí odstranění nedostupných symbolů.
+  Ve výsledku tedy může program odstranit všechny zbytečné symboly dané gramatiky.
+
+____________
+IMPLEMENTACE
+
+  Zdrojový soubor obsahuje stručné komentáře ke každé funkci a definované datové struktuře. Tyto
+  struktury jsou dvě: 'Rule' představující přepisovací pravidlo gramatiky a 'Grammar' představující
+  samotnou gramatiku. K nim jsou vytvořeny funkce pro jejich výpis. Program implementuje algoritmy
+  (4.1), (4.2) a (4.3) z opory předmětu Teoretická informatika (TIN). Opora je dostupná na adrese:
+  https://wis.fit.vutbr.cz/FIT/st/cfs.php.cs?file=%2Fcourse%2FTIN-IT%2Ftexts%2Fopora.pdf&cid=12941
+  
+  Vstup programu musí mít striktní formát dle zadání. Jediná podporovaná odchylka jsou mezery
+  na jednotlivých řádcích vstupu, které jsou při zpracování odstraněny (a,b ~ a, b ~ a , b). Vstup
+  musí obsahovat minimálně 4 řádky, jinak program skončí s chybou. Vychází to z definice gramatiky.
+  Veškteré porušení formátu vstupu je testovány v automatických testech popsaných níže.
+
+_________
+TESTOVÁNÍ
+
+  Pro účely testování byl vytvořen samostatný skript 'run_tests.sh', který slouží pro automatické
+  spuštění a vyhodnocení připravených testů. Skript je zaintegrován do souboru Makefile. Testování
+  je tedy možné spustit pomocí příkazu 'make tests'. Po spuštění automatických testů se na konzoli
+  postupně vypíše výsledek aktuálního testu a na závěr se vypíše celkové vyhodnocení všech testů.
+  Testování se zaměřuje pouze na neplatný vstup, tedy na parsování gramatiky.
+  
+  Popis jednotlivých testů je uveden níže:
+
+    test00.in  - neplatný vstup: nedostatek řádků
+    test01.in  - neplatný vstup: prázdný řádek 1
+    test02.in  - neplatný vstup: prázdný řádek 2
+    test03.in  - neplatný vstup: neterminály: nejsou množina
+    test04.in  - neplatný vstup: neterminály: obsahují řetězec
+    test05.in  - neplatný vstup: neterminály: obsahují malé písmeno
+    test06.in  - neplatný vstup: neterminály: obsahují číslo
+    test07.in  - neplatný vstup: neterminály: obsahují # (epsilon)
+    test08.in  - neplatný vstup: neterminály: obsahují diakritiku
+    test09.in  - neplatný vstup: terminály: nejsou množina
+    test10.in  - neplatný vstup: terminály: obsahují řetězec
+    test11.in  - neplatný vstup: terminály: obsahují velké písmeno
+    test12.in  - neplatný vstup: terminály: obsahují číslo
+    test13.in  - neplatný vstup: terminály: obsahují # (epsilon)
+    test14.in  - neplatný vstup: terminály: obsahují diakritiku
+    test15.in  - neplatný vstup: počáteční symbol: řetězec
+    test16.in  - neplatný vstup: počáteční symbol: malé písmeno
+    test17.in  - neplatný vstup: počáteční symbol: číslo
+    test18.in  - neplatný vstup: počáteční symbol: epsilon
+    test19.in  - neplatný vstup: počáteční symbol: diakritika
+    test20.in  - neplatný vstup: počáteční symbol: velké písmeno, ale ne součástí neterminálů
+	test21.in  - neplatný vstup: pravidla: nejsou množina
+	test22.in  - neplatný vstup: pravidla: žádná pravidla
+	test23.in  - neplatný vstup: pravidla: A není neterminál
+	test24.in  - neplatný vstup: pravidla: druhý znak není pomlčka
+	test25.in  - neplatný vstup: pravidla: třetí znak není šipka
+	test26.in  - neplatný vstup: pravidla: alfa není prvkem (N u T)*
+	test27.in  - neplatný vstup: pravidla: alfa obsahuje také epsilon (i další znaky)
+	test28.in  - neplatný vstup: pravidla: alfa obsahuje také epsilon (i další znaky)
+	test29.in  - neplatný vstup: pravidla: alfa zcela chybí
