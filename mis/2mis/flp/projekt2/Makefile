@@ -17,7 +17,7 @@ all: clean
 
 # zip
 zip:
-	zip ${ZIPFILE} ${SOURCE} README Makefile
+	zip ${ZIPFILE} ${SOURCE} README Makefile tests/*
 
 # cleanup
 clean:
