@@ -109,7 +109,7 @@ parse_input(Vstup, Pravidla, Paska) :-
 %%%%%%%%%%%%%%%%%% Funkce pro simulaci TS %%%%%%%%%%%%%%%%%
 
 % získání aktuálního symbolu z pásky
-get_cur_symbol([], ' ').
+get_cur_symbol([], ' ').  % nekonečná posloupnost prázdných symbolů
 get_cur_symbol([H|_], H).
 
 
@@ -127,9 +127,10 @@ get_cur_config([H|T], Stav, Symbol) :-
 	get_cur_config(T, Stav, Symbol).
 
 
-% nalezení pravidla, které lze aplikovat
-find_rule(_, _, [], _, Akce) :- Akce='X'. % abnormální zastavení (není definován přechod z aktuální konfigurace)
-find_rule(Stav, Symbol, [[S, Z, N, A]|Pravidla], NovyStav, Akce) :-
+% nalezni pravidlo pro přechod do koncového stavu z aktuální konfigurace
+find_rule_final(_, _, [], _, Akce) :- Akce='X'. % nelze přejít do koncového stavu z aktuální konfigurace
+find_rule_final(Stav, Symbol, [[S, Z, N, A]|Pravidla], NovyStav, Akce) :-
+	N == 'F',
 	Stav == S,
 	Symbol == Z,
 	% pravidlo nalezelo
@@ -138,24 +139,49 @@ find_rule(Stav, Symbol, [[S, Z, N, A]|Pravidla], NovyStav, Akce) :-
 		Akce = A
 	);
 	% hledej dále
-	find_rule(Stav, Symbol, Pravidla, NovyStav, Akce).
+	find_rule_final(Stav, Symbol, Pravidla, NovyStav, Akce).
+
+
+% nalezení pravidla, které lze aplikovat nebo nastav chybu
+find_rule_any(_, _, [], _, Akce) :- Akce='X'. % abnormální zastavení (není definován přechod z aktuální konfigurace)
+find_rule_any(Stav, Symbol, [[S, Z, N, A]|Pravidla], NovyStav, Akce) :-
+	Stav == S,
+	Symbol == Z,
+	% pravidlo nalezelo
+	(
+		NovyStav = N,
+		Akce = A
+	);
+	% hledej dále
+	find_rule_any(Stav, Symbol, Pravidla, NovyStav, Akce).
+
+
+% hledání aplikovatelných pravidel
+find_rule(Stav, Symbol, Pravidla, NovyStav, Akce) :-
+	% zjisti, zdali se dá přejít do koncového stavu
+	find_rule_final(Stav, Symbol, Pravidla, NovyStav, Akce),
+	% lze přejít do koncového stavu
+	Akce \= 'X';
+
+	% nelze přejít do koncového stavu -> nalezni jakékoliv pravidlo, které se dá aplikovat
+	find_rule_any(Stav, Symbol, Pravidla, NovyStav, Akce).
 
 
 % aktuální posun čtecí hlavy vlevo
-shif_left_aux([H|[Hlava|Zbytek]], Stav, NovyStav, NovaPaska) :-
-	Stav == Hlava,
+shift_left_aux([H|[HT|TT]], Stav, NovyStav, NovaPaska) :-
+	Stav == HT,
 	(
-		% vymění se nový stav s aktuálním znakem v H a zkopíruje se zbytek pásky
-		append([NovyStav], [Hlava], NP),
-		append(NP, Zbytek, NovaPaska)
+		% vymění se nový stav s aktuálním znakem v H (začátek pásky) a zkopíruje se zbytek pásky
+		append([NovyStav], [H], NP),
+		append(NP, TT, NovaPaska)
 	);
 
 	% hledej dál
-	shif_left_aux([Hlava|Zbytek], Stav, NovyStav, NP2),
+	shift_left_aux([HT|TT], Stav, NovyStav, NP2),
 	NovaPaska = [H|NP2].
 
 
-% ukončení provádění nebo zahájení posunu čtecí hlavy vlevo
+% abnormální zastavení nebo zahájení posunu čtecí hlavy vlevo
 shif_left([H|T], Stav, NovyStav, NovaPaska) :-
 	% dojde k přepadnutí čtecí hlavy - abnormální zastavení
 	H == Stav, NovaPaska='X' ;
@@ -172,13 +198,13 @@ shif_right([H|T], Stav, NovyStav, NovaPaska) :-
 		T == [],
 		(
     	% přidání prázdného symbolu
-    	append([NovyStav], [' '], NP),
-    	append(H, NP, NovaPaska)
+    	append([' '], [NovyStav], NovaPaska)
 		);
 
-		[HZ|TZ] = T,
-		append([HZ], [NovyStav], NP),
-		append(NP, TZ, NovaPaska)
+		% uloží se hlava zbytku, následně nový stav a zkopíruje se zbytek pásky
+		[HT|TT] = T,
+		append([HT], [NovyStav], NP),
+		append(NP, TT, NovaPaska)
 	);
   
 	% hledej dál
@@ -187,23 +213,24 @@ shif_right([H|T], Stav, NovyStav, NovaPaska) :-
 
 
 % přepsání symbolu aktuálně se nacházejícího pod čtecí hlavou
-write_symbol([H|[Hlava|Zbytek]], Stav, NovyStav, NovySymbol, NovaPaska) :-
+write_symbol([H|T], Stav, NovyStav, NovySymbol, NovaPaska) :-
 	Stav == H,
 	(
 		% konec pásky (následují prázdné symboly)
-		Zbytek == [],
+		T == [],
 		(
-    	% přidání symbolu za aktuální pásku
+    	% přidání symbolu za "konec" aktuální pásky
     	append([NovyStav], [NovySymbol], NovaPaska)
 		);
 
 		% vymění se nový stav s aktuálním znakem v H a zkopíruje se zbytek pásky
+		[_|TT] = T,
 		append([NovyStav], [NovySymbol], NP),
-		append(NP, Zbytek, NovaPaska)
+		append(NP, TT, NovaPaska)
 	);
 
 	% hledej dál
-	write_symbol([Hlava|Zbytek], Stav, NovyStav, NovySymbol, NP2),
+	write_symbol(T, Stav, NovyStav, NovySymbol, NP2),
 	NovaPaska = [H|NP2].
 
 
@@ -225,8 +252,8 @@ simulate(Paska, Pravidla, Konfigurace) :-
 		),
 		(
 			% došlo k abnormálnímu zastavení
-			Akce == 'X', writeln('Došlo k abnormálnímu zastavení! Nebyl nalezen přechod.');
-			NovaPaska == 'X', writeln('Došlo k přepadu čtecí hlavy!');
+			Akce == 'X', writeln('Abnormální zastavení! Nebyl nalezen přechod.');
+			NovaPaska == 'X', writeln('Abnormální zastavení! Přepadla čtecí hlava.');
 
 			% pokračování v simulaci
 			simulate(NovaPaska, Pravidla, NoveKonfigurace),
@@ -246,15 +273,12 @@ write_config([H|T]) :-
 	write(H),
 	write_config(T).
 
+
 % vypíše seznam konfigurací TS
 write_configs([]).
 write_configs([H|T]) :-
 	write_config(H),
 	write_configs(T).
-
-
-write_lines2([]).
-write_lines2([H|T]) :- writeln(H), write_lines2(T). %(writeln je "knihovni funkce")
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
