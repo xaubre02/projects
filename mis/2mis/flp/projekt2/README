@@ -6,24 +6,43 @@ Autor:   Tomáš Aubrecht
 Login:   xaubre02
 ------------------------
 
-_____
-POPIS
-
-  Program provádí na základě vstupních parametrů kontrolu a výpis vstupní gramatiky, odstranění
-  symbolů, které nelze derivovat na řetězec pouze z terminálních symbolů či prázdný řetězec nebo
-  provádí odstranění nedostupných symbolů.
-  Ve výsledku tedy může program odstranit všechny zbytečné symboly dané gramatiky.
-
 ____________
 IMPLEMENTACE
 
-  Zdrojový soubor obsahuje stručné komentáře ke každé funkci a definované datové struktuře. Tyto
-  struktury jsou dvě: 'Rule' představující přepisovací pravidlo gramatiky a 'Grammar' představující
-  samotnou gramatiku. K nim jsou vytvořeny funkce pro jejich výpis. Program implementuje algoritmy
-  (4.1), (4.2) a (4.3) z opory předmětu Teoretická informatika (TIN). Opora je dostupná na adrese:
-  https://wis.fit.vutbr.cz/FIT/st/cfs.php.cs?file=%2Fcourse%2FTIN-IT%2Ftexts%2Fopora.pdf&cid=12941
-  
-  Vstup programu musí mít striktní formát dle zadání. Jediná podporovaná odchylka jsou mezery
-  na jednotlivých řádcích vstupu, které jsou při zpracování odstraněny (a,b ~ a, b ~ a , b). Vstup
-  musí obsahovat minimálně 4 řádky, jinak program skončí s chybou. Vychází to z definice gramatiky.
-  Veškteré porušení formátu vstupu je testovány v automatických testech popsaných níže.
+  Zdrojový soubor obsahuje stručné komentáře popisující každou funkci. Vstup programu musí mít
+  striktní formát dle zadání. Veškteré porušení formátu vstupu je testováno v testech popsaných
+  níže. Program provádí kontrolu vstupního Turingova stroje, kde v případě odchýlení se od
+  zadání vypíše danou odchylku a skončí s chybou. V případě platného vstupu spustí simulaci
+  Turingova stroje, která běží až do doby, kdy Turingův stroj přejde do koncové stavu nebo dojde
+  k abnormálnímu zastavení. Jako abnormální zastavení se uvažuje stav, kdy dojde k přepadnutí 
+  čtecí hlavy, tedy posun doleva při pozici čtecí hlavy na začátku pásky, nebo se nenalezne
+  přechod z aktuální konfigurace. V případě, že se Turingův stroj zacyklí, tak cyklí i simulace,
+  a to až do doby, než dojde paměť.
+
+_____
+TESTY
+
+  Za účelem ověření funkcionality bylo vytvořeno několik testů, kde prvních 9 se zaměřuje
+  na neplatný vstup a zbylých 8 testuje správnou funkcionalitu simulátoru Turingova stroje.
+  Testy jsou uloženy ve složce tests.
+
+  Popis jednotlivých testů je uveden níže:
+
+    test00.in  - neplatný vstup: prázdný vstup (nekonečná posloupnost prázdných symbolů)
+    test01.in  - neplatný vstup: pouze jeden řádek s pravidlem
+    test02.in  - neplatný vstup: pouze jeden řádek se vstupní páskou
+    test03.in  - neplatný vstup: neplatný formát pravidla
+    test04.in  - neplatný vstup: neplatný stav v pravidle
+    test05.in  - neplatný vstup: neplatný symbol v pravidle
+    test06.in  - neplatný vstup: neplatný nový stav v pravidle
+    test07.in  - neplatný vstup: neplatná akce v pravidle
+    test08.in  - neplatný vstup: neplatná vstupní páska
+    
+    test09.in  - referenční vstup ze zadání
+    test10.in  - test na zacyklení (fórum)
+    test11.in  - test na prázdné symboly (fórum)
+    test12.in  - test na zapisování za "konec" pásky (nekonečná posloupnost prázdných symbolů)
+    test13.in  - test na posun za "konec" pásky (nekonečná posloupnost prázdných symbolů)
+    test14.in  - test na posuny pravo a vlevo přes celou pásku (bez neko. posl. prázdných symbolů)
+    test15.in  - abnormální zastavení: nedefinován přechod z dané konfigurace
+    test16.in  - abnormální zastavení: přepadnutí čtecí hlavy
