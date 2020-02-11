@@ -1,0 +1,11 @@
+// syntax error if missing condition
+class MyClass : Object {
+	void foo(int y, string x) {
+		if () {
+
+		}
+		else {
+
+		}
+	}
+}

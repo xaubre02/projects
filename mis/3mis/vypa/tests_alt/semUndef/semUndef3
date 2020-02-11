@@ -1,0 +1,11 @@
+// Assigment to undefined variable 'nonDefinedVar'
+string myFunc42(void) {
+    print("Hey");
+}
+
+void main(void) {
+	string str1, str2;
+	int p, p2;
+
+    nonDefinedVar = 1;
+}

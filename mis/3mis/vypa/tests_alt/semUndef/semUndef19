@@ -1,0 +1,13 @@
+// Using undefined class/datatype 'ShapeNotDefined' in variable definition
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+}
+
+void main(void) {
+	ShapeNotDefined s;
+	s = new Shape;
+}

@@ -1,0 +1,10 @@
+/* Invalid type in condition - string */
+void main(void) {
+    int i;
+    string s;
+    while (s) {
+        i = 5;
+    }
+
+    return;
+}

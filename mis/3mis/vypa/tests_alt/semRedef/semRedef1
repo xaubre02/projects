@@ -1,0 +1,5 @@
+/* Redefinition of variable str1 */
+void main(void) {
+	string str1, str2;
+	int str1;
+}

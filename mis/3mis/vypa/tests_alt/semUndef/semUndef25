@@ -1,0 +1,5 @@
+// Assigment to myVar undefined function call 'undefinedFunc'
+void main(void) {
+	int myVar;
+    myVar = undefinedFunc();
+}

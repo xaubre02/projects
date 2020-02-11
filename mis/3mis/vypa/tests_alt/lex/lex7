@@ -1,0 +1,5 @@
+class Main : Object {
+	void run(void) {
+		int \a; // lex error
+	}
+}

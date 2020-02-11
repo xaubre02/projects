@@ -1,0 +1,10 @@
+/* Invalid type of operation NOT(!) - string */
+void main(void) {
+    int i;
+    string s;
+    while(!s) {
+        i = 42;
+    }
+    
+    return;
+}

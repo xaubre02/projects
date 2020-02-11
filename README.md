@@ -101,3 +101,19 @@
   - [8/10]
 - **WAP**
   - [30/30]
+
+#### **3MIS** - Třetí semestr
+- **AGS**
+  - [20/20]
+- **AIS**
+  - [30/34] (-4 body za nesprávné zpracování zodpovědostí)
+- **BIS**
+  - [15/15]
+- **SEM**
+  - [18/18]
+- **SEP**
+  - [83/100] (-17 bodů za zmeškanou obhajobu..)
+- **VYPa**
+  - [16/20] (-4 body za špatné generování objektů)
+- **ZZN**
+  - [34/34]

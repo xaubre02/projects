@@ -1,0 +1,23 @@
+// Assigment to undefined object 'undefinedObject' attribute - same as previous but used in if statements
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+}
+
+void main(void) {
+	Shape s;
+	s = new Shape;
+
+    if (s) {
+        Shape s2;
+	    s2 = new Shape;
+        if (s2) {
+            undefinedObject.id = 5;
+        }
+        else {}
+    }
+    else {}
+}

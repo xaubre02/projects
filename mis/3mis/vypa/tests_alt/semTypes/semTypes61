@@ -1,0 +1,26 @@
+/* Invalid type of paramaters in embedded function print call */
+class Shape : Object {
+	int id;
+    string stringAttr;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+	string toString(void) {
+		return "instance of Shape " + (string)(this.id);
+	}
+
+    void hello(string s) {
+        print(s);
+    }
+}
+
+void main(void) {
+	Shape r;
+	r = new Shape;
+
+    print(r);
+
+    return;
+}

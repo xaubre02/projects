@@ -1,0 +1,12 @@
+/* Redefinition of variable var007 inside while statement */
+void main(void) {
+	int a, b;
+    a = 0;
+	
+    while(a < 5) {
+        int var007;
+        string var007;
+        
+        a = a + 1;
+    }
+}

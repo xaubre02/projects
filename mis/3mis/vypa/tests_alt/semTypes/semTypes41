@@ -1,0 +1,11 @@
+/* Invalid type of paramaters in function call */
+string strFunc(int a, int b) {
+    return "NoWay";
+}
+
+void main(void) {
+    string s;
+    s = strFunc(42, "Bee");
+
+    return;
+}

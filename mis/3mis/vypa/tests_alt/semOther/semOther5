@@ -1,0 +1,21 @@
+/* Invalid number of parameters of method */
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+    string myMethod42(int a, int b) {
+        return "42";
+    }
+}
+
+void main(void) {
+	Shape s;
+	s = new Shape;
+    string ss;
+    ss = s.myMethod42(1, 2, 3, 4, 5);
+
+    return;
+}

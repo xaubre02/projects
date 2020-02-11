@@ -1,0 +1,13 @@
+// Using undefined superior class 'UndefinedSuperior'
+class Shape : UndefinedSuperior {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+}
+
+void main(void) {
+	Shape s;
+	s = new Shape;
+}

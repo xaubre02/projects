@@ -1,0 +1,1 @@
+[{"assets":[],"native":[],"permissions":["android.permission.CHANGE_WIFI_STATE","android.permission.ACCESS_WIFI_STATE"],"activities":[],"broadcastReceivers":[],"broadcastReceiver":[],"libraries":[],"type":"com.puravidaapps.TaifunWiFi","androidMinSdk":["7"]}]

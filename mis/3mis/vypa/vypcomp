@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# -------------------------
+# Subject: VYPa 2019/2020
+# Project: VYPa19 compiler
+# Author: Tomas Aubrecht, Jan Kotras
+# Date:   2019-10-08
+# -------------------------
+
+python3 src/main.py "$@"

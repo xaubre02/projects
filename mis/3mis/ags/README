@@ -1,0 +1,34 @@
+Autoři:
+-------
+ - všichni členové se podíleli na projektu
+
+ 1.  Ambrož Vít, Bc.        xambro15
+ 2.  Aubrecht Tomáš, Bc.    xaubre02
+ 3.  Bednařík David, Bc.    xbedna62
+
+
+Agenti:
+-------
+ - zdrojové soubory pro každého agenta jsou specifikovány níže
+ 
+ 1.  široký         broad.asl
+ 2.  dlouhý         long.asl
+ 3.  bystrozraký    sharpSight.asl
+ 4.  druid          priest.asl
+
+
+
+Informace k Java implementaci
+-----------------------------
+V Javě jsou implementovány 2 funkce a to pro hledání cesty na danou pozici a pro hledání nejbližší buňky,
+která ještě nebyla viděna. Obě tyto funkce jsou implementovány i v Jasonu, kde je možné je použít místo
+jejich rychlejších variant zakomentováním plánů využívající Java implementace. Implementace v Javě slouží
+pouze pro zrychlení výpočtů, které v některých případech mohou výrazně zpomalit jednotlivé agenty.
+
+Algoritmus A* je stejně implementován jak v Javě, tak i v Jasonu, tedy 1:1.
+Algoritmus pro hledání nejbližší neviděné buňky se však nepatrně liší mezi jednotlivými implementacemi.
+V Jasonu se nalezne množina nejbližších neviděných buňek se stejnou vzdáleností od dané pozice a z této
+množiny se vybere ta buňka, která je nejblíže depu. V Javě se naleznou 2 množiny a to množina nejbližších
+neviděných buňek k dané pozici a množina nejbližších neviděných buňek k depu. Z těchto dvou množin se
+nalezne dvojice s nejmenší vzdáleností mezi těmito množinami a výsledkem je buňka z dané dvojice, která
+je nejblíže dané pozici.

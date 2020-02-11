@@ -1,0 +1,14 @@
+// Assigment to undefined attribute 'Shape.undefinedAttr'
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+}
+
+void main(void) {
+	Shape s;
+	s = new Shape;
+    s.undefinedAttr = 5;
+}

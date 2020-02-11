@@ -1,0 +1,6 @@
+class Main : Object {
+	void run(void) {
+		int aß85;
+		aß85 = 3;
+	}
+}

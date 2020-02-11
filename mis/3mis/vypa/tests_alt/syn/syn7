@@ -1,0 +1,5 @@
+// syntax error in var definitation
+class MyClass : Object {
+	int Object.x;
+
+}

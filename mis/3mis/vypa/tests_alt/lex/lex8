@@ -1,0 +1,9 @@
+class Main : Object {
+	void run(void) {
+		int abcd?defg; // lex error
+	}
+}
+
+class foo : Object {
+	void bar(void) {}
+}

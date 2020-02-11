@@ -1,0 +1,26 @@
+// Assigment to undefined attribute 'super.undefinedAttr'
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+}
+
+class Rectangle : Shape {
+	int id;
+
+	void Rectangle(void) {
+		print("constructor of Rectangle");
+	}
+
+	void trySuper(void) {
+		super.undefinedAttr = 99;
+	}
+}
+
+void main(void) {
+	Shape s;
+	s = new Shape;
+	print(s.toString());
+}

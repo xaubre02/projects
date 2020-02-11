@@ -1,0 +1,13 @@
+// Creating instance with undefined class
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+}
+
+void main(void) {
+	Shape r;
+	r = new Rectangle;
+}

@@ -1,0 +1,18 @@
+/* Local variable cannot have the same identifier as function MyFunc42 */
+
+string MyFunc42(void) {
+    print("Hey");
+}
+
+
+int r(int a) {
+    if (a) {
+        string MyFunc42;
+    }
+    else {}
+}
+
+void main(void) {
+	string str1, str2;
+	int p, p2;
+}

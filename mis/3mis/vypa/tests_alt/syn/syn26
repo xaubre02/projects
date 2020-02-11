@@ -1,0 +1,8 @@
+// syntax error in expression
+class MyClass : Object {
+	int var;
+
+	void foo(int y, string x) {
+		y = y this.var;
+	}
+}

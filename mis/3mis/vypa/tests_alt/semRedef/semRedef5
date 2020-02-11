@@ -1,0 +1,10 @@
+/* Redefinition of variable var007 inside any function */
+void hello(void) {
+    int var007;
+    string var007;
+}
+
+void main(void) {
+	int a, b;
+    a = 2;
+}

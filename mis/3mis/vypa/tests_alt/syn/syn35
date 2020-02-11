@@ -1,0 +1,6 @@
+// syntax error in return
+int foo(void) {
+
+	return
+
+}

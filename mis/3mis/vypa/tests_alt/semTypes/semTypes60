@@ -1,0 +1,30 @@
+/* Invalid type of paramaters in method call */
+class Shape : Object {
+	int id;
+    string stringAttr;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+	string toString(void) {
+		return "instance of Shape " + (string)(this.id);
+	}
+
+    void hello(string s) {
+        print(s);
+    }
+}
+
+int func(void) {
+    Shape s;
+    s = new Shape;
+    return s.stringAttr;
+}
+
+void main(void) {
+	Rectangle r;
+	r = new Rectangle;
+
+    return;
+}

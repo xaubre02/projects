@@ -1,0 +1,1 @@
+void main(int p1, string p2) {}

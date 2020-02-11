@@ -1,0 +1,8 @@
+// syntax error if missing else block
+class MyClass : Object {
+	void foo(int y, string x) {
+		if (x == 5) {
+
+		}
+	}
+}

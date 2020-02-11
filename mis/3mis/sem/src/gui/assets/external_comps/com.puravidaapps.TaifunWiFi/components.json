@@ -1,0 +1,184 @@
+[{
+ "categoryString": "EXTENSION",
+ "nonVisible": "true",
+ "iconName": "https://puravidaapps.com/images/taifun16.png",
+ "methods": [
+  {
+   "deprecated": "false",
+   "name": "AccessPointIP",
+   "description": "Return the IP Address of access point.",
+   "params": [],
+   "returnType": "text"
+  },
+  {
+   "deprecated": "false",
+   "name": "AvailableSSIDs",
+   "description": "Get a list of available SSIDs (Service Set Identifiers). WiFi must be enabled for this.",
+   "params": []
+  },
+  {
+   "deprecated": "false",
+   "name": "BSSID",
+   "description": "Get current WiFi BSSID (the MAC address of the access point).",
+   "params": [],
+   "returnType": "text"
+  },
+  {
+   "deprecated": "false",
+   "name": "ConfiguredSSIDs",
+   "description": "Get a list of configured SSIDs (Service Set Identifiers). WiFi must be enabled for this.",
+   "params": [],
+   "returnType": "any"
+  },
+  {
+   "deprecated": "false",
+   "name": "ConnectSSID",
+   "description": "Connect to a SSID (Service Set Identifier).",
+   "params": [
+    {
+     "name": "ssid",
+     "type": "text"
+    },
+    {
+     "name": "password",
+     "type": "text"
+    }
+   ]
+  },
+  {
+   "deprecated": "false",
+   "name": "ConnectionInfo",
+   "description": "Get current connection info.",
+   "params": [],
+   "returnType": "text"
+  },
+  {
+   "deprecated": "false",
+   "name": "Disable",
+   "description": "Disable WiFi. You can hide the success message after setting the suppressSuccessMessage property to false.",
+   "params": []
+  },
+  {
+   "deprecated": "false",
+   "name": "Disconnect",
+   "description": "Disconnect.",
+   "params": []
+  },
+  {
+   "deprecated": "false",
+   "name": "DnsServers",
+   "description": "Return a list of DNS servers (primary and secondary) of the current network.",
+   "params": [],
+   "returnType": "any"
+  },
+  {
+   "deprecated": "false",
+   "name": "Enable",
+   "description": "Enable WiFi. You can hide the success message after setting the suppressSuccessMessage property to false.",
+   "params": []
+  },
+  {
+   "deprecated": "false",
+   "name": "Is5GHzBandSupported",
+   "description": "Check, if 5 GHz Band is supported.",
+   "params": [],
+   "returnType": "boolean"
+  },
+  {
+   "deprecated": "false",
+   "name": "IsEnabled",
+   "description": "Get current WiFi state: true or false.",
+   "params": [],
+   "returnType": "boolean"
+  },
+  {
+   "deprecated": "false",
+   "name": "LocalIP",
+   "description": "Return the local IP Address.",
+   "params": [],
+   "returnType": "text"
+  },
+  {
+   "deprecated": "false",
+   "name": "MacAddress",
+   "description": "Get MAC address",
+   "params": [],
+   "returnType": "text"
+  },
+  {
+   "deprecated": "false",
+   "name": "SSID",
+   "description": "Get current WiFi SSID (Service Set Identifier).",
+   "params": [],
+   "returnType": "text"
+  },
+  {
+   "deprecated": "false",
+   "name": "SignalStrength",
+   "description": "Get signal strength (RSSI) in a range between 0 and 100.",
+   "params": [],
+   "returnType": "number"
+  }
+ ],
+ "blockProperties": [
+  {
+   "rw": "read-write",
+   "deprecated": "false",
+   "name": "SuppressSuccessMessage",
+   "description": "whether Success Message should be suppressed. Used in Enable and Disable method.",
+   "type": "boolean"
+  },
+  {
+   "rw": "read-write",
+   "deprecated": "false",
+   "name": "SuppressWarnings",
+   "description": "whether Warnings should be suppressed",
+   "type": "boolean"
+  }
+ ],
+ "helpUrl": "https://puravidaapps.com/wifi.php",
+ "type": "com.puravidaapps.TaifunWiFi",
+ "androidMinSdk": 7,
+ "version": "11",
+ "external": "true",
+ "showOnPalette": "true",
+ "name": "TaifunWiFi",
+ "helpString": "WiFi Manager Extension. Version 11 as of 2019-01-28 for App Inventor version nb174 and Companion version 2.50.",
+ "properties": [
+  {
+   "defaultValue": "false",
+   "name": "SuppressSuccessMessage",
+   "editorArgs": [],
+   "editorType": "boolean"
+  },
+  {
+   "defaultValue": "false",
+   "name": "SuppressWarnings",
+   "editorArgs": [],
+   "editorType": "boolean"
+  }
+ ],
+ "events": [{
+  "deprecated": "false",
+  "name": "GotAvailableSSIDs",
+  "description": "indicating that Available SSIDs (Service Set Identifiers) have been scanned.",
+  "params": [
+   {
+    "name": "availableSSIDs",
+    "type": "any"
+   },
+   {
+    "name": "bestSSID",
+    "type": "text"
+   },
+   {
+    "name": "correspondingRSSIs",
+    "type": "any"
+   },
+   {
+    "name": "correspondingBSSIs",
+    "type": "any"
+   }
+  ]
+ }]
+}]

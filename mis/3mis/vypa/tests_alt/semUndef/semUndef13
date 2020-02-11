@@ -1,0 +1,18 @@
+// Calling method 'this.undefinedMethod' in some expression
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+	string toString(void) {
+		return "instance of Shape " + (string)(this.undefinedMethod());
+	}
+}
+
+void main(void) {
+	Shape s;
+	s = new Shape;
+	print(s.toString());
+}

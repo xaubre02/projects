@@ -1,0 +1,14 @@
+// Calling method 'Shape.undefinedMethod'
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+}
+
+void main(void) {
+	Shape s;
+	s = new Shape;
+    s.undefinedMethod();
+}

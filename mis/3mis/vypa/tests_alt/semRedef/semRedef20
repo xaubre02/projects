@@ -1,0 +1,17 @@
+/* Argument cannot have the same identifier as class MyClass42 */
+class MyClass42 : Object {
+    string myAttribute;
+
+	void MyClass42(void) {
+		print("Hey");
+	}
+}
+
+int myFunc(int MyClass42) {
+    int a;
+}
+
+void main(void) {
+	string str1, str2;
+	int p, p2;
+}

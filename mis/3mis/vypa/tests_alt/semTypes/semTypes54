@@ -1,0 +1,9 @@
+/* Invalid return type */
+string myFunc(void) {
+    return 42;
+}
+
+void main(void) {
+    int i;
+    return;
+}

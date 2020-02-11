@@ -1,0 +1,13 @@
+/* Invalid number of parameters of function */
+int myFunc42(int a, int b) {
+    return 42;
+}
+
+void main(void) {
+	string str1, str2;
+	int p;
+
+    p = myFunc42(4);
+
+    return;
+}

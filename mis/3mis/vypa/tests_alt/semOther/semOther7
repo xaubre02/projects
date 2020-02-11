@@ -1,0 +1,21 @@
+/* Invalid number of parameters of method toString() */
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+    string myMethod42() {
+        return "42";
+    }
+}
+
+void main(void) {
+	Shape s;
+	s = new Shape;
+
+    print(s.toString("NoWay"));
+
+    return;
+}

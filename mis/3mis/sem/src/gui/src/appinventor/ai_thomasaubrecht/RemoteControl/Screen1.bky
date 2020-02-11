@@ -1,0 +1,578 @@
+<xml xmlns="http://www.w3.org/1999/xhtml">
+  <block type="procedures_defnoreturn" id="Tj!FjNstIhulQ-+2]$aH" x="-1652" y="-398">
+    <field name="NAME">swapScreens</field>
+    <statement name="STACK">
+      <block type="component_set_get" id="jqbKGX1tOn9Z.0cE~{L:">
+        <mutation component_type="Clock" set_or_get="set" property_name="TimerEnabled" is_generic="false" instance_name="Timer"></mutation>
+        <field name="COMPONENT_SELECTOR">Timer</field>
+        <field name="PROP">TimerEnabled</field>
+        <value name="VALUE">
+          <block type="logic_false" id="V!4ds*%{!?|=?R8aBz;:">
+            <field name="BOOL">FALSE</field>
+          </block>
+        </value>
+        <next>
+          <block type="controls_openAnotherScreen" id="Tl#kcEXAG~sGhHYCz]k5">
+            <value name="SCREEN">
+              <block type="text" id="C35r25svOk0cQAmf47@t">
+                <field name="TEXT">Screen2</field>
+              </block>
+            </value>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="global_declaration" id="rF[?0A{*m$bEzmY1PlDI" x="-912" y="-369">
+    <field name="NAME">AP_SSID</field>
+    <value name="VALUE">
+      <block type="text" id="7gwBU.;H:M-fG?Au|ssJ">
+        <field name="TEXT">ESP32_AP</field>
+      </block>
+    </value>
+  </block>
+  <block type="global_declaration" id="XjJ%eIZjy5}$WNZ)9oU2" x="-912" y="-341">
+    <field name="NAME">AP_PASWD</field>
+    <value name="VALUE">
+      <block type="text" id="q?q0[8~jiC$dyy:TpPX%">
+        <field name="TEXT">xaubre02_xbedna62</field>
+      </block>
+    </value>
+  </block>
+  <block type="procedures_defnoreturn" id="h=$=OLU6p$J8%.2e-fs8" x="-1654" y="-295">
+    <field name="NAME">checkConnection</field>
+    <statement name="STACK">
+      <block type="controls_if" id="OI3Bnfal$BJ+3a!b-E$F">
+        <value name="IF0">
+          <block type="text_compare" id="F*b}vS+;jA*=7jYIg~.;">
+            <field name="OP">NEQ</field>
+            <value name="TEXT1">
+              <block type="component_method" id="r@t6e,yudSHMFlhKDIDo">
+                <mutation component_type="TaifunWiFi" method_name="ConnectionInfo" is_generic="false" instance_name="WiFi"></mutation>
+                <field name="COMPONENT_SELECTOR">WiFi</field>
+              </block>
+            </value>
+            <value name="TEXT2">
+              <block type="text" id="#O7H8=;`gpCWu)*C.bpe">
+                <field name="TEXT"></field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="controls_if" id="N}Z5j{P{m,92od5dmXCA">
+            <mutation elseif="1"></mutation>
+            <value name="IF0">
+              <block type="text_compare" id=".cgvFT~j`jtJ1AZ:pzF1">
+                <field name="OP">EQUAL</field>
+                <value name="TEXT1">
+                  <block type="component_method" id="fh]r^OaXnVUcdVO;Vi+_">
+                    <mutation component_type="TaifunWiFi" method_name="SSID" is_generic="false" instance_name="WiFi"></mutation>
+                    <field name="COMPONENT_SELECTOR">WiFi</field>
+                  </block>
+                </value>
+                <value name="TEXT2">
+                  <block type="lexical_variable_get" id=".;lw~l|*ZyabU(:#!BVo">
+                    <field name="VAR">global AP_SSID</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO0">
+              <block type="procedures_callnoreturn" id="yIs1y[1fo0h?#/Ib@KB|" inline="false">
+                <mutation name="swapScreens"></mutation>
+                <field name="PROCNAME">swapScreens</field>
+              </block>
+            </statement>
+            <value name="IF1">
+              <block type="text_compare" id="O%U12#@Tyde9J%wb#AR9">
+                <field name="OP">EQUAL</field>
+                <value name="TEXT1">
+                  <block type="component_method" id="2~=M|kiJNxg(db@b@R~*">
+                    <mutation component_type="TaifunWiFi" method_name="SSID" is_generic="false" instance_name="WiFi"></mutation>
+                    <field name="COMPONENT_SELECTOR">WiFi</field>
+                  </block>
+                </value>
+                <value name="TEXT2">
+                  <block type="text" id="Ze3%gVz#EwfKZa~G-cIV">
+                    <field name="TEXT">&lt;unknown ssid&gt;</field>
+                  </block>
+                </value>
+              </block>
+            </value>
+            <statement name="DO1">
+              <block type="component_set_get" id="6IB10R}|0p.yF/I:T+FG">
+                <mutation component_type="Clock" set_or_get="set" property_name="TimerEnabled" is_generic="false" instance_name="Timer"></mutation>
+                <field name="COMPONENT_SELECTOR">Timer</field>
+                <field name="PROP">TimerEnabled</field>
+                <value name="VALUE">
+                  <block type="logic_false" id="Fp4|oQJqfMl8OVSm@*Hr">
+                    <field name="BOOL">FALSE</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="component_method" id="@m+)]e_GqW`5x{}RtbT,">
+                    <mutation component_type="Notifier" method_name="ShowChooseDialog" is_generic="false" instance_name="Notifier1"></mutation>
+                    <field name="COMPONENT_SELECTOR">Notifier1</field>
+                    <value name="ARG0">
+                      <block type="text" id="~emkB%Mx%x2Gq?x:e2Qx">
+                        <field name="TEXT">You have to turn on Location</field>
+                      </block>
+                    </value>
+                    <value name="ARG1">
+                      <block type="text" id="ES*O:[S;BKgA^PM!FBm1">
+                        <field name="TEXT">Location is turned off</field>
+                      </block>
+                    </value>
+                    <value name="ARG2">
+                      <block type="text" id="$hD8c_m1{{Ai9eaL.t@g">
+                        <field name="TEXT">OK</field>
+                      </block>
+                    </value>
+                    <value name="ARG3">
+                      <block type="text" id="FQlIgXcvIBaFA?=veDkW">
+                        <field name="TEXT">Exit</field>
+                      </block>
+                    </value>
+                    <value name="ARG4">
+                      <block type="logic_boolean" id="5*Ih~r47uCGpltgt`Izi">
+                        <field name="BOOL">FALSE</field>
+                      </block>
+                    </value>
+                  </block>
+                </next>
+              </block>
+            </statement>
+          </block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+  <block type="global_declaration" id="%=#yaki@)K,o)rFDJ}1-" x="-911" y="-313">
+    <field name="NAME">AP_AVAIL</field>
+    <value name="VALUE">
+      <block type="logic_false" id="Z!osljdYL)kzA|r3uhu:">
+        <field name="BOOL">FALSE</field>
+      </block>
+    </value>
+  </block>
+  <block type="component_event" id="d3tMJJ,zK1F-8)$9EO+U" x="-910" y="-282">
+    <mutation component_type="Form" is_generic="false" instance_name="Screen1" event_name="Initialize"></mutation>
+    <field name="COMPONENT_SELECTOR">Screen1</field>
+    <statement name="DO">
+      <block type="lexical_variable_set" id="ryQvVKGs55aCL608f9q:">
+        <field name="VAR">global AP_AVAIL</field>
+        <value name="VALUE">
+          <block type="logic_boolean" id=".vfR3HEDM7085pG^nPQ#">
+            <field name="BOOL">FALSE</field>
+          </block>
+        </value>
+        <next>
+          <block type="procedures_callnoreturn" id="L9Gn*c|o-}Ctd$Y3c8C]" inline="false">
+            <mutation name="changeAvailability"></mutation>
+            <field name="PROCNAME">changeAvailability</field>
+            <next>
+              <block type="controls_if" id="ag11XIhk;-qM`$3=bbq@">
+                <mutation else="1"></mutation>
+                <value name="IF0">
+                  <block type="logic_negate" id="x|[T.L~{J+rHq6VQ?j4h">
+                    <value name="BOOL">
+                      <block type="component_method" id="L7n[v@Y8}l2242i+yDbX">
+                        <mutation component_type="TaifunWiFi" method_name="IsEnabled" is_generic="false" instance_name="WiFi"></mutation>
+                        <field name="COMPONENT_SELECTOR">WiFi</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="component_method" id="Go^N[%|2Rxx$[aYS={a-">
+                    <mutation component_type="Notifier" method_name="ShowChooseDialog" is_generic="false" instance_name="Notifier1"></mutation>
+                    <field name="COMPONENT_SELECTOR">Notifier1</field>
+                    <value name="ARG0">
+                      <block type="text" id="F)6z{{Y`=v:n--|{L^+z">
+                        <field name="TEXT">Do you want to turn the Wi-Fi on?</field>
+                      </block>
+                    </value>
+                    <value name="ARG1">
+                      <block type="text" id="-AaAfK95.%)Mg$9L:-2u">
+                        <field name="TEXT">Wi-Fi is turned off</field>
+                      </block>
+                    </value>
+                    <value name="ARG2">
+                      <block type="text" id="al8(^%}g1jFn~9Yk6~A+">
+                        <field name="TEXT">Yes</field>
+                      </block>
+                    </value>
+                    <value name="ARG3">
+                      <block type="text" id="jVCZ|F%h~b|:NjO9Q:;6">
+                        <field name="TEXT">Exit</field>
+                      </block>
+                    </value>
+                    <value name="ARG4">
+                      <block type="logic_boolean" id="1z}`gR=hf$H3_21?S1C0">
+                        <field name="BOOL">FALSE</field>
+                      </block>
+                    </value>
+                  </block>
+                </statement>
+                <statement name="ELSE">
+                  <block type="component_set_get" id="676lk#/Q7aDiHF.l9`=?">
+                    <mutation component_type="Clock" set_or_get="set" property_name="TimerEnabled" is_generic="false" instance_name="Timer"></mutation>
+                    <field name="COMPONENT_SELECTOR">Timer</field>
+                    <field name="PROP">TimerEnabled</field>
+                    <value name="VALUE">
+                      <block type="logic_false" id=";2-wK^;U!YD~~Y++qy2Q">
+                        <field name="BOOL">TRUE</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="procedures_callnoreturn" id="uP!Y;(_vcFg#wGgtki[`" inline="false">
+                        <mutation name="checkConnection"></mutation>
+                        <field name="PROCNAME">checkConnection</field>
+                      </block>
+                    </next>
+                  </block>
+                </statement>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="component_event" id="pn({DV5~Flej}NDjx(N^" x="-1654" y="100">
+    <mutation component_type="TaifunWiFi" is_generic="false" instance_name="WiFi" event_name="GotAvailableSSIDs"></mutation>
+    <field name="COMPONENT_SELECTOR">WiFi</field>
+    <statement name="DO">
+      <block type="lexical_variable_set" id="@^9dI~+v#p.Q@+qqo-uu">
+        <field name="VAR">global AP_AVAIL</field>
+        <value name="VALUE">
+          <block type="logic_boolean" id="5iFWvPxD#|;-feXn[fQ;">
+            <field name="BOOL">FALSE</field>
+          </block>
+        </value>
+        <next>
+          <block type="controls_forEach" id="Q1QetGQTQ_40vM#K)6bP">
+            <field name="VAR">ssid</field>
+            <value name="LIST">
+              <block type="lexical_variable_get" id="FW4S36=UD.O~Up~GqS..">
+                <mutation>
+                  <eventparam name="availableSSIDs"></eventparam>
+                </mutation>
+                <field name="VAR">availableSSIDs</field>
+              </block>
+            </value>
+            <statement name="DO">
+              <block type="controls_if" id=")Je(o3,Rh8YnckdHeH!_">
+                <value name="IF0">
+                  <block type="text_compare" id="IcH4(5+Qpf0B+6]v;?uQ">
+                    <field name="OP">EQUAL</field>
+                    <value name="TEXT1">
+                      <block type="lexical_variable_get" id="T!{B,hc$F_#$OOe1:URU">
+                        <field name="VAR">ssid</field>
+                      </block>
+                    </value>
+                    <value name="TEXT2">
+                      <block type="lexical_variable_get" id="9?rNv@TV$Up)CaBf8c!T">
+                        <field name="VAR">global AP_SSID</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="DO0">
+                  <block type="lexical_variable_set" id="kSM9/B;GNAru)c@h.:kX">
+                    <field name="VAR">global AP_AVAIL</field>
+                    <value name="VALUE">
+                      <block type="logic_boolean" id="eYb75Wf8}u.D2w0h4|JC">
+                        <field name="BOOL">TRUE</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="controls_break" id=".wkhm9M^B1p@?Hn6r:JK" collapsed="true"></block>
+                    </next>
+                  </block>
+                </statement>
+              </block>
+            </statement>
+            <next>
+              <block type="procedures_callnoreturn" id="C{}8#ueYc2JDtH(I]}RY" inline="false">
+                <mutation name="changeAvailability"></mutation>
+                <field name="PROCNAME">changeAvailability</field>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="component_event" id="h[bIc#?1aa8vu}|R7=!f" x="-911" y="74">
+    <mutation component_type="Notifier" is_generic="false" instance_name="Notifier1" event_name="AfterChoosing"></mutation>
+    <field name="COMPONENT_SELECTOR">Notifier1</field>
+    <statement name="DO">
+      <block type="controls_if" id="1C#%(k|d7y#Qx;A7^UP3">
+        <mutation elseif="1" else="1"></mutation>
+        <value name="IF0">
+          <block type="text_compare" id="GThFfmU+K==oT.8RRe/z">
+            <field name="OP">EQUAL</field>
+            <value name="TEXT1">
+              <block type="lexical_variable_get" id="mql==jS-)sHKY^Zw3gF=">
+                <mutation>
+                  <eventparam name="choice"></eventparam>
+                </mutation>
+                <field name="VAR">choice</field>
+              </block>
+            </value>
+            <value name="TEXT2">
+              <block type="text" id="3qA.G5q}o9Q)g@NK2Q3R">
+                <field name="TEXT">Yes</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="component_method" id=";,g+DvngAHf[bQ32qm`1">
+            <mutation component_type="TaifunWiFi" method_name="Enable" is_generic="false" instance_name="WiFi"></mutation>
+            <field name="COMPONENT_SELECTOR">WiFi</field>
+            <next>
+              <block type="component_set_get" id="WY%J1lo11.duxawOV~]Y">
+                <mutation component_type="Clock" set_or_get="set" property_name="TimerEnabled" is_generic="false" instance_name="Timer"></mutation>
+                <field name="COMPONENT_SELECTOR">Timer</field>
+                <field name="PROP">TimerEnabled</field>
+                <value name="VALUE">
+                  <block type="logic_false" id="t+-tExBy8V+LIW1]Kmz9">
+                    <field name="BOOL">TRUE</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="procedures_callnoreturn" id="ikmjheL={EM-7cPI|W18" inline="false">
+                    <mutation name="checkConnection"></mutation>
+                    <field name="PROCNAME">checkConnection</field>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <value name="IF1">
+          <block type="text_compare" id="q1/8]5s@9e_M.MRzAK2x">
+            <field name="OP">EQUAL</field>
+            <value name="TEXT1">
+              <block type="lexical_variable_get" id="|!=!Dp/oz}Co-Z[|v0dp">
+                <mutation>
+                  <eventparam name="choice"></eventparam>
+                </mutation>
+                <field name="VAR">choice</field>
+              </block>
+            </value>
+            <value name="TEXT2">
+              <block type="text" id="]RIRkFXDeTmprT!U:U2!">
+                <field name="TEXT">OK</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <statement name="DO1">
+          <block type="component_set_get" id="}nWq!2J8*x^b!RSY5nj!">
+            <mutation component_type="Clock" set_or_get="set" property_name="TimerEnabled" is_generic="false" instance_name="Timer"></mutation>
+            <field name="COMPONENT_SELECTOR">Timer</field>
+            <field name="PROP">TimerEnabled</field>
+            <value name="VALUE">
+              <block type="logic_false" id="@$cop}4Dj?;~,k|H//hP">
+                <field name="BOOL">TRUE</field>
+              </block>
+            </value>
+          </block>
+        </statement>
+        <statement name="ELSE">
+          <block type="controls_closeApplication" id="r:}t`~$$Bn]NF3e]Olz4"></block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+  <block type="component_event" id="c4;Z1FTdOmXT]RHv?rxG" x="-1674" y="394">
+    <mutation component_type="Button" is_generic="false" instance_name="Connect" event_name="Click"></mutation>
+    <field name="COMPONENT_SELECTOR">Connect</field>
+    <statement name="DO">
+      <block type="component_method" id="GJ3=F7O~Gugm(is)]Mz*">
+        <mutation component_type="TaifunWiFi" method_name="ConnectSSID" is_generic="false" instance_name="WiFi"></mutation>
+        <field name="COMPONENT_SELECTOR">WiFi</field>
+        <value name="ARG0">
+          <block type="lexical_variable_get" id="=--0In;^2:~`F4@NO0#K">
+            <field name="VAR">global AP_SSID</field>
+          </block>
+        </value>
+        <value name="ARG1">
+          <block type="lexical_variable_get" id="$6mJmUV6I5ZIi6$l/M#$">
+            <field name="VAR">global AP_PASWD</field>
+          </block>
+        </value>
+        <next>
+          <block type="procedures_callnoreturn" id="mJMg=:$MpNd51#[CokT|" inline="false">
+            <mutation name="checkConnection"></mutation>
+            <field name="PROCNAME">checkConnection</field>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <block type="procedures_defnoreturn" id="$.Ncy%v8?pG@pIr@9_h(" x="-905" y="376">
+    <field name="NAME">changeAvailability</field>
+    <statement name="STACK">
+      <block type="controls_if" id="[=N;m-RvpO6G_T=I:i)2">
+        <mutation else="1"></mutation>
+        <value name="IF0">
+          <block type="logic_compare" id="^4GD+=j|CJitr66S*.GT">
+            <field name="OP">EQ</field>
+            <value name="A">
+              <block type="lexical_variable_get" id="cNW7q[*gJ1JJde(pMhKI">
+                <field name="VAR">global AP_AVAIL</field>
+              </block>
+            </value>
+            <value name="B">
+              <block type="logic_boolean" id="Cr5Z_Qi}?d8wWO@`=Ox]">
+                <field name="BOOL">TRUE</field>
+              </block>
+            </value>
+          </block>
+        </value>
+        <statement name="DO0">
+          <block type="component_set_get" id="K`-[_Z2J^/?5qWe+0#WO">
+            <mutation component_type="Label" set_or_get="set" property_name="Text" is_generic="false" instance_name="APAvailLabel"></mutation>
+            <field name="COMPONENT_SELECTOR">APAvailLabel</field>
+            <field name="PROP">Text</field>
+            <value name="VALUE">
+              <block type="text" id="^!ZVQ.Tae!W8]WTKHaQM">
+                <field name="TEXT">AVAILABLE</field>
+              </block>
+            </value>
+            <next>
+              <block type="component_set_get" id="1);jbkY!zmx}eT@)qS.o">
+                <mutation component_type="Label" set_or_get="set" property_name="TextColor" is_generic="false" instance_name="APAvailLabel"></mutation>
+                <field name="COMPONENT_SELECTOR">APAvailLabel</field>
+                <field name="PROP">TextColor</field>
+                <value name="VALUE">
+                  <block type="color_green" id="[`}pmY//+ijg(G8dJa%R">
+                    <field name="COLOR">#00ff00</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="component_set_get" id="vk*M;B/PNN^B{xrq^~(l">
+                    <mutation component_type="Button" set_or_get="set" property_name="BackgroundColor" is_generic="false" instance_name="Connect"></mutation>
+                    <field name="COMPONENT_SELECTOR">Connect</field>
+                    <field name="PROP">BackgroundColor</field>
+                    <value name="VALUE">
+                      <block type="color_orange" id="X}55^c`?(ixnJZLjY.%P">
+                        <field name="COLOR">#ffc800</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="component_set_get" id="M2(!L|Ixpy37d?$4zzy=">
+                        <mutation component_type="Button" set_or_get="set" property_name="TextColor" is_generic="false" instance_name="Connect"></mutation>
+                        <field name="COMPONENT_SELECTOR">Connect</field>
+                        <field name="PROP">TextColor</field>
+                        <value name="VALUE">
+                          <block type="color_black" id="W?8eTo/EHJlE=|bdiv8G">
+                            <field name="COLOR">#000000</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="component_set_get" id="N5riLk7+Bj^i8G:T!U-d">
+                            <mutation component_type="Button" set_or_get="set" property_name="Enabled" is_generic="false" instance_name="Connect"></mutation>
+                            <field name="COMPONENT_SELECTOR">Connect</field>
+                            <field name="PROP">Enabled</field>
+                            <value name="VALUE">
+                              <block type="logic_boolean" id="wn3^$=vUws{efkIZg0!!">
+                                <field name="BOOL">TRUE</field>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <statement name="ELSE">
+          <block type="component_set_get" id="AwA:e9dK?*n)e+-+Y95g">
+            <mutation component_type="Label" set_or_get="set" property_name="Text" is_generic="false" instance_name="APAvailLabel"></mutation>
+            <field name="COMPONENT_SELECTOR">APAvailLabel</field>
+            <field name="PROP">Text</field>
+            <value name="VALUE">
+              <block type="text" id="kDI93nj*v;Vd3a)uCg94">
+                <field name="TEXT">UNAVAILABLE</field>
+              </block>
+            </value>
+            <next>
+              <block type="component_set_get" id="r]ZMQ!U_Yo@Ba59C5GY8">
+                <mutation component_type="Label" set_or_get="set" property_name="TextColor" is_generic="false" instance_name="APAvailLabel"></mutation>
+                <field name="COMPONENT_SELECTOR">APAvailLabel</field>
+                <field name="PROP">TextColor</field>
+                <value name="VALUE">
+                  <block type="color_red" id="|]BBWrGoG-!u0cb%(kdu">
+                    <field name="COLOR">#ff0000</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="component_set_get" id="E48Efqthbv=/DyDW,-:d">
+                    <mutation component_type="Button" set_or_get="set" property_name="BackgroundColor" is_generic="false" instance_name="Connect"></mutation>
+                    <field name="COMPONENT_SELECTOR">Connect</field>
+                    <field name="PROP">BackgroundColor</field>
+                    <value name="VALUE">
+                      <block type="color_gray" id="=UrZa~E}(wSOmyJ:z98/">
+                        <field name="COLOR">#888888</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="component_set_get" id="@z~v2JNMQ%$8H4*PudLJ">
+                        <mutation component_type="Button" set_or_get="set" property_name="TextColor" is_generic="false" instance_name="Connect"></mutation>
+                        <field name="COMPONENT_SELECTOR">Connect</field>
+                        <field name="PROP">TextColor</field>
+                        <value name="VALUE">
+                          <block type="color_light_gray" id=":[E)ce}}G|Y}^DO+hPw8">
+                            <field name="COLOR">#cccccc</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="component_set_get" id="Y2O:35$Pz9?]`TxtBCyZ">
+                            <mutation component_type="Button" set_or_get="set" property_name="Enabled" is_generic="false" instance_name="Connect"></mutation>
+                            <field name="COMPONENT_SELECTOR">Connect</field>
+                            <field name="PROP">Enabled</field>
+                            <value name="VALUE">
+                              <block type="logic_false" id="/qD}9Nn~dZ|#gg)3Fzc!">
+                                <field name="BOOL">FALSE</field>
+                              </block>
+                            </value>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+  <block type="component_event" id=":;!Lfg6OC`zZ7jRKdjtk" x="-1189" y="419">
+    <mutation component_type="Clock" is_generic="false" instance_name="Timer" event_name="Timer"></mutation>
+    <field name="COMPONENT_SELECTOR">Timer</field>
+    <statement name="DO">
+      <block type="component_method" id="OI1$n%E[]=%}u7ym/m8k">
+        <mutation component_type="TaifunWiFi" method_name="AvailableSSIDs" is_generic="false" instance_name="WiFi"></mutation>
+        <field name="COMPONENT_SELECTOR">WiFi</field>
+        <next>
+          <block type="procedures_callnoreturn" id="%:+ZN~a.0Cu1oP8bYVUX" inline="false">
+            <mutation name="checkConnection"></mutation>
+            <field name="PROCNAME">checkConnection</field>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+  <yacodeblocks ya-version="186" language-version="27"></yacodeblocks>
+</xml>

@@ -1,0 +1,14 @@
+/* Invalid type of operation NOT(!) - void */
+string voidFunc(void) {
+    return "Hello World";
+}
+
+void main(void) {
+    int i;
+    string s;
+    while(!voidFunc()) {
+        i = 42;
+    }
+    
+    return;
+}

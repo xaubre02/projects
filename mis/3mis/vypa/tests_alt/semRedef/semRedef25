@@ -1,0 +1,8 @@
+// Redefinition of embedded function readString
+void readString(string a) {
+    int b;
+}
+
+void main(void) {
+    int a, b;
+}

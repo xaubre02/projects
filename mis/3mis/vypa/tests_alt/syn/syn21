@@ -1,0 +1,6 @@
+// syntax error var definition
+class MyClass : Object {
+	void foo(int y, string x) {
+		int k = 5;
+	}
+}

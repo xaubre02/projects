@@ -1,0 +1,11 @@
+// syntax error if missing )
+class MyClass : Object {
+	void foo(int y, string x) {
+		if (x == 5 {
+
+		}
+		else {
+
+		}
+	}
+}

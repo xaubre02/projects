@@ -1,0 +1,33 @@
+// Assigment to undefined attribute 'undefinedAttr' - multiple superiors(one more than in previous test)
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+}
+
+class Rectangle : Shape {
+	void Rectangle(void) {
+		print("constructor of Rectangle");
+	}
+}
+
+class LittleRectangle : Rectangle {
+	void Rectangle(void) {
+		print("constructor of LittleRectangle");
+	}
+}
+
+class EasyPeasy : LittleRectangle {
+	void EasyPeasy(void) {
+		print("constructor of EasyPeasy");
+	}
+}
+
+void main(void) {
+	EasyPeasy ep;
+	ep = new EasyPeasy;
+
+    ep.undefinedAttr = 5;
+}

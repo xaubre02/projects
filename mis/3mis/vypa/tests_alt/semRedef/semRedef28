@@ -1,0 +1,12 @@
+// Redefinition of default Oblect class
+class Object : Object {
+	int x;
+
+	void Object(void) {
+		this.x = 5;
+	}
+}
+
+void main(void) {
+    Object o;
+}

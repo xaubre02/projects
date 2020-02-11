@@ -1,0 +1,6 @@
+// syntax error in method definitation, wrong parameters
+class MyClass : Object {
+	void main(int y string x) {
+
+	}
+}

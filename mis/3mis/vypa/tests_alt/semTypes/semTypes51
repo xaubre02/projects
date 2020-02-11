@@ -1,0 +1,5 @@
+/* Invalid return type */
+void main(void) {
+    int i;
+    return i;
+}

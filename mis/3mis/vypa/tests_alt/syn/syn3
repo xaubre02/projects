@@ -1,0 +1,4 @@
+// missing first {
+class MyClass : Object
+
+}

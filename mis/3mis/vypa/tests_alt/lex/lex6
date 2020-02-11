@@ -1,0 +1,8 @@
+class Main : Object {
+	void run(void) {
+		string valid_es;
+		valid_es = "\n\t\\\"";
+		string invalid_es;
+		invalid_es = "ahoj\k";
+	}
+}

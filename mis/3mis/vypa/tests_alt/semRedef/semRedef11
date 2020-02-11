@@ -1,0 +1,17 @@
+/* Redefinition of method myMethod() in class MyClass42 */
+class MyClass42 : Object {
+	int id;
+
+	void myMethod(void) {
+		print("Hey");
+	}
+
+	int myMethod(int a) {
+		print("Hey Redefinition");
+	}
+}
+
+void main(void) {
+	string str1, str2;
+	int p, p2;
+}

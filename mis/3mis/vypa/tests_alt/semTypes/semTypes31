@@ -1,0 +1,14 @@
+/* Invalid type in condition - void */
+void voidFunc(void) {
+    return;
+}
+
+void main(void) {
+    int i;
+    if (voidFunc()) {
+        i = 5;
+    }
+    else {}
+
+    return;
+}

@@ -1,0 +1,17 @@
+/* Redefinition of class MyClass42 */
+class MyClass42 : Object {
+	int id;
+
+	void MyClass42(void) {
+		print("constructor of Shape");
+	}
+}
+
+class MyClass42 : Object {
+	int id;
+}
+
+void main(void) {
+	string str1, str2;
+	int p, p2;
+}

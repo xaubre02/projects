@@ -1,0 +1,28 @@
+/* Invalid type of assigment */
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+	string toString(void) {
+		return "instance of Shape " + (string)(this.id);
+	}
+
+    int hello(void) {
+        return 42;
+    }
+}
+
+string myfunc42(void) {
+    return "MyFunc42";
+}
+
+void main(void) {
+    Shape s;
+    s = new Shape;
+    s = myfunc42();
+
+    return;
+}

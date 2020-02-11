@@ -1,0 +1,31 @@
+// Calling method 'undefinedMethod' - multiple superiors
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+    void firstMethodEver42(void) {
+        int hereIAm;
+    }
+}
+
+class Rectangle : Shape {
+	void Rectangle(void) {
+		print("constructor of Rectangle");
+	}
+}
+
+class LittleRectangle : Rectangle {
+	void Rectangle(void) {
+		print("constructor of LittleRectangle");
+	}
+}
+
+void main(void) {
+	LittleRectangle lr;
+	lr = new LittleRectangle;
+
+    lr.undefinedMethod();
+}

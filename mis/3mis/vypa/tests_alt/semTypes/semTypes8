@@ -1,0 +1,11 @@
+/* Invalid type of assigment */
+int myfunc42(void) {
+    return 42;
+}
+
+void main(void) {
+    string s;
+    s = myfunc42();
+    
+    return;
+}

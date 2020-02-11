@@ -1,0 +1,11 @@
+/* Invalid type of assigment */
+void func() {
+	return;
+}
+
+void main(void) {
+    int i;
+    i = func();
+
+    return;
+}

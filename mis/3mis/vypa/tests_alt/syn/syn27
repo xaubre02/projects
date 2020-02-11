@@ -1,0 +1,13 @@
+// syntax error in expression
+class MyClass : Object {
+	int var;
+
+	int foo(void)
+	{
+		return 5;
+	}
+
+	void bar(int y, string x) {
+		y = y * this.var foo();
+	}
+}

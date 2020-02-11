@@ -1,0 +1,63 @@
+/* Program 4: Program with Classes and Objects */
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+	string toString(void) {
+		return "instance of Shape " + (string)(this.id);
+	}
+}
+
+class Rectangle : Shape {
+	int height, width;
+
+	string toString(void) {
+		return super.toString() + " - rectangle " + (string)(this.area());
+	}
+
+	int area() {
+		return this.height * this.width;
+	}
+
+	int area2(int a, int b) {
+		return a + b;
+	}
+
+	Shape getShape(int a, int b) {
+		Shape s1;
+		s1 = new Shape;
+		return s1;
+	}
+}
+
+Rectangle func() {
+	Rectangle r;
+	r = new Rectangle;
+	int a;
+	int c;
+
+	return r;
+}
+
+string strFunc(void) {
+	return (new Rectangle).toString();
+}
+
+void main(void) {
+	Rectangle r;
+	r = new Rectangle;
+	r.id = 42;
+	//r.width = readInt();
+	//r.height = readInt();
+
+	int iii; 
+	//iii = r.getShape(2, 3).toString();
+	//iii = func().getShape(1, 1);
+	//iii = new Rectangle.area2("ahoj", "bee");
+
+	Shape s; s = r;
+	print(s.toString());
+} // end of main

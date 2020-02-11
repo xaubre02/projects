@@ -1,0 +1,17 @@
+// Assigment to this.id undefined method call 'undefinedMethod'
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+    void myMethod(void) {
+        this.id = this.undefinedMethod();
+	}
+}
+
+void main(void) {
+	Shape s;
+	s = new Shape;
+}

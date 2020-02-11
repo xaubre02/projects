@@ -1,0 +1,7 @@
+# Run script 'test.sh' from directory where your binary/script is located.
+# In that directory should be also located current directory 'test'.
+# Check variable NAME in 'test.sh' - should be the name of your binary/script.
+# 
+# Run 'test.sh':
+#
+# e.g. bash test/test.sh

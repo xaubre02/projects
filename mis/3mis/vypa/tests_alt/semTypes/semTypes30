@@ -1,0 +1,30 @@
+/* Invalid type in condition - string */
+class Shape : Object {
+	int id;
+    string stringAttr;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+	string toString(void) {
+		return "instance of Shape " + (string)(this.id);
+	}
+
+    void hello(string s) {
+        print(s);
+    }
+}
+
+void main(void) {
+    Shape s;
+    s = new Shape;
+
+    int i;
+    if (s.stringAttr) {
+        i = 5;
+    }
+    else {}
+
+    return;
+}

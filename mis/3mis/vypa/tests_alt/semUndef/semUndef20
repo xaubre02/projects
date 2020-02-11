@@ -1,0 +1,8 @@
+// Using undefined class/datatype 'NotDefined' in function return type definition
+NotDefined myFunc42(void) {
+    string a;
+}
+
+void main(void) {
+	int s;
+}

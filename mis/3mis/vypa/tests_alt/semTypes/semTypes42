@@ -1,0 +1,31 @@
+/* Invalid type of paramaters in function call */
+class Shape : Object {
+	int id;
+    string stringAttr;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+	string toString(void) {
+		return "instance of Shape " + (string)(this.id);
+	}
+
+    void hello(string s) {
+        print(s);
+    }
+}
+
+string strFunc(string s) {
+    return "NoWay";
+}
+
+void main(void) {
+    Shape shape;
+    shape = new Shape;
+    
+    string s;
+    s = strFunc(shape);
+
+    return;
+}

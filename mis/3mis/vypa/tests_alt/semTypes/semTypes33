@@ -1,0 +1,9 @@
+/* Invalid type in while condition - string */
+void main(void) {
+    int i;
+    while ("str") {
+        i = 5;
+    }
+
+    return;
+}

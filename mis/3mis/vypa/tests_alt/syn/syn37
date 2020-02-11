@@ -1,0 +1,19 @@
+// syntax error in chain call of methods
+class MyClass : Object {
+	int x;
+
+	void MyClass(void) {
+		this.x = 5;
+	}
+
+	MyClass inc(void) {
+		this.x = this.x + 1;
+	}
+}
+
+void main(void) {
+	MyClass m;
+	m = MyClass();
+
+	m.inc().inc()inc();
+}

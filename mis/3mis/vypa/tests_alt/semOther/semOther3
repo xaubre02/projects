@@ -1,0 +1,12 @@
+/* Invalid number of parameters of embedded function print */
+int myFunc42(void) {
+    return 42;
+}
+
+void main(void) {
+	string str1, str2;
+	int p;
+    print();
+    
+    return;
+}

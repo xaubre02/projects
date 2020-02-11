@@ -1,0 +1,4 @@
+// syntax error in function definition
+int foo(void)
+
+}

@@ -1,0 +1,8 @@
+// Redefinition of embedded function length
+string length(void) {
+    int b;
+}
+
+void main(void) {
+    int a, b;
+}

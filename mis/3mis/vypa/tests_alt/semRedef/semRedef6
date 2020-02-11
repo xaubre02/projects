@@ -1,0 +1,4 @@
+/* Redefinition of variable var007 on the same row */
+void main(void) {
+	int var007, var008, var007;
+}

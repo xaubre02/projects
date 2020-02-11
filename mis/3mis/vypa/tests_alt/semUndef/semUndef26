@@ -1,0 +1,16 @@
+// Assigment to myVar undefined method call 'undefinedMethod'
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+}
+
+void main(void) {
+	Shape s;
+	s = new Shape;
+
+    int myVar;
+    myVar = s.undefinedMethod();
+}

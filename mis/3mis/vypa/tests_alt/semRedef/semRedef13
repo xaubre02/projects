@@ -1,0 +1,14 @@
+/* Redefinition of attribute realMadrid with method realMadrid in class MyClass42 */
+class MyClass42 : Object {
+	int realMadrid;
+    string myAttribute;
+
+	void realMadrid(void) {
+		print("Hey Benzema");
+	}
+}
+
+void main(void) {
+	string str1, str2;
+	int p, p2;
+}

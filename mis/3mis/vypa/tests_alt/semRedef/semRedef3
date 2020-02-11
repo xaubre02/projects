@@ -1,0 +1,14 @@
+/* Redefinition of variable var007 inside nested if statement */
+void main(void) {
+	int a, b;
+	
+    if(a) {
+        int a1; 
+        if(a1) {
+            string var007;
+            int var007;
+        }
+        else {}
+    }
+    else {}
+}

@@ -1,0 +1,9 @@
+/* Invalid type of assigment */
+void main(void) {
+	string str1, str2;
+	int p;
+
+    str1 = p;
+
+    return;
+}

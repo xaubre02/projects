@@ -1,0 +1,8 @@
+// syntax error while missing {
+class MyClass : Object {
+	void foo(int y, string x) {
+		while (x > 0)
+
+		}
+	}
+}

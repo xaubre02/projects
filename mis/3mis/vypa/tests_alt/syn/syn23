@@ -1,0 +1,6 @@
+// syntax error in expression
+class MyClass : Object {
+	void foo(int y, string x) {
+		y = +*;
+	}
+}

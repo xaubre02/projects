@@ -1,0 +1,10 @@
+/* Redefinition of variable var007 inside if statement */
+void main(void) {
+	int a, b;
+	
+    if(a) {
+        int var007;
+        string var007;
+    }
+    else {}
+}

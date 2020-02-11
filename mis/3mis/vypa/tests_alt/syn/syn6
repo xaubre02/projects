@@ -1,0 +1,5 @@
+// missing , in var definitation
+class MyClass : Object {
+	int x y;
+
+}

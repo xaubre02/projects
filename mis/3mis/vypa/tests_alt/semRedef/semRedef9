@@ -1,0 +1,10 @@
+/* Redefinition of function argument arg007 with local variables */
+string myFunc42(int arg007, string b) {
+    int myVar;
+    string arg007;
+}
+
+void main(void) {
+	string str1, str2;
+	int p, p2;
+}

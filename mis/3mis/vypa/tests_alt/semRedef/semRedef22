@@ -1,0 +1,13 @@
+// Class Shape could not be inherited of itself
+class Shape : Shape {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+}
+
+void main(void) {
+	Shape s;
+	s = new Shape;
+}

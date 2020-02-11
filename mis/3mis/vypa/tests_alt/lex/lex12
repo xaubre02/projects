@@ -1,0 +1,5 @@
+// invalid literal integer with superfluous zeros in the front
+void main(void) {
+	int i;
+	i = 00 + 0009 + 015;
+}

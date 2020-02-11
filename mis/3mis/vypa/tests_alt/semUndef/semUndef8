@@ -1,0 +1,22 @@
+// Assigment to undefined attribute 'Rectangle.undefinedAttr' that is not defined even in superior class Shape
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+}
+
+class Rectangle : Shape {
+	int height;
+
+	void Rectangle(void) {
+		print("constructor of Rectangle");
+	}
+}
+
+void main(void) {
+	Rectangle r;
+	r = new Rectangle;
+    r.undefinedAttr = 5;
+}

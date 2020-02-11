@@ -1,0 +1,51 @@
+/* Invalid type of assigment */
+class Shape : Object {
+	int id;
+    string stringAttr;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+	string toString(void) {
+		return "instance of Shape " + (string)(this.id);
+	}
+
+    void hello(string s) {
+        print(s);
+    }
+}
+
+class Rectangle : Shape {
+	int height, width;
+
+	string toString(void) {
+		return super.toString() + " - rectangle " + (string)(this.area());
+	}
+
+	int area() {
+		return this.height * this.width;
+	}
+
+	int area2(int a, int b) {
+		return a + b;
+	}
+
+	Shape getShape(int a, int b) {
+		Shape s1;
+		s1 = new Shape;
+		return s1;
+	}
+}
+
+void func() {
+	return;
+}
+
+void main(void) {
+	Rectangle r;
+	r = new Rectangle;
+    r.id = func();
+
+    return;
+}

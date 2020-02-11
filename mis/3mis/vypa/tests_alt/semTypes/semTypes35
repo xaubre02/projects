@@ -1,0 +1,13 @@
+/* Invalid type in condition - string */
+string strFunc(void) {
+    return "NoWay";
+}
+
+void main(void) {
+    int i;
+    while (strFunc()) {
+        i = 5;
+    }
+
+    return;
+}

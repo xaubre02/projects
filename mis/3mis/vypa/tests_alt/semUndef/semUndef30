@@ -1,0 +1,17 @@
+// Assigment to this.id undefined attribute call 'undefinedAttr'
+class Shape : Object {
+	int id;
+
+	void Shape(void) {
+		print("constructor of Shape");
+	}
+
+    void myMethod(void) {
+        this.id = this.undefinedAttr;
+	}
+}
+
+void main(void) {
+	Shape s;
+	s = new Shape;
+}
