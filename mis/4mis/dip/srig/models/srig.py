@@ -2,37 +2,49 @@ from .generator import Generator
 from .discriminator import Discriminator
 
 import os
+import sys
 import time
 import datetime
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from pathlib import Path
 
 
 class SRIG:
 
-    def __init__(self):
+    def __init__(self, log_directory=None):
+        self.logdir = self.create_log_directory(log_directory)
+
         self.generator = Generator()
         self.discriminator = Discriminator()
 
-        self.checkpoint_prefix = os.path.join('./checkpoints', 'srig')  # TODO: predelat na Path z pathlibu
+        # self.checkpoint_prefix = os.path.join('./checkpoints', 'srig')  # TODO: predelat na Path z pathlibu
+        self.checkpoint_prefix = str(self.logdir / 'checkpoints/srig')
         self.checkpoint = tf.train.Checkpoint(generator_optimizer=self.generator.optimizer,
                                               discriminator_optimizer=self.discriminator.optimizer,
                                               generator=self.generator.model,
                                               discriminator=self.discriminator.model)
-        # summary writer TODO: what does it do?
-        self.summary_writer = tf.summary.create_file_writer('./summary/' + datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
+        # summary writer
+        self.summary_writer = tf.summary.create_file_writer(str(self.logdir / 'summary'))
 
-        # Define the training loop
-        self.BATCH_SIZE = 256
-        self.noise_dim = 100
-        self.num_examples_to_generate = 16
+    @staticmethod
+    def create_log_directory(path):
+        if path is None:
+            # current working directory / logs
+            path = Path.cwd() / 'logs'
+        else:
+            if isinstance(path, str):
+                path = Path(path)
+            # relative path
+            if not path.is_absolute():
+                path = Path.cwd() / path
+                path = path.resolve()
+        # create the log directory
+        if not path.exists():
+            print('Creating logging directory: {}'.format(path))
+            path.mkdir(parents=True)
 
-        # We will reuse this seed overtime (so it's easier)
-        # to visualize progress in the animated GIF)
-        self.seed = tf.random.normal([self.num_examples_to_generate, self.noise_dim])  # TODO: make really random, like random(time.time())
-
-        self.dlos = []
-        self.glos = []
+        return path
 
     @tf.function  # This annotation causes the function to be "compiled".
     def train_step(self, input_image, target, epoch):
@@ -44,8 +56,6 @@ class SRIG:
 
             gen_total_loss, gen_gan_loss, gen_l1_loss = self.generator.calculate_loss(fake_output, g_img, target)
             disc_loss = self.discriminator.calculate_loss(real_output, fake_output)
-            self.glos.append(gen_total_loss)
-            self.dlos.append(disc_loss)
 
         self.generator.update_weights(gen_tape.gradient(gen_total_loss, self.generator.trainable_variables))
         self.discriminator.update_weights(disc_tape.gradient(disc_loss, self.discriminator.trainable_variables))
@@ -56,59 +66,65 @@ class SRIG:
             tf.summary.scalar('gen_l1_loss', gen_l1_loss, step=epoch)
             tf.summary.scalar('disc_loss', disc_loss, step=epoch)
 
-    def train(self, dataset, epochs, dataset_test):
+    def train(self, train_data, test_data, checkpoint_period, output_period, epochs):
+        # image output directory
+        outdir = self.logdir / 'output'
+        if not outdir.exists():
+            outdir.mkdir(parents=True)
+
+        print('Training data count: {}'.format(len(list(train_data))))
+        print('Testing data count:  {}'.format(len(list(test_data))))
+        print()
+
+        print('Training..\n')
+        steps_per_epoch = len(list(train_data.enumerate()))
         training_start = time.time()
         for epoch in range(epochs):
             start = time.time()
 
-            # TODO: probably not necessary
-            # get first image from the testing set
-            first_img_pair = list(dataset_test.as_numpy_iterator())[0]
-            self.generate_and_save_images(self.generator.model, first_img_pair[0], first_img_pair[1], epoch)
-
-            print("Epoch: ", epoch)
-            print('Training on {:d} images'.format(len(list(dataset))))
+            print('Epoch #{:d}'.format(epoch + 1))
+            if output_period > 0 and (epoch + 1) % output_period == 0:
+                # generate an image
+                print('Generating output..')
+                first_img_pair = list(test_data.as_numpy_iterator())[0]
+                output_file = outdir / 'image_at_epoch_{:03d}.jpg'.format(epoch + 1)
+                self.generate_and_save_image(generator=self.generator.model,
+                                             input_img=first_img_pair[0],
+                                             target=first_img_pair[1],
+                                             output_file=output_file)
 
             # Train
-            for n, (input_image, target) in dataset.enumerate():
-                print('.', end='')
-                if (n + 1) % 100 == 0:
-                    print()
+            for n, (input_image, target) in train_data.enumerate():
+                sys.stdout.write('\rCompleted: {:d}% (step: [{:d}/{:d}])'.format(int((n+1) / steps_per_epoch * 100), n+1, steps_per_epoch))
                 self.train_step(input_image, target, epoch)
             print()
 
-            # saving (checkpoint) the model every 5 epochs
-            if (epoch + 1) % 5 == 0:
+            # save the checkpoint every 'checkpoint_period' epochs
+            if checkpoint_period > 0 and (epoch + 1) % checkpoint_period == 0:
+                print('Saving checkpoint..')
                 self.checkpoint.save(file_prefix=self.checkpoint_prefix)
 
-            print('Time taken for epoch {} is {} sec\n'.format(epoch + 1, time.time() - start))
+            print('Time: {:d} seconds'.format(int(time.time() - start)))
+            print('-------------------------------\n')
 
-        print('Training took {:2f} minutes'.format((time.time() - training_start) / 60))
-
+        # save the last checkpoint
+        print('Saving the last checkpoint..')
         self.checkpoint.save(file_prefix=self.checkpoint_prefix)
-
-        # TODO: plot loss
-        # plt.figure(figsize=(10, 5))
-        # plt.title("Generator and Discriminator Loss During Training")
-        # plt.plot(self.glos, label="Gen")
-        # plt.plot(self.dlos, label="Dis")
-        # plt.xlabel("iterations")
-        # plt.ylabel("Loss")
-        # plt.legend()
-        # plt.show()
-        # Generate after the final epoch
-        # display.clear_output(wait=True)
+        print('==============================================================')
+        total_time = time.time() - training_start
+        print('Training took {:.2f} minutes'.format(total_time / 60))
+        print('Average time per epoch: {:d} seconds'.format(int(total_time / epochs)))
 
     @staticmethod
-    def generate_and_save_images(model, test_input, target, epoch, plot=False):
-        prediction = model(test_input, training=True)  # TODO: co s trainingem?
+    def generate_and_save_image(generator, input_img, target, output_file, plot=False):
+        prediction = generator(input_img, training=True)  # TODO: co s trainingem?
         # getting the pixel values between [0, 1] to plot it.
         p_img = prediction[0] * 0.5 + 0.5
-        plt.imsave('./output/image_at_epoch_{:03d}.png'.format(epoch), p_img.numpy())
+        plt.imsave(str(output_file), p_img.numpy())
 
         # plot images
         if plot:
-            display_list = [test_input[0], target[0], prediction[0]]
+            display_list = [input_img[0], target[0], prediction[0]]
             title = ['Input Image', 'Ground Truth', 'Predicted Image']
             for i in range(3):
                 plt.subplot(1, 3, i + 1)

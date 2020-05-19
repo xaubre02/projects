@@ -1,7 +1,7 @@
 import tensorflow as tf
-from tensorflow.keras import layers
-
+import matplotlib.pyplot as plt
 from .model import Model, downsample, upsample
+from pathlib import Path
 
 #TODO: checkout tento generator: https://towardsdatascience.com/dcgans-generating-dog-images-with-tensorflow-and-keras-fb51a1071432
 
@@ -41,6 +41,8 @@ class Generator(Model):
     def __init__(self):
         super().__init__(loss_function=tf.keras.losses.BinaryCrossentropy(from_logits=True),
                          optimizer=tf.keras.optimizers.Adam(learning_rate=adam_lr, beta_1=adam_beta1))
+        # check if the model is initialized
+        self.gen_flag = self.model is not None
 
     def save(self):
         pass
@@ -95,3 +97,41 @@ class Generator(Model):
         x = last(x)
 
         return tf.keras.Model(inputs=inputs, outputs=x)
+
+    def load_checkpoint(self, checkpoint_dir):
+        # process path
+        if isinstance(checkpoint_dir, str):
+            checkpoint_dir = Path(checkpoint_dir)
+
+        if not checkpoint_dir.is_absolute():
+            checkpoint_dir = Path.cwd() / checkpoint_dir
+            checkpoint_dir = checkpoint_dir.resolve()
+
+        # restore the checkpoint
+        checkpoint = tf.train.Checkpoint(generator=self.model, generator_optimizer=self.optimizer)
+        checkpoint.restore(tf.train.latest_checkpoint(str(checkpoint_dir)))
+
+    def generate(self, input_img, output_file, plot=False):
+        # generate the retinal image
+        generated = self.model(input_img, training=self.gen_flag)
+        # get the pixel values between [0, 1] to plot it
+        i_img = input_img[0] * 0.5 + 0.5
+        g_img = generated[0] * 0.5 + 0.5
+        # save the generated image
+        plt.imsave(str(output_file), g_img.numpy())
+
+        # plot images
+        if plot:
+            plt.figure('Generator output')
+            # plot the input image
+            plt.subplot(1, 2, 1)
+            plt.title('Input Image')
+            plt.imshow(i_img)
+            plt.axis('off')
+            # plot the output image
+            plt.subplot(1, 2, 2)
+            plt.title('Output Image')
+            plt.imshow(g_img)
+            plt.axis('off')
+            # show the plot
+            plt.show()
