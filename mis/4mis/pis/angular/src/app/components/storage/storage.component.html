@@ -1,0 +1,138 @@
+<div *ngIf="userIsAuthorized" class="row pt-4">
+  <div class="col-lg-3">
+    <div class="sticky-top">
+      <app-side-menu #sideMenu [title]="'Možnosti'" [ignoreStorage]='true' [storageKey]="'storageMenu'">
+        <div body>
+          <button class="{{sideMenu.buttonClass}}" (click)="removeSelection(sideMenu.setIndex(0))" [ngClass]="{'active': sideMenu.index === 0}">
+            <i class="icon fas fa-list-ul"></i>Přehled surovin
+          </button>
+          <button *ngIf="userManager || userMaterialStoreman" class="{{sideMenu.buttonClass}}" 
+          (click)="removeSelection(sideMenu.setIndex(1))" [ngClass]="{'active': sideMenu.index === 1}">
+            <i class="icon fas fa-sign-in-alt"></i>Naskladnit suroviny
+          </button>
+          <button *ngIf="userManager || userMaterialStoreman" class="{{sideMenu.buttonClass}}" (click)="removeSelection(sideMenu.setIndex(2))" [ngClass]="{'active': sideMenu.index === 2}">
+            <i class="icon fas fa-sign-out-alt"></i>Vyskladnit suroviny
+          </button>
+          <button *ngIf="userManager || userMaterialStoreman" class="{{sideMenu.buttonClass}}" (click)="openDialog(dialog, 'new')">
+            <i class="icon fas fa-plus"></i>Přidat surovinu
+          </button>
+        </div>
+      </app-side-menu>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <app-main-content 
+      #mainContent 
+      [noContent]="!itemList.length" 
+      [noContentText]="'Nejsou dostupné žádné suroviny'" 
+      [footer]="(sideMenu.index === 1 || (sideMenu.index === 2 && !storageEmpty())) && itemList.length" 
+      [loading]="loadingItems && !itemList.length"
+      [bgColor]="sideMenu.index === 1 ? 'green' : sideMenu.index === 2 ? 'red' : ''">
+      <div header class="px-3 d-flex justify-content-between w-100">
+        <b>{{itemList.length ? 'Surovina' : ''}}</b>
+        <button *ngIf="!sideMenu.index && (userManager || userMaterialStoreman)" class="btn btn-header btn-primary" (click)="openDialog(dialog, 'new')">
+          Nová surovina
+        </button>
+      </div>
+      <div body>
+        <div class="row m-0" *ngFor="let item of itemList; trackBy: trackByFunction; let i = index; let last = last">
+          <div class="list-item px-3 w-100 d-flex justify-content-between" [ngClass]="{ 'border-bottom' : !last, 'disabled': sideMenu.index === 2 && !item.amount }">
+            <h5 class="my-auto">{{item.name}}</h5>
+            <div *ngIf="!sideMenu.index" class="d-flex justify-content-between h-100">
+              <span *ngIf="loadingAmount && !item.gotAmount" class="my-auto font-weight-bold mr-4 text-muted spinner-border spinner-border-sm"></span>
+              <div *ngIf="item.gotAmount" class="my-auto font-weight-bold mr-4" [ngClass]="{'text-dark': item.amount, 'text-danger': !item.amount}">{{item.amount ? item.amount : 0}} Kg</div>
+              <div *ngIf="userManager || userMaterialStoreman" class="dropdown my-auto">
+                <button class="d-block btn-item btn btn-secondary" data-toggle="dropdown">Možnosti</button>
+                <div class="dropdown-menu">
+                  <a class="dropdown-item text-primary" (click)="openDialog(dialog, 'enter', i)">
+                    <i class="icon fas fa-sign-in-alt text-primary"></i>
+                    Naskladnit
+                  </a>
+                  <a class="dropdown-item text-primary" (click)="openDialog(dialog, 'withdraw', i)" [ngClass]="{'text-muted disabled': !item.amount}">
+                    <i class="icon fas fa-sign-out-alt text-primary" [ngClass]="{'text-muted disabled': !item.amount}"></i>
+                    Vyskladnit
+                  </a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item  text-primary" (click)="openDialog(dialog, 'edit', i)">
+                    <i class="icon fas fa-cog text-primary"></i>
+                    Upravit
+                  </a>
+                  <a class="dropdown-item text-danger" (click)="openDialog(confirmDialog, 'confirm', i)">
+                    <i class="icon fas fa-times text-danger"></i>
+                    Odstranit
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div *ngIf="sideMenu.index" class="d-flex justify-content-between">
+              <span *ngIf="loadingAmount && !item.gotAmount" class="my-auto font-weight-bold mr-4 text-muted spinner-border spinner-border-sm"></span>
+              <span *ngIf="item.gotAmount" class="my-auto mx-3" [ngClass]="{'text-danger': !item.amount}">({{item.amount ? item.amount : 0}} Kg)</span>
+              <app-number-spinner #counter [(value)]="item.storageChange" [maxValue]="sideMenu.index === 2 ? item.amount : undefined" *ngFor="let r of reset" class="m-auto"
+              [ngClass]="{ 'disabled': sideMenu.index === 2 && !item.amount }"></app-number-spinner>
+              <a class="my-auto ml-1 text-primary" (click)="selectMaxAmount(i)" *ngIf="sideMenu.index === 2">(max)</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div footer class="{{mainContent.footerClass}}">
+        <button class="btn btn-link text-secondary text-decoration-none" (click)="removeSelection()">Zrušit</button>
+        <button class="btn btn-link text-danger text-decoration-none p-0 mr-3" (click)="selectAllMaxAmount()" *ngIf="sideMenu.index === 2">Vyskladnit vše</button>
+        <button class="btn btn-success shadow-none col-2" *ngIf="sideMenu.index === 1" (click)="storeItems()" [disabled]="!anySelected()">Naskladnit</button>
+        <button class="btn btn-danger shadow-none col-2" *ngIf="sideMenu.index === 2" (click)="pickItems()" [disabled]="!anySelected()">Vyskladnit</button>
+      </div>
+    </app-main-content>
+  </div>
+</div>
+
+<!-- Storage modal dialog -->
+<ng-template #dialog let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-dark">{{dialogConfig.title}}</h4>
+    <button type="button" class="close" (click)="onDialogSubmit(modal, dialogConfig.type, true)"><span aria-hidden="false">&times;</span></button>
+  </div>
+  <div class="modal-body">
+    <!-- New item, updating items -->
+    <div *ngIf="dialogConfig.type === 'new' || dialogConfig.type === 'edit'" class="m-2 d-flex justify-content-center">
+      <span class="label">Název&nbsp;suroviny</span>
+      <div>
+        <input type="text" placeholder="Název suroviny" class="form-control" [(ngModel)]="newItemName" [ngClass]="{ 'is-invalid': submitted && newItemName === '' }"/>
+        <span *ngIf="submitted && newItemName === ''" class="d-block invalid-input">Zadejte název suroviny</span>
+      </div>
+    </div>
+    <!-- Item amount change -->
+    <div *ngIf="dialogConfig.type === 'enter' || dialogConfig.type === 'withdraw'" class="m-2 d-flex justify-content-center align-items-center">
+      <span class="font-weight-bold mr-2">Množství</span>
+      <app-number-spinner #amount [(value)]="clickedItem.storageChange" [maxValue]="dialogConfig.type === 'withdraw' ? clickedItem.amount : undefined" class="m-0"></app-number-spinner>
+      <a class="my-auto ml-1 text-primary" (click)="selectMaxAmount()" *ngIf="dialogConfig.type === 'withdraw'">(max)</a>
+    </div>
+
+    <!-- required info -->
+    <span class="font-italic small float-right mt-3">* všechna pole jsou povinná</span>
+  </div>
+  <div class="modal-footer">
+    <button type="button" [disabled]="(dialogConfig.type === 'enter' || dialogConfig.type === 'withdraw') && !clickedItem.storageChange" class="btn col-3 rounded m-auto {{dialogConfig.buttonClass}}" (click)="onDialogSubmit(modal, dialogConfig.type)">
+      <span class="text-white">{{dialogConfig.buttonText}}</span>
+    </button>
+  </div>
+</ng-template>
+
+<!-- Confirmation dialog -->
+<ng-template #confirmDialog let-modal>
+  <div class="modal-header">
+	<h4 class="modal-title font-weight-bold text-danger">
+    <i class="my-auto mx-1 fas fa-exclamation-triangle text-danger"></i>
+    Odstranit surovinu
+	</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body text-dark font-weight-bold">
+    Opravdu si přejete odstranit tuto surovinu?
+  </div>
+  <div class="modal-footer d-flex justify-content-center">
+    <button type="button" class="btn btn-dark mx-3 col-3" (click)="modal.dismiss()">Zrušit</button>
+    <button type="button" class="btn btn-danger mx-3 col-3" (click)="deleteMaterial(modal)">Odstranit</button>
+  </div>
+</ng-template>

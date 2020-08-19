@@ -1,0 +1,42 @@
+<div class="row pt-4">
+  <div class="col-lg-3 pt-2">
+    <div class="sticky-top">
+      <app-side-menu #sideMenu [title]="'Kategorie'" [storageKey]="'eshopMenu'" [defaultIndex]="-1">
+        <div body>
+          <button class="{{sideMenu.buttonClass}} text-primary" (click)="sideMenu.setIndex(-1)" [ngClass]="{'active': sideMenu.index === -1}">
+            <i class="icon fas fa-cubes text-primary"></i>Celý sortiment
+          </button>
+          <button *ngFor="let category of categoryList" class="{{sideMenu.buttonClass}}" (click)="sideMenu.setIndex(category.categoryId)" 
+          [ngClass]="{'active': sideMenu.index === category.categoryId}">
+          <i class="icon fas fa-cube"></i>{{category.name}}
+        </button>
+        </div>
+      </app-side-menu>
+    </div>
+  </div>
+
+  <div class="col-lg-9 pt-2">
+    <div class="row">
+      <div class="mx-auto mt-3 h2 font-italic font-weight-light" *ngIf="pastryByCategory(sideMenu.index).length === 0">
+        V této kategorii nebylo nalezeno žádné pečivo
+      </div>
+      <div class="col-lg-4 col-md-6 mb-4" *ngFor="let pastry of pastryByCategory(sideMenu.index)">
+        <div class="card shadow">
+          <img class="card-img-top shadow-lg img-max-height" [src]="'../../assets/' + pastry.pastryId + '.jpg'" alt="obrázek">
+          <div class="card-body">
+            <h5 class="card-title m-0">{{pastry.name}}</h5>
+            <p class="card-text">{{pastry.category.name}}</p>
+            <h5>{{pastry.cost | number:'1.2-2'}},- Kč</h5>
+          </div>
+          <div *ngIf="!userIsAuthorized" class="card-footer d-flex justify-content-end">
+            <app-number-spinner #counter class="m-auto"></app-number-spinner>
+            <button class="btn btn-success shadow-none" (click)="buyItem(pastry, counter.value)" data-toggle="modal" data-target="#itemConfirm">Koupit</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal dialog -->
+<app-modal-dialog [_config]="modalConfig"></app-modal-dialog>

@@ -1,0 +1,13 @@
+.number-spinner {
+  width: 117px !important;
+  height: 32px !important;
+}
+
+.number-spinner input {
+  width: 48px !important;
+  height: 100% !important;
+}
+
+.number-spinner button {
+  font-size: 14pt;
+}

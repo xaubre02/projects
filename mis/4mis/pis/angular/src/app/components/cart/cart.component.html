@@ -1,0 +1,330 @@
+<div *ngIf="loggedUser && userIsAuthorized" class="row pt-4">
+  <h4>Tato stránka je určena pouze pro zákazníky E-shopu</h4>
+</div>
+
+<!-- Step 1-->
+<div *ngIf="(!loggedUser || userCustomer) && cartState == CART01" class="row pt-4">
+  <app-main-content class="col-lg-12"
+    [footer]="true"
+    [noContent]="!itemList.length" 
+    [noContentText]="'Váš košík je prázdný!'">
+    <div header class="px-3 d-flex justify-content-between w-100">
+      <span class="my-auto">Položky ve Vašem košíku</span>
+      <span class="my-auto"><span class="font-weight-bold">{{itemList.length}}</span> {{itemLabel}}</span>
+    </div>
+    <div body>
+      <div class="row mx-2 py-3" *ngFor="let item of itemList; let last = last" [ngClass]="{ 'border-bottom' : !last }">
+        <div class="col-md-5 mb-2">
+          <div class="d-flex">
+            <img class="shadow img-thumbnail" [src]="'../../assets/' + item.pastryId + '.jpg'" alt="obrázek">
+            <div class="mx-3">
+              <h5 class="text-dark m-0 mt-2">{{item.name}}</h5>
+              <span class="">{{item.category.name}}</span>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 mb-2">
+          <div class="d-flex justify-content-start">
+            <i class="my-auto h6 mr-2 font-weight-light">({{item.cost | number:'1.2-2'}} Kč)</i>
+            <app-number-spinner #counter class="my-auto" [initValue]="item.quantity" [(value)]="item.quantity" (valueChange)="onQuantityChange(item, counter.value)"></app-number-spinner>
+          </div>
+        </div>
+        <div class="col-md-3 mb-2">
+          <div class="d-flex justify-content-between">
+            <h5 class="my-auto text-dark text-right text-nowrap">{{item.totalCost | number:'1.2-2'}} Kč</h5>
+            <button class="btn btn-link h-50 my-auto close mx-3 shadow-non text-decoration-none" aria-label="Close" data-toggle="modal" data-target="#itemRemove" (click)="itemToBeRemoved = item;" data-toggle-second="tooltip" title="Odstranit položku" data-placement="bottom">
+              <span aria-hidden="true" class="text-danger">&times;</span>
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="submitted01 && !item.quantity" class="col-md 7 offset-md-5">
+          <span class="invalid-input">Je nutné zadat počet kusů pečiva, případně odstranit celou tuto položku z košíku.</span>
+        </div>
+      </div>
+      
+      <div class="col-md-12">
+        <h4 class="mt-3 font-weight-bold text-dark">Celková cena: {{totalCost | number:'1.2-2'}} Kč</h4>
+      </div>
+    </div>
+    <div footer class="row mx-0 w-100">
+      <div class="col-md-8 mb-2">
+        <div class="d-flex">
+          <button class="btn btn-outline-secondary mr-2" [routerLink]="['/eshop']">
+            <i class="mr-1 fas fa-arrow-left"></i>
+            Pokračovat v nákupu
+          </button>
+          <button class="btn btn-outline-secondary" [disabled]="!itemList.length" data-toggle="modal" data-target="#clearCart">
+            Vysypat košík
+            <i class="ml-1 fas fa-recycle"></i>
+          </button>
+        </div>
+      </div>
+        
+      <div class="col-md-4 text-right">
+        <button class="btn btn-success text-nowrap" [disabled]="!itemList.length" (click)="continueToState02()">
+          <i class="fas fa-step-forward text-white"></i>
+          Pokračovat
+        </button>
+      </div>
+    </div>
+  </app-main-content>
+</div>
+
+<!-- Step 2 - Customer is already authenticated -->
+<div *ngIf="(!loggedUser || userCustomer) && cartState == CART02Auth" class="row pt-4">
+  <app-main-content class="col-lg-12"
+    [footer]="true"
+    [noContent]="!itemList.length" 
+    [noContentText]="'Váš košík je prázdný!'">
+    <div header class="px-3 d-flex justify-content-between w-100">
+      <span class="my-auto">Údaje a termín vyzvednutí</span>
+      <span class="my-auto"><span class="font-weight-bold">{{itemList.length}}</span> {{itemLabel}} ({{totalCost | number:'1.2-2'}} Kč)</span>
+    </div>
+
+    <div body>
+      <div class="row mx-3 py-3">
+        <div class="col-md-7 mb-3">
+          <div class="row mb-2">
+            <h5 class="col-lg-11">Vaše údaje</h5>
+          </div>
+          <div class="row">
+            <h6 class="col-lg-5">Jméno a příjmení:</h6>
+            <h6 class="col-lg-7 font-weight-bold">{{loggedUser.name}} {{loggedUser.surname}}</h6>
+          </div>
+          <div class="row">
+            <h6 class="col-lg-5">E-mail:</h6>
+            <h6 class="col-lg-7 font-weight-bold">{{loggedUser.email}}</h6>
+          </div>
+          <div class="row">
+            <h6 class="col-lg-5">Datum narození:</h6>
+            <h6 class="col-lg-7 font-weight-bold">{{loggedUser.bornCZ}}</h6>
+          </div>
+        </div>
+        <div class="col-md-5">
+          <div class="row mb-2">
+            <div class="col-lg-12">
+              <h5 class="d-inline-block mr-2">Datum vyzvednutí</h5>
+              <a class="badge badge-pill badge-primary text-center" href="javascript:void(0)"
+              [ngbPopover]="deliveryDatePopover" container="body" placement="bottom">?</a>
+              <ng-template #deliveryDatePopover>
+                Datum vyzvednutí lze přizpůsobit Vašemu požadavku.
+                Výchozí datum vyzvednuté je naplánováno na následující den.
+                V případě neplánovaného zpoždění budete informováni o změně termínu.
+              </ng-template>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <app-date-picker #deliveryDate 
+              [(date)]="newOrder.deliveryDateObject" 
+              [submitted]="submitted02Auth" 
+              [disableWeekend]="true" 
+              [tomorrowValidation]="true"
+              [startDate]="newOrder.minDate" 
+              [minDate]="newOrder.minDate" 
+              [maxDate]="newOrder.maxDate">
+              </app-date-picker>
+            </div>
+          </div>
+          <div *ngIf="submitted02Auth && !deliveryDate.isTomorrowOrLater" class="row">
+            <div class="col-lg-12">
+              <span class="invalid-input">Nejbližší možný termín vyzvednutí je {{newOrder.tomorrow | date: 'dd.MM.yyyy'}}</span>
+            </div>
+          </div>
+
+          <div class="row mt-3">
+            <div class="col-lg-12">
+              <h5 class="d-inline-block mr-2">Obchodní podmínky</h5>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="terms" [(ngModel)]="termsConditions">
+                <label class="custom-control-label" for="terms">
+                  Potvrzuji svůj souhlas s <a href="javascript:void(0)">obchodními podmínkami</a>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div *ngIf="submitted02Auth && !termsConditions" class="row">
+            <div class="col-lg-12">
+              <span class="invalid-input">Je nutné potvrdit souhlas s obchodními podmínkami</span>
+            </div>
+          </div>
+ 
+          <!-- required info -->
+          <span class="font-italic small float-right mt-3">* datum vyzvednutí i souhlas s podmínkami jsou povinné</span>
+        </div>
+      </div>
+    </div>
+
+    <div footer class="row mx-0 w-100">
+      <div class="col-md-8 mb-2">
+        <div class="d-flex">
+          <button class="btn btn-outline-secondary mr-2" [routerLink]="['/eshop']">
+            <i class="mr-1 fas fa-arrow-left"></i>
+            Pokračovat v nákupu
+          </button>
+          <button class="btn btn-outline-secondary" (click)="cartState = CART01">
+            <i class="fas fa-step-backward"></i>
+            Zpět k položkám
+          </button>
+        </div>
+      </div>
+        
+      <div class="col-md-4 text-right">
+        <button class="btn btn-success text-nowrap" [disabled]="!itemList.length" (click)="continueToState03()">
+          <i class="fas fa-step-forward text-white"></i>
+          Pokračovat
+        </button>
+      </div>
+    </div>
+  </app-main-content>
+</div>
+
+<!-- Step 2 - Customer is not authenticated -->
+<div *ngIf="(!loggedUser || userCustomer) && cartState == CART02NonAuth" class="row pt-4">
+  <app-main-content class="col-lg-12" [noContent]="false">
+    <div header class="px-3">
+      <span class="my-auto">Přihlášení</span>
+    </div>
+    <div body>
+      <div class="row mx-3 py-3">
+        <div class="col-lg-12 text-center">
+          <h4>Pro pokračování je nutné se přihlásit</h4>
+          <div>
+            Náš systém umožňuje přijímat objednávky pečiva pouze pro přihlášené zákazníky.
+            Pokud u nás již máte účet, pro pokračování se přihlašte.
+            Pokud zatím účet nemáte, pro pokračování se zaregistrujte.
+          </div>
+
+          <h5 class="mt-4">Již máte účet?</h5>
+          <button class="btn btn-primary mt-1" [routerLink]="['/login']">
+            <i class="fas fa-sign-in-alt text-white"></i>
+            Přihlásit se
+          </button>
+
+          <h5 class="mt-4">Zatím nemáte účet? Registrace je zdarma a zabere pouze několik sekund.</h5>
+          <button class="btn btn-success mt-1" [routerLink]="['/register']">
+            <i class="fas fa-handshake text-white"></i>
+            Registrovat
+          </button>
+        </div>
+      </div>
+    </div>
+  </app-main-content>
+</div>
+
+<!-- Step 3 - Confirmation of order -->
+<div *ngIf="(!loggedUser || userCustomer) && cartState == CART03" class="row pt-4">
+  <app-main-content class="col-lg-12"
+    [footer]="true"
+    [noContent]="!itemList.length" 
+    [noContentText]="'Váš košík je prázdný!'">
+    <div header class="px-3">
+      <span class="my-auto">Rekapitulace objednávky</span>
+    </div>
+    <div body>
+      <div class="row mx-3 py-3">
+        <div class="col-md-6 mb-3">
+          <div class="row mb-2">
+            <h5 class="col-lg-11">Položky</h5>
+          </div>
+          
+          <div *ngFor="let item of itemList; let last = last" [ngClass]="{ 'border-bottom' : !last }" class="row mb-2">
+            <div class="col-lg-5 mb-2">
+              <img class="shadow img-thumbnail" [src]="'../../assets/' + item.pastryId + '.jpg'" alt="obrázek">
+            </div>
+            <div class="col-lg-7 mb-2">
+              <h6 class="font-weight-bold">{{item.name}}</h6>
+              <ul>
+                <li>{{item.quantity}} ks</li>
+                <li>{{item.totalCost | number:'1.2-2'}} Kč</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="col-lg-11 mt-4">
+            <h4 class="font-weight-bold">Celková cena: {{totalCost | number:'1.2-2'}} Kč</h4>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="row mb-2">
+            <h5 class="col-lg-11">Vaše údaje</h5>
+          </div>
+          <div class="row">
+            <h6 class="col-lg-5">Jméno a příjmení:</h6>
+            <h6 class="col-lg-7 font-weight-bold">{{loggedUser.name}} {{loggedUser.surname}}</h6>
+          </div>
+          <div class="row">
+            <h6 class="col-lg-5">E-mail:</h6>
+            <h6 class="col-lg-7 font-weight-bold">{{loggedUser.email}}</h6>
+          </div>
+          <div class="row">
+            <h6 class="col-lg-5">Datum narození:</h6>
+            <h6 class="col-lg-7 font-weight-bold">{{loggedUser.bornCZ}}</h6>
+          </div>
+          <div class="row mt-3 mb-2">
+            <h5 class="col-lg-12">Datum vyzvednutí</h5>
+          </div>
+          <div class="row">
+            <h6 class="col-lg-5">Vyzvedněte:</h6>
+            <h6 class="col-lg-7 font-weight-bold">{{newOrder.deliveryDateFormattedCZ}}</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div footer class="row mx-0 w-100">
+      <div class="col-md-8 mb-2">
+        <div class="d-flex">
+          <button class="btn btn-outline-secondary mr-2" [routerLink]="['/eshop']">
+            <i class="mr-1 fas fa-arrow-left"></i>
+            Pokračovat v nákupu
+          </button>
+          <button class="btn btn-outline-secondary" (click)="cartState = CART02Auth">
+            <i class="fas fa-step-backward"></i>
+            Zpět k údajům
+          </button>
+        </div>
+      </div>
+        
+      <div class="col-md-4 text-right">
+        <button class="btn btn-success text-nowrap" [disabled]="!itemList.length" (click)="createNewOrder()">
+          <i class="fas fa-shopping-cart text-white"></i>
+          Objednat
+        </button>
+      </div>
+    </div>
+  </app-main-content>
+</div>
+
+<!-- Step 4 - Final info -->
+<div *ngIf="(!loggedUser || userCustomer) && cartState == CART04" class="row pt-4">
+  <app-main-content class="col-lg-12" [noContent]="false">
+    <div header class="px-3">
+      <span class="my-auto">Potvrzení objednávky</span>
+    </div>
+    <div body>
+      <div class="row mx-3 py-3">
+        <div class="col-lg-12 text-center">
+          <h4>Děkujeme Vám za Vaši objednávku.</h4>
+          <div>Na e-mailovou adresu Vám bylo zasláno potvrzení objednávky. 
+            V případě jakéhokoliv dotazu nás neváhejte kontaktovat.
+            Položky z Vašeho košíku byly odebrány a nyní se můžete vrátit zpět do našeho E-shopu.
+          </div>
+          <button class="btn btn-primary mt-3" [routerLink]="['/eshop']">
+            <i class="fas fa-arrow-left text-white"></i>
+            Zpět do E-shopu
+          </button>
+        </div>
+      </div>
+    </div>
+  </app-main-content>
+</div>
+
+<!-- Modal dialog for removing the item -->
+<app-modal-dialog [_config]="modalConfigs[0]" (_confirm)="removeItem()"></app-modal-dialog>
+<!-- Modal dialog for clearing the cart -->
+<app-modal-dialog [_config]="modalConfigs[1]" (_confirm)="clearCart()"></app-modal-dialog>

@@ -1,0 +1,20 @@
+<div class="modal fade" [id]="config.targetName">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h4 class="modal-title">{{config.title}}</h4>
+      <button type="button" class="close" data-dismiss="modal">&times;</button>
+    </div>
+    <!-- Modal body -->
+    <div class="modal-body">{{config.question}}</div>
+    <!-- Modal footer -->
+    <div class="modal-footer d-flex justify-content-center">
+      <!-- Cancellation button -->
+	  <button type="button" class="btn btn-secondary mx-3 col-3" data-dismiss="modal" [className]="config.buttons[0].HTMLclass" [routerLink]="config.buttons[0].route ? [config.buttons[0].route] : []">{{config.buttons[0].title}}</button>
+      <!-- Confirmation button --> 
+      <button type="button" class="btn btn-secondary mx-3 col-3" data-dismiss="modal" [className]="config.buttons[1].HTMLclass" [routerLink]="config.buttons[1].route ? [config.buttons[1].route] : []" (click)="confirm()" *ngIf="config.isConfirmatory">{{config.buttons[1].title}}</button>
+    </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,149 @@
+/* Global */
+* {
+  font-family: 'Roboto', Arial, sans-serif;
+  color: #616161;
+  box-sizing: border-box;
+  outline: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+	height: 100vh !important;
+	background-color: rgb(232,232,232);
+}
+
+.allButFooter {
+  min-height: calc(100vh - 200px);
+}
+
+a, button {
+  cursor: pointer !important;
+  text-decoration: none !important;
+}
+
+a, button, .item-hover {
+  transition: 0.25s !important;
+}
+
+a:hover, .item-hover:hover, .btn-light:hover {
+  opacity: 0.8;
+}
+
+button:focus {
+  outline:0;
+}
+
+.btn-light:hover, .active {
+  -webkit-box-shadow: 0 4px 8px 0 rgba(0,0,0,0.15);
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.15);
+}
+
+/* Buttons */
+.btn {
+  padding: 6px 11px;
+}
+
+.btn-header, .btn-item {
+  font-size: 12px !important;
+  padding: 1px 8px !important;
+  min-width: 75px;
+  margin: auto 0px;
+}
+
+.btn-item {
+  opacity: 0.6;
+}
+
+/* Icons */
+.dropdown-item .icon {
+  margin-right: -1px !important;
+}
+
+.icon {
+  width: 20px !important;
+  margin: auto 4px auto 0 !important;
+  text-align: center !important;
+}
+
+/* Forms */
+input {
+  width: auto;
+  height: 42px;
+  font-size: 12pt;
+  -webkit-box-shadow: 0 2px 8px 0 rgba(0,0,0,0.2);
+  box-shadow: 0px 2px 8px 0px rgba(0,0,0,0.2);
+}
+
+select {
+  height: auto;
+  width: auto !important;
+  padding: 3px !important;
+  font-size: 11pt !important;
+  -webkit-box-shadow: 0 2px 8px 0 rgba(0,0,0,0.2);
+  box-shadow: 0px 2px 8px 0px rgba(0,0,0,0.2);
+}
+
+.label {
+  width: 130px !important;
+  text-align: right;
+  font-weight: bold;
+  margin: auto 24px auto 0;
+}
+
+.invalid-input {
+  color: red;
+  font-weight: 300;
+  font-size: 14px;
+  margin: 4px 4px 0 4px;
+}
+
+/* Modal window */
+.modalWindow .modal-content {
+  border-radius: 14px !important;
+  -webkit-box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
+  box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
+  animation-name: modalDialog;
+  animation-duration: 0.25s;
+  animation-timing-function: ease-out;
+}
+
+@keyframes modalDialog {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Accordion */
+.accordion-class {
+  overflow: visible !important;  /* to be able to see the dropdown-menu */
+}
+
+.accordion-class, .accordion-class .card-header, .accordion-class .card-body {
+  margin: 0;
+  padding: 0;
+  border: 0px;
+  min-height: 42px !important;
+  background-color: inherit !important;
+}
+
+.accordion-class .card-body {
+  padding: 10px 20px;
+}
+
+.accordion-class:hover {
+  z-index: 10;
+  opacity: 1 !important;
+  border-radius: 10px !important;
+  -webkit-box-shadow: 0 4px 8px 0 rgba(0,0,0,0.15) !important;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.15) !important;
+}
+
+.accordion-class:hover .btn-item {
+  opacity: 1;
+}

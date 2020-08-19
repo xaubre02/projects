@@ -1,0 +1,23 @@
+.head-row {
+  height: 100px!important;
+}
+
+.card-header {
+  min-height: 49px;
+}
+
+.red-header {
+  background-color: #ffcccc;
+}
+
+.red-body {
+  background-color: #ffe6e6;
+}
+
+.green-header {
+  background-color: #d6f5d6;
+}
+
+.green-body {
+  background-color: #e6ffe6;
+}

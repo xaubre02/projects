@@ -1,0 +1,17 @@
+<ng-template #modalDialog let-modal>
+  <div class="modal-header">
+	<h4 class="modal-title font-weight-bold {{color}}">
+      <i class="my-auto mx-1 {{icon}} {{color}}"></i>
+      {{title}}
+	</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body text-dark font-weight-bold">
+    {{alert.text}}
+  </div>
+  <div class="modal-footer d-flex justify-content-center">
+    <button type="button" class="btn btn-dark mx-3 col-3" (click)="processClose(modal)">Zavřít</button>
+  </div>
+</ng-template>

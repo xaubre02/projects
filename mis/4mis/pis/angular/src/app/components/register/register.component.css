@@ -1,0 +1,10 @@
+.row {
+  height: 100vh!important;
+}
+
+.reg-form {
+  border-radius: 14px 14px 14px 14px;
+  -webkit-box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
+  box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
+  background-color: white;
+}

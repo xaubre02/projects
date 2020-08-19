@@ -1,0 +1,28 @@
+.list-item {
+  height: 42px;
+}
+
+.list-item:not(.disabled):hover {
+  color: black;
+  opacity: 1;
+  border-radius: 10px;
+  -webkit-box-shadow: 0 4px 8px 0 rgba(0,0,0,0.15) !important;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.15) !important;
+}
+
+h5 {
+  color: inherit;
+}
+
+.list-item:hover .btn-item {
+  opacity: 1;
+}
+
+a:active {
+	background-color: inherit;
+}
+
+.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}

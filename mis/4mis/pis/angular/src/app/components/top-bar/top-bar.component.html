@@ -1,0 +1,107 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+  <a class="navbar-brand" [routerLink]="[eshopPage ? '/eshop' : '']">Pekárna AABF</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarItems" aria-controls="navbarItems" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarItems">
+    <!-- Left-side navigation menu -->
+    <ul *ngIf="eshopPage" class="navbar-nav mr-auto"></ul>
+    <ul *ngIf="!eshopPage && userIsAuthorized" class="navbar-nav mr-auto">
+      <li class="nav-item px-1" [ngClass]="{'active': storagePage}">
+        <a class="nav-link" [routerLink]="['/storage']">Sklad</a>
+      </li>
+      <li class="nav-item px-1" [ngClass]="{'active': expeditionPage}">
+        <a class="nav-link" [routerLink]="['/expedition']">Výdejna</a>
+      </li>
+      <li *ngIf="userManager || userPastryStoreman || userMaterialStoreman" class="nav-item px-1" [ngClass]="{'active': ordersPage}">
+        <a class="nav-link" [routerLink]="['/orders']">Objednávky</a>
+      </li>
+      <li class="nav-item px-1" [ngClass]="{'active': productionPage}">
+        <a class="nav-link" [routerLink]="['/production']">Výroba</a>
+      </li>
+      <li *ngIf="userManager" class="nav-item px-1" [ngClass]="{'active': managementPage}">
+        <a class="nav-link" [routerLink]="['/management']">Správa</a>
+      </li>
+    </ul>
+    <!-- Right-side navigation menu -->
+    <ul class="navbar-nav justify-content-end mx-2">
+      <li *ngIf="eshopPage && userIsAuthorized" class="nav-item mx-1">
+        <a class="nav-link" [routerLink]="['/']" ngbTooltip="Informační systém" container="body">
+          <i class="fas fa-coins text-light h6"></i>
+        </a>
+      </li>
+      <li *ngIf="!eshopPage || allowEshop" class="nav-item mx-1">
+        <a class="nav-link" [routerLink]="['/eshop']" ngbTooltip="E-shop" container="body">
+          <i class="fas fa-gift text-light h6"></i>
+        </a>
+      </li>
+      <li *ngIf="eshopPage && !userIsAuthorized" class="nav-item mx-1">
+        <a class="nav-link position-relative" [routerLink]="['/eshop/cart']" ngbTooltip="Nákupní košík" container="body">
+          <i class="fas fa-shopping-basket text-light h6"></i>
+          <span class="count position-absolute px-1 rounded-circle font-weight-bold" *ngIf="cartItemsCount">{{cartItemsCount}}</span>
+        </a>
+      </li>
+      <li class="nav-item mx-1 dropdown">
+        <a class="nav-link" data-toggle="dropdown" ngbTooltip="Můj účet" container="body" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-user text-light h6"></i>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right">
+          <div class="dropdown-header">
+            <i class="fas fa-user border-0"></i>
+            Můj účet
+          </div> 
+          <a class="dropdown-item" *ngIf="!userIsLogged" (click)="login()">
+            <i class="fas fa-key mr-1"></i>
+            Přihlásit se
+          </a>
+          <a class="dropdown-item" *ngIf="!userIsLogged" [routerLink]="['/register']">
+            <i class="fas fa-user-plus mr-1"></i>
+            Registrovat se
+          </a>
+          <a class="dropdown-item" *ngIf="userIsLogged" [routerLink]="['/eshop/profile']">
+            <i class="fas fa-address-book"></i>
+            Profil
+          </a>
+          <a class="dropdown-item" *ngIf="userIsLogged && userCustomer" [routerLink]="['/eshop/orders']">
+            <i class="fas fa-clipboard-list"></i>
+            Objednávky
+          </a>
+          <a class="dropdown-item" *ngIf="userIsLogged" (click)="logout()">
+            <i class="fas fa-lock"></i>
+            Odhlásit se
+          </a>
+        </div>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<header *ngIf="eshopPage && !allowEshop" class="masthead text-center shadow" 
+style="background:url('../../assets/ales-krivec-compressed.jpg')no-repeat center center; background-size:cover;">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xl-9 mx-auto">
+        <div class="my-5">
+          <h1 class="text-white pt-3 pb-1" style="font-family: Comic Sans, Comic Sans MS, cursive; text-shadow: 0px 1px 3px #ffffff;">AABF</h1>
+          <h3 class="text-white pb-3" style="font-family: Comic Sans, Comic Sans MS, cursive; text-shadow: 0px 1px 2px #ffffff;">
+            Čerstvé a křupavé pečivo
+          </h3>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<header *ngIf="homePage" class="masthead text-center shadow" 
+style="background:url('../../assets/roman-kraft-compressed.jpg')no-repeat center center; background-size:cover;">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-xl-9 mx-auto">
+        <h1 class="my-5 py-3 text-white" style="font-family: Comic Sans, Comic Sans MS, cursive; text-shadow: 0px 1px 3px #ffffff;">AABF IS</h1>
+      </div>
+    </div>
+  </div>
+</header>

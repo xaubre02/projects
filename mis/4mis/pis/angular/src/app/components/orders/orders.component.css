@@ -1,0 +1,29 @@
+.label {
+  width: 170px !important;
+}
+
+.form-control {
+  width: 215px !important
+}
+
+.min-width-100 {
+  min-width: 100px !important;
+}
+
+.width-170 {
+  width: 170px !important;
+}
+
+.state {
+  font-weight: 300;
+  font-size: 14px;
+}
+
+a:active {
+  background-color: inherit;
+}
+
+.status {
+  font-weight: 300;
+  font-size: 14px;
+}

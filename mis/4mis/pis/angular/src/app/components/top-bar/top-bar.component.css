@@ -1,0 +1,37 @@
+/* Top Bar */
+.navbar {
+  -webkit-box-shadow: 0 4px 8px 0 rgba(0,0,0,0.15);
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.15);
+}
+
+.count {
+	left: 18px;
+	bottom: 4px;
+	font-size: 10px;
+	background-color: greenyellow;
+	color: black;
+	opacity: inherit;
+}
+
+a:active {
+	background-color: inherit;
+}
+
+.dropdown-menu {
+	min-width: auto !important;
+}
+
+.dropdown-item i, .dropdown-header i {
+	width: 16px;
+}
+
+.dropdown-header, .dropdown-header i {
+	color: grey;
+	border-bottom: 1px solid lightgray;
+	margin-bottom: 6px;
+	font-weight: bold;
+}
+
+.btn-light:hover, .active {
+  border-radius: 8px !important;
+}

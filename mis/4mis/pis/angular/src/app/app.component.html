@@ -1,0 +1,13 @@
+<div class="allButFooter">
+  <!-- top-bar -->
+  <app-top-bar *ngIf="!loginPage && !registerPage"></app-top-bar>
+
+  <!-- body -->
+  <div class="container">
+    <app-alert></app-alert>
+    <router-outlet></router-outlet>
+  </div>
+</div>
+
+<!-- footer -->
+<app-footer *ngIf="!loginPage && !registerPage"></app-footer>

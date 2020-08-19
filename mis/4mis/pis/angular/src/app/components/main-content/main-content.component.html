@@ -1,0 +1,21 @@
+<div class="card shadow w-100 mb-5">
+  <div *ngIf="!loading" class="card-header px-4" [ngClass]="{'red-header': bgColor === 'red', 'green-header': bgColor === 'green'}">
+    <div class="row m-0">
+      <ng-content select="[header]"></ng-content>
+    </div>
+  </div>
+  <div class="card-body px-4" [ngClass]="{'red-body': bgColor === 'red', 'green-body': bgColor === 'green'}">
+    <div *ngIf="loading" class="row head-row">
+      <span class="m-auto text-muted spinner-border spinner-border-lg"></span>
+    </div>
+    <div *ngIf="!loading && noContent" class="row head-row">
+      <h2 class="m-auto text-muted">{{noContentText}}</h2>
+    </div>
+    <ng-content *ngIf="!loading" select="[body]"></ng-content>
+  </div>
+  <div *ngIf="!loading && footer" class="card-footer px-4" [ngClass]="{'red-header': bgColor === 'red', 'green-header': bgColor === 'green'}">
+    <div class="row m-0">
+      <ng-content select="[footer]"></ng-content>
+    </div>
+  </div>
+</div>

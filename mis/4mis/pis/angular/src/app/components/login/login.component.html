@@ -1,0 +1,31 @@
+<div class="row justify-content-center">
+  <div class="d-flex align-items-center">
+	<form [formGroup]="formGroup" (ngSubmit)="onSubmit()" class="p-4">
+		<h2 class="text-center m-4 mb-5">Přihlášení</h2>
+		<div class="form-group m-4">
+			<input type="text" placeholder="E-mailová adresa" formControlName="username" class="form-control rounded-pill" [ngClass]="{ 'is-invalid': incorrect || (submitted && form.username.errors) }"/>
+			<div *ngIf="submitted && form.username.errors" class="invalid-feedback">
+				<div *ngIf="form.username.errors.required" class="mx-2 text-danger">Zadejte uživatelské jméno</div>
+			</div>
+		</div>
+		<div class="form-group m-4">
+			<input type="password" placeholder="Heslo" formControlName="password" class="form-control rounded-pill" [ngClass]="{ 'is-invalid': incorrect || (submitted && form.password.errors) }"/>
+			<div *ngIf="submitted && form.password.errors" class="invalid-feedback">
+				<div *ngIf="form.password.errors.required" class="mx-2 text-danger">Zadejte heslo</div>
+			</div>
+			<div *ngIf="incorrect" class="invalid-feedback">
+				<div class="mx-2 text-danger">Neplatné uživatelské jméno nebo heslo!</div>
+			</div>
+		</div>
+		<div class="form-group text-center">
+			<div class="p-2">
+				<a class="btn btn-link m-auto text-secondary text-decoration-none" [routerLink]="['/register']">Vytvořit nový účet</a>
+			</div>
+			<button [disabled]="loading" class="btn btn-dark col-4 rounded-pill py-2">
+				<span *ngIf="loading" class="spinner-border spinner-border-sm mr-1 text-white"></span>
+				<span *ngIf="!loading" class="text-white">Přihlásit</span>
+			</button>
+		</div>
+	</form>
+  </div>   
+</div>

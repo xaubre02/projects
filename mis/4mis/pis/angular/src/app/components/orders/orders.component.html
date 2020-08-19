@@ -1,0 +1,812 @@
+<div *ngIf="!userManager && !userMaterialStoreman && !userPastryStoreman && !userCustomer" class="row pt-4">
+  <h4>Nejste oprávněni zobrazit tuto stránku</h4>
+</div>
+
+<div *ngIf="userManager || userMaterialStoreman || userPastryStoreman || userCustomer" class="row pt-4">
+  <div class="col-lg-3">
+    <div class="sticky-top">
+      <app-side-menu #sideMenu [title]="'Možnosti'" [ignoreStorage]='true' [storageKey]="'ordersMenu'" 
+      [defaultIndex]="userMaterialStoreman ? 1 : 0">
+        <div body>
+          <button *ngIf="userManager || userCustomer || userPastryStoreman" class="{{sideMenu.buttonClass}}" 
+          (click)="sideMenu.setIndex(0)" [ngClass]="{'active': sideMenu.index === 0}">
+            <i class="icon fas fa-list-ul"></i>Objednávky pečiva
+          </button>
+          <button *ngIf="userManager || userMaterialStoreman" class="{{sideMenu.buttonClass}}" 
+          (click)="sideMenu.setIndex(1)" [ngClass]="{'active': sideMenu.index === 1}">
+            <i class="icon fas fa-list-ul"></i>Objednávky surovin
+          </button>
+          <button *ngIf="userManager || userCustomer" class="{{sideMenu.buttonClass}}" (click)="openDialog(dialog, 'newOrder')">
+            <i class="icon fas fa-plus"></i>Objednat pečivo
+          </button>
+          <button *ngIf="userManager" class="{{sideMenu.buttonClass}}" (click)="openDialog(matOrderDialog, 'newMatOrder')">
+            <i class="icon fas fa-plus"></i>Objednat suroviny
+          </button>
+        </div>
+      </app-side-menu>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <app-main-content *ngIf="sideMenu.index === 0"
+      [noContent]="!pastryOrderList.length" 
+      [noContentText]="'Nejsou dostupné žádné objednávky'"  
+      [loading]="loading">
+      <div header class="px-3 d-flex justify-content-between w-100">
+        <div>
+          <b class="d-block">Objednávky pečiva</b>
+          <select [(ngModel)]="selectedState" class="form-control" (ngModelChange)="loadOrdersByState()">
+            <option [ngValue]="null" class="text-primary">Všechny</option>
+            <option value="created">Vytvořené</option>
+            <option value="prepared">Připravené</option>
+            <option value="delivered">Vyzvednuté</option>
+            <option value="canceled">Zrušené</option>
+          </select>
+        </div>
+        <button class="btn btn-header btn-primary" (click)="openDialog(dialog, 'newOrder')">Objednat pečivo</button>
+      </div>
+      <div body>
+        <div class="px-2" *ngIf="pastryOrderList.length">
+          <a class="status text-primary ml-2" (click)="accordion.expandAll()">Rozbalit vše</a>
+          <a class="status text-primary ml-2" (click)="accordion.collapseAll()">Zabalit vše</a>
+        </div>
+        <ngb-accordion #accordion [destroyOnHide]="false">
+          <ngb-panel *ngFor="let order of pastryOrderList; trackBy: trackByOrder; let i = index; let last = last" 
+          [cardClass]="'accordion-class px-3 ' + (last ? '' : 'border-bottom')">
+            <ng-template ngbPanelHeader let-opened="opened">
+              <div class="d-flex align-items-center justify-content-between py-2">
+                <div class="d-flex align-items-center justify-content-between">
+                  <button ngbPanelToggle class="btn btn-link p-0 mr-2">
+                    <i class="fas fa-angle-{{opened ? 'down' : 'right'}}"></i>  
+                  </button>
+                  <div>
+                    <h6 class="m-0 text-dark font-weight-bold">{{order.orderId}}</h6>
+                    <h6 class="m-0 state">{{getStateCz(order)}}</h6>
+                  </div>
+                </div>
+                <div *ngIf="couldBeEdited(order) && (userManager || userPastryStoreman)" class="d-flex justify-content-between h-100">
+                  <div class="dropdown my-auto">
+                    <button class="d-block btn-item btn btn-secondary" data-toggle="dropdown">Možnosti</button>
+                    <div class="dropdown-menu">
+                      <a *ngIf="userManager || userPastryStoreman" class="dropdown-item text-success" (click)="openDialog(dialog, 'deliverOrder', i)">
+                        <i class="icon fas fa-user-edit text-success"></i>
+                        Předat zákazníkovi
+                      </a>
+                      <a *ngIf="userManager || userPastryStoreman" class="dropdown-item text-primary" (click)="openDialog(dialog, 'editOrder', i)">
+                        <i class="icon fas fa-cog text-primary"></i>
+                        Upravit
+                      </a>
+                      <a *ngIf="userManager" class="dropdown-item text-danger" (click)="openDialog(dialog, 'cancelOrder', i)">
+                        <i class="icon fas fa-times text-danger"></i>
+                        Zrušit
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="userCustomer && couldBeEdited(order) && order.isTomorrowOrLater" class="h-100">
+                  <div class="dropdown my-auto">
+                    <button class="d-block btn-item btn btn-secondary" data-toggle="dropdown">Možnosti</button>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item text-danger" (click)="openDialog(dialog, 'cancelOrder', i)">
+                        <i class="icon fas fa-times text-danger"></i>
+                        Zrušit
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="userCustomer && couldBeEdited(order) && !order.isTomorrowOrLater" class="h-100">
+                  <span>Již nelze zrušit</span>
+                </div>
+              </div>
+            </ng-template>
+            <ng-template ngbPanelContent>
+              <div class="row">
+                <div class="col-md-4">
+                  <span>Stav objednávky:</span>
+                </div>
+                <div class="col-md-8">
+                  <span class="font-weight-bold">{{getStateCz(order)}}</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <span>Cena objednávky:</span>
+                </div>
+                <div class="col-md-8">
+                  <span class="font-weight-bold">{{order.price | number:'1.2-2'}} Kč</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <span>Datum vyzvednutí:</span>
+                </div>
+                <div class="col-md-8">
+                  <span *ngIf="!order.deliveryDate" class="font-weight-bold">Datum zatím nebylo určeno</span>
+                  <span *ngIf="order.deliveryDate" class="font-weight-bold">{{order.deliveryDateFormattedCZ}}</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <span>Zákazník:</span>
+                </div>
+                <div class="col-md-8">
+                  <span class="font-weight-bold">{{order.customer.name}} {{order.customer.surname}} ({{order.customer.email}})</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <span>Položky:</span>
+                </div>
+                <div class="col-md-8">
+                  <div *ngIf="!order.items || !order.items.length">
+                    <span class="font-weight-bold">Žádné položky</span>
+                  </div>
+                  <div *ngIf="order.items?.length">
+                    <div *ngFor="let item of order.items">
+                      <span class="font-weight-bold"><i class="far fa-circle fa-xs"></i> {{item.name}}</span>
+                      <ul>
+                        <li>
+                          <span class="min-width-100 d-inline-block">Počet kusů:</span>
+                          <span class="font-weight-bold">{{item.count}}</span>
+                        </li>
+                        <li>
+                          <span class="min-width-100 d-inline-block">Cena za kus:</span>
+                          <span class="font-weight-bold">{{item.cost}} Kč</span>
+                        </li>
+                        <li>
+                          <span class="min-width-100 d-inline-block">Cena celkem:</span>
+                          <span class="font-weight-bold">{{item.cost * item.count}} Kč</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngb-panel>
+        </ngb-accordion>
+      </div>
+    </app-main-content>
+
+    <app-main-content *ngIf="sideMenu.index === 1"
+      [noContent]="!materialOrderList.length"
+      [noContentText]="'Nejsou dostupné žádné objednávky'"
+      [loading]="loading">
+      <div header class="px-3 d-flex justify-content-between w-100">
+        <div>
+          <b class="d-block">Objednávky surovin</b>
+          <select [(ngModel)]="deliveredOrder" class="form-control" (ngModelChange)="loadMaterialOrdersByState()">
+            <option [ngValue]="null" class="text-primary">Všechny</option>
+            <option [ngValue]="false">Aktivní</option>
+            <option [ngValue]="true">Přijaté</option>
+          </select>
+        </div>
+        <button class="btn btn-header btn-primary" (click)="openDialog(matOrderDialog, 'newMatOrder')">Objednat suroviny</button>
+      </div>
+      <div body>
+        <div class="px-2" *ngIf="materialOrderList.length">
+          <a class="status text-primary ml-2" (click)="accordion.expandAll()">Rozbalit vše</a>
+          <a class="status text-primary ml-2" (click)="accordion.collapseAll()">Zabalit vše</a>
+        </div>
+        <ngb-accordion #accordion [destroyOnHide]="false">
+          <ngb-panel *ngFor="let order of materialOrderList; trackBy: trackByMaterialOrder; let i = index; let last = last" 
+          [cardClass]="'accordion-class px-3 ' + (last ? '' : 'border-bottom')">
+            <ng-template ngbPanelHeader let-opened="opened">
+              <div class="d-flex align-items-center justify-content-between py-2">
+                <div class="d-flex align-items-center justify-content-between">
+                  <button ngbPanelToggle class="btn btn-link p-0 mr-2">
+                    <i class="fas fa-angle-{{opened ? 'down' : 'right'}}"></i>  
+                  </button>
+                  <div>
+                    <h6 class="m-0 text-dark font-weight-bold">{{order.orderId}}</h6>
+                    <h6 class="m-0 state">{{getDeliveredCz(order)}}</h6>
+                  </div>
+                </div>
+                <div *ngIf="!isDelivered(order)" class="d-flex justify-content-between h-100">
+                  <div class="dropdown my-auto">
+                    <button class="d-block btn-item btn btn-secondary" data-toggle="dropdown">Možnosti</button>
+                    <div class="dropdown-menu">
+                      <a *ngIf="(userManager || userMaterialStoreman)" 
+                      class="dropdown-item text-success" (click)="openDialog(matOrderDialog, 'acceptMatOrder', i)">
+                        <i class="icon fas fa-user-edit text-success"></i>
+                        Přijmout
+                      </a>
+                      <a *ngIf="userManager" class="dropdown-item text-danger" (click)="openDialog(matOrderDialog, 'cancelMatOrder', i)">
+                        <i class="icon fas fa-times text-danger"></i>
+                        Smazat
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+            <ng-template ngbPanelContent>
+              <div class="row">
+                <div class="col-md-4">
+                  <span>Stav objednávky:</span>
+                </div>
+                <div class="col-md-8">
+                  <span class="font-weight-bold">{{getDeliveredCz(order)}}</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <span>Datum vytvoření:</span>
+                </div>
+                <div class="col-md-8">
+                  <span *ngIf="!order.dateOfCreation" class="font-weight-bold">Datum nebylo určeno</span>
+                  <span *ngIf="order.dateOfCreation" class="font-weight-bold">{{order.dateOfCreationFormattedCZ}}</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <span>Položky(suroviny):</span>
+                </div>
+                <div class="col-md-8">
+                  <div *ngIf="!order.materials || !order.materials.length">
+                    <span class="font-weight-bold">Žádné položky</span>
+                  </div>
+                  <div *ngIf="order.materials?.length">
+                    <div *ngFor="let material of order.materials">
+                      <span class="font-weight-bold"><i class="far fa-circle fa-xs"></i> {{material.name}}</span>
+                      <ul>
+                        <li>
+                          <span class="min-width-100 d-inline-block">Počet kg:</span>
+                          <span class="font-weight-bold">{{material.amount}}</span>
+                        </li>
+                        <li>
+                          <span class="min-width-100 d-inline-block">Cena za kg:</span>
+                          <span class="font-weight-bold">{{material.cost}} Kč</span>
+                        </li>
+                        <li>
+                          <span class="min-width-100 d-inline-block">Cena celkem:</span>
+                          <span class="font-weight-bold">{{material.cost * material.amount}} Kč</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngb-panel>
+        </ngb-accordion>
+      </div>
+    </app-main-content>
+  </div>
+</div>
+
+
+
+<!-- MODAL dialogs -->
+<!-- Pastry order modal dialog -->
+<ng-template #dialog let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-dark">{{dialogConfig.title}}</h4>
+    <button type="button" class="close" (click)="onDialogClose(modal, dialogConfig.type)">
+      <span aria-hidden="false">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <!-- New/Edit Pastry order -->
+    <div *ngIf="dialogConfig.type === 'newOrder' || dialogConfig.type === 'editOrder'" class="px-3">
+      <!-- Manager could edit all states of order -->
+      <div *ngIf="(userManager || userPastryStoreman) && dialogConfig.type === 'editOrder'" class="mb-3">
+        <div class="d-flex">
+          <span class="label">Stav</span>
+          <select [(ngModel)]="currentOrder.state" class="form-control">
+            <option value="created">Vytvořená</option>
+            <option value="prepared">Připravená</option>
+            <option value="delivered">Vyzvednutá</option>
+            <option value="canceled">Zrušená</option>
+          </select>
+        </div>
+      </div>
+      <!-- Manager could select customer -->
+      <div *ngIf="userManager || userPastryStoreman">
+        <div class="d-flex">
+          <span class="label">Zákazník</span>
+          <select [(ngModel)]="currentOrderCustomerId" class="form-control" (ngModelChange)="setCurrentOrderCustomer()"
+          [ngClass]="{ 'is-invalid': submitted && !currentOrderCustomerId }">
+            <option [ngValue]="null">Zvolte zákazníka</option>
+            <option *ngFor="let customer of customersList" [ngValue]="customer.userId">
+              {{customer.surname}} {{customer.name}}
+            </option>
+          </select>
+        </div>
+        <div *ngIf="submitted && !currentOrderCustomerId" class="d-flex">
+          <span class="label">&nbsp;</span>
+          <span class="d-block invalid-input">Zvolte zákazníka</span>
+        </div>
+      </div>
+      <!-- Manager would get displayed email of selected customer -->
+      <div *ngIf="(userManager || userPastryStoreman) && currentOrder.customer?.userId" class="d-flex mt-3">
+        <span class="label">E-mail</span>
+        <input type="text" [ngModel]="currentOrder.customer.email" class="form-control" readonly/>
+      </div>
+      <!-- Manager could edit the price manually, customer gets computed price according to items -->
+      <div class="mt-3">
+        <div class="d-flex">
+          <span class="label text-nowrap">Cena (Kč)&nbsp;
+            <a class="badge badge-pill badge-primary text-center" href="javascript:void(0)"
+            ngbPopover="Celková cena je automaticky dopočítávána podle zvolených položek" container="body" placement="top">?</a>
+          </span>
+          <div *ngIf="userManager || userPastryStoreman">
+            <input type="number" [(ngModel)]="currentOrder.price" class="form-control" min="0"
+            [ngClass]="{ 'is-invalid': submitted && currentOrder.price === 0 }"/>
+          </div>
+          <div *ngIf="userCustomer">
+            <span>{{currentOrder.price}},-</span>
+          </div>
+        </div>
+        <div *ngIf="submitted && currentOrder.price === 0" class="d-flex">
+          <span class="label">&nbsp;</span>
+          <span *ngIf="userManager || userPastryStoreman" class="d-block invalid-input">Zadejte cenu objednávky</span>
+          <span *ngIf="userCustomer" class="d-block invalid-input">Nulová cena, zkontrolujte prosím položky</span>
+        </div>
+      </div>
+      <!-- Delivery date, min tomorrow -->
+      <div class="mt-3">
+        <div class="d-flex">
+          <span class="label text-nowrap">Datum vyzvednutí&nbsp;
+            <a class="badge badge-pill badge-primary text-center" href="javascript:void(0)"
+            [ngbPopover]="deliveryDatePopover" container="body" placement="top">?</a>
+            <ng-template #deliveryDatePopover>
+              Datum vyzvednutí lze přizpůsobit Vašemu požadavku.
+              Výchozí datum vyzvednutí je naplánováno na následující den.
+              V případě neplánovaného zpoždění budete informováni o změně termínu vyzvednutí.
+            </ng-template>
+          </span>
+          <div>
+            <app-date-picker #deliveryDate 
+            [(date)]="currentOrder.deliveryDateObject" 
+            [submitted]="submitted" 
+            [disableWeekend]="true" 
+            [tomorrowValidation]="dialogConfig.type=='newOrder' ? true : false"
+            [startDate]="currentOrder.minDate" 
+            [minDate]="dialogConfig.type=='newOrder' ? currentOrder.minDate : undefined" 
+            [maxDate]="currentOrder.maxDate">
+            </app-date-picker>
+          </div>
+        </div>
+        <div *ngIf="submitted && !deliveryDate.isTomorrowOrLater && dialogConfig.type=='newOrder'" class="d-flex">
+          <span class="label">&nbsp;</span>
+          <span class="d-block invalid-input">Nejbližší možný termín vyzvednutí je {{currentOrder.tomorrow | date: 'dd.MM.yyyy'}}</span>
+        </div>
+        <div *ngIf="submitted && !deliveryDate.isValid && dialogConfig.type=='editOrder'" class="d-flex">
+          <span class="label">&nbsp;</span>
+          <span class="d-block invalid-input">Zadejte platné datum</span>
+        </div>
+      </div>
+      <!-- New item button -->
+      <div class="d-flex mt-3">
+        <div class="label my-1">Položky</div>
+        <button *ngIf="availableCurrentOrderPastry.length && currentOrder.items.length < pastryList.length" 
+        class="btn btn-success btn-header my-1" (click)="currentOrderAddPastry()">
+          Přidat pečivo
+        </button>
+      </div>
+      <!-- Items list managing -->
+      <div class="d-flex mt-2">
+        <i *ngIf="!pastryList.length" class="my-1 text-danger">Žádné pečivo není k dispozici</i>
+        <div *ngIf="pastryList.length" class="w-100">
+          <div *ngFor="let pastry of currentOrder.items; let i = index" class="mb-2 pt-2 border-top">
+            <div class="d-flex justify-content-between mb-1">
+              <select *ngIf="pastry.pastryId === -1" class="form-control width-170 mr-1" 
+              [(ngModel)]="pastry.pastryId" (ngModelChange)="selectCurrentOrderItem(pastry.pastryId)">
+                <option [ngValue]="-1">Zvolte pečivo</option>
+                <option *ngFor="let avaiPastry of availableCurrentOrderPastry" [ngValue]="avaiPastry.pastryId">
+                  {{avaiPastry.name}}
+                </option>
+              </select>
+              <div *ngIf="pastry.pastryId !== -1" class="my-auto font-weight-bold width-170 mr-1 d-flex justify-content-start">
+                <span>{{(i + 1) + ')'}}&nbsp;</span>
+                <span>{{pastry.name}}</span>
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <div class="d-flex">
+                  <app-number-spinner [(value)]="pastry.count" [initValue]="pastry.count" (valueChange)="setCurrentOrderPrice(pastry)" class="m-0">
+                  </app-number-spinner>
+                  <span class="my-auto mr-2">Ks</span>
+                </div>
+                
+                <button class="btn btn-link p-0 my-auto" (click)="currentOrderRemovePastry(i); setCurrentOrderPrice(pastry)" 
+                ngbTooltip="Odstranit položku" container="body">
+                  <i class="fas fa-times-circle fa-sm text-danger"></i>
+                </button>
+              </div>
+            </div>
+
+            <div *ngIf="pastry.pastryId !== -1" class="d-flex w-100 justify-content-between">
+              <div>
+                <span>Cena/Kus</span>
+                <span class="font-weight-bold"> {{pastry.cost | number:'1.2-2'}}Kč</span>
+              </div>
+              <div>
+                <span>Cena celkem</span>
+                <span class="font-weight-bold"> {{(pastry.count * pastry.cost) | number:'1.2-2'}}Kč</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-center">
+            <span *ngIf="submitted && currentOrder.items.length === 0" class="d-block invalid-input">
+              Zvolte položky(pečivo) objednávky
+            </span>
+            <span *ngIf="submitted && currentOrder.items.length && !currentOrder.gotItems" class="d-block invalid-input w-100">
+              Zadejte množství zvoleného pečiva
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- required info -->
+      <span class="font-italic small float-right mt-3">* všechna pole jsou povinná</span>
+    </div>
+
+    <!-- Deliver order -->
+    <div *ngIf="dialogConfig.type === 'deliverOrder'" class="px-3">
+      <h5 class="font-weight-bold mb-5">Přejete si předat objednávku "{{currentOrder.orderId}}"?</h5>
+
+      <div class="row mb-2">
+        <div class="col-md-5">
+          <span>Stav objednávky:</span>
+        </div>
+        <div class="col-md-7">
+          <span class="font-weight-bold {{currentOrder.state == 'canceled' ? 'text-danger' : ''}}">{{getStateCz(currentOrder)}}</span>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-5">
+          <span>Cena objednávky:</span>
+        </div>
+        <div class="col-md-7">
+          <span class="font-weight-bold">{{currentOrder.price | number:'1.2-2'}} Kč</span>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-5">
+          <span>Datum vyzvednutí:</span>
+        </div>
+        <div class="col-md-7">
+          <span *ngIf="currentOrder.deliveryDate" class="font-weight-bold">{{currentOrder.deliveryDateFormattedCZ}}</span>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-5">
+          <span>Zákazník:</span>
+        </div>
+        <div class="col-md-7">
+          <span class="font-weight-bold">{{currentOrder.customer.name}} {{currentOrder.customer.surname}} ({{currentOrder.customer.email}})</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-5">
+          <span>Položky:</span>
+        </div>
+        <div class="col-md-7">
+          <div *ngIf="currentOrder.items?.length">
+            <div *ngFor="let item of currentOrder.items; let i = index">
+              <span class="font-weight-bold">{{i+1}}) {{item.name}}</span>
+              <ul>
+                <li>
+                  <span class="min-width-100 d-inline-block">Počet kusů:</span>
+                  <span class="font-weight-bold">{{item.count}}</span>
+                </li>
+                <li>
+                  <span class="min-width-100 d-inline-block">Cena za kus:</span>
+                  <span class="font-weight-bold">{{item.cost}} Kč</span>
+                </li>
+                <li>
+                  <span class="min-width-100 d-inline-block">Cena celkem:</span>
+                  <span class="font-weight-bold">{{item.cost * item.count}} Kč</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h6 class="mt-4">Pozor! Předání objednávky již nelze vzít zpět.</h6>
+    </div>
+
+    <!-- Cancel order -->
+    <div *ngIf="dialogConfig.type === 'cancelOrder'" class="px-3">
+      <h5 class="font-weight-bold">Opravdu si přejete zrušit objednávku "{{currentOrder.orderId}}"?</h5>
+      <h6 class="mt-4">Pozor! Zrušení objednávky již nelze vzít zpět.</h6>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <div class="d-flex justify-content-center w-100">
+      <button type="button" class="btn rounded mr-3 {{dialogConfig.buttonClass}}" (click)="onDialogSubmit(modal, confirmDialog, dialogConfig.type)">
+        <span class="text-white">{{dialogConfig.buttonText}}</span>
+      </button>
+      <button type="button" class="btn btn-outline-secondary rounded" (click)="onDialogClear(modal, dialogConfig.type)">
+        <span>{{dialogConfig.buttonClearText}}</span>
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+
+<!-- Material order modal dialog -->
+<ng-template #matOrderDialog let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-dark">{{dialogConfig.title}}</h4>
+    <button type="button" class="close" (click)="onDialogClose(modal, dialogConfig.type)">
+      <span aria-hidden="false">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <!-- New material order -->
+    <div *ngIf="dialogConfig.type === 'newMatOrder'" class="px-3">
+      <!-- New item button -->
+      <div class="d-flex mt-2">
+        <div class="label my-1">Položky(suroviny)</div>
+        <button *ngIf="availableCurrentOrderMaterial.length && currentMatOrder.materials.length < materialList.length" 
+        class="btn btn-success btn-header my-1" (click)="currentMatOrderAddMaterial()">
+          Přidat suroviny
+        </button>
+      </div>
+      <!-- material list managing -->
+      <div class="d-flex mt-2">
+        <i *ngIf="!materialList.length" class="my-1 text-danger">Žádné suroviny nejsou k dispozici</i>
+        <div *ngIf="materialList.length" class="w-100">
+          <div *ngFor="let material of currentMatOrder.materials; let i = index" class="mb-2 pt-2 border-top">
+            <div class="d-flex mb-2">
+              <div class="width-170 mr-2">
+                <select *ngIf="material.materialId === -1" class="form-control width-170 mr-1" 
+                [(ngModel)]="material.materialId" (ngModelChange)="selectCurrentMatOrderMaterial(material.materialId)">
+                  <option [ngValue]="-1">Zvolte surovinu</option>
+                  <option *ngFor="let avaiMat of availableCurrentOrderMaterial" [ngValue]="avaiMat.materialId">
+                    {{avaiMat.name}}
+                  </option>
+                </select>
+                <div *ngIf="material.materialId !== -1" class="my-auto mr-1 font-weight-bold width-170 d-flex justify-content-start">
+                  <span>{{(i + 1) + ')'}}&nbsp;</span>
+                  <span>{{material.name}}</span>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between w-100">
+                <div class="d-flex justify-content-between">
+                  <app-number-spinner [(value)]="material.amount" [initValue]="material.amount" class="m-0">
+                  </app-number-spinner>
+                  <span class="my-auto mr-2">Kg</span>
+                </div>
+                
+                <button class="btn btn-link p-0 my-auto" (click)="currentMatOrderRemoveMaterial(i)" ngbTooltip="Odstranit položku" container="body">
+                  <i class="fas fa-times-circle text-danger"></i>
+                </button>
+              </div>
+            </div>
+
+            <div *ngIf="material.materialId !== -1" class="d-flex mb-2">
+              <span class="width-170 font-weight-bold mr-2">Cena/Kg</span>
+              <div class="d-flex justify-content-between">
+                <app-number-spinner [(value)]="material.cost" [initValue]="material.cost" class="m-0">
+                </app-number-spinner>
+                <span class="my-auto mr-2">Kč</span>
+              </div>
+            </div>
+            <div *ngIf="material.materialId !== -1" class="d-flex">
+              <span class="width-170 mr-5">Cena celkem</span>
+              <span class="font-weight-bold"> {{(material.amount * material.cost) | number:'1.2-2'}}Kč</span>
+            </div>
+            
+            <div class="text-center">
+              <span *ngIf="submitted && material.materialId == -1" class="d-block invalid-input w-100">
+                Zvolte surovinu
+              </span>
+              <span *ngIf="submitted && material.materialId !== -1 && material.amount == 0" class="d-block invalid-input w-100">
+                Zadejte množství zvolených surovin
+              </span>
+              <span *ngIf="submitted && material.materialId !== -1 && material.cost == 0" class="d-block invalid-input w-100">
+                Zadejte cenu za 1kg zvolené suroviny
+              </span>
+            </div>
+          </div>
+          <div class="text-center">
+            <span *ngIf="submitted && currentMatOrder.materials.length === 0" class="d-block invalid-input w-100">
+              Zvolte položky(suroviny) objednávky
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- required info -->
+      <span class="font-italic small float-right mt-3">* všechna pole jsou povinná</span>
+    </div>
+
+    <!-- Accept material order -->
+    <div *ngIf="dialogConfig.type === 'acceptMatOrder'" class="px-3">
+      <h5 class="font-weight-bold mb-5">Přejete si přijmout objednávku "{{currentMatOrder.orderId}}"?</h5>
+
+      <div class="row">
+        <div class="col-md-4">
+          <span>Stav objednávky:</span>
+        </div>
+        <div class="col-md-8">
+          <span class="font-weight-bold">{{getDeliveredCz(currentMatOrder)}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <span>Datum vytvoření:</span>
+        </div>
+        <div class="col-md-8">
+          <span *ngIf="!currentMatOrder.dateOfCreation" class="font-weight-bold">Datum nebylo určeno</span>
+          <span *ngIf="currentMatOrder.dateOfCreation" class="font-weight-bold">{{currentMatOrder.dateOfCreationFormattedCZ}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <span>Položky(suroviny):</span>
+        </div>
+        <div class="col-md-8">
+          <div *ngIf="!currentMatOrder.materials || !currentMatOrder.materials.length">
+            <span class="font-weight-bold">Žádné položky</span>
+          </div>
+          <div *ngIf="currentMatOrder.materials?.length">
+            <div *ngFor="let material of currentMatOrder.materials; let i = index">
+              <span class="font-weight-bold">{{i+1}}) {{material.name}}</span>
+              <ul>
+                <li>
+                  <span class="min-width-100 d-inline-block">Počet kg:</span>
+                  <span class="font-weight-bold">{{material.amount}}</span>
+                </li>
+                <li>
+                  <span class="min-width-100 d-inline-block">Cena za kg:</span>
+                  <span class="font-weight-bold">{{material.cost}} Kč</span>
+                </li>
+                <li>
+                  <span class="min-width-100 d-inline-block">Cena celkem:</span>
+                  <span class="font-weight-bold">{{material.cost * material.amount}} Kč</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h6 class="mt-4">Přijetím této objednávky dojde i k naskladnění všech objednaných surovin.</h6>
+      <h6 class="mt-1">Pozor! Přijetí objednávky již nelze vzít zpět.</h6>
+    </div>
+
+    <!-- Cancel order -->
+    <div *ngIf="dialogConfig.type === 'cancelMatOrder'" class="px-3">
+      <h5 class="font-weight-bold">Opravdu si přejete smazat objednávku "{{currentMatOrder.orderId}}"?</h5>
+      <h6 class="mt-4">Pozor! Zrušení objednávky již nelze vzít zpět.</h6>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <div class="d-flex justify-content-center w-100">
+      <button type="button" class="btn rounded py-2 mr-3 {{dialogConfig.buttonClass}}" 
+      (click)="onDialogSubmit(modal, confirmDialog, dialogConfig.type)">
+        <span class="text-white">{{dialogConfig.buttonText}}</span>
+      </button>
+      <button type="button" class="btn btn-outline-secondary rounded py-2" 
+      (click)="onDialogClear(modal, dialogConfig.type)">
+        <span>{{dialogConfig.buttonClearText}}</span>
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+
+<!-- Confirmation dialog -->
+<ng-template #confirmDialog let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-dark">{{dialogConfig.confirmTitle}}</h4>
+    <button type="button" class="close" (click)="modal.dismiss()">
+      <span aria-hidden="false">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <!-- New order -->
+    <div *ngIf="dialogConfig.type === 'newOrder' || dialogConfig.type === 'editOrder'" class="px-3">
+      <div *ngIf="dialogConfig.type === 'editOrder'" class="row mb-2">
+        <div class="col-md-5">
+          <span>Stav objednávky:</span>
+        </div>
+        <div class="col-md-7">
+          <span class="font-weight-bold {{currentOrder.state == 'canceled' ? 'text-danger' : ''}}">{{getStateCz(currentOrder)}}</span>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-5">
+          <span>Cena objednávky:</span>
+        </div>
+        <div class="col-md-7">
+          <span class="font-weight-bold">{{currentOrder.price | number:'1.2-2'}} Kč</span>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-5">
+          <span>Datum vyzvednutí:</span>
+        </div>
+        <div class="col-md-7">
+          <span *ngIf="currentOrder.deliveryDate" class="font-weight-bold">{{currentOrder.deliveryDateFormattedCZ}}</span>
+        </div>
+      </div>
+      <div class="row mb-2">
+        <div class="col-md-5">
+          <span>Zákazník:</span>
+        </div>
+        <div class="col-md-7">
+          <span class="font-weight-bold">{{currentOrder.customer.name}} {{currentOrder.customer.surname}} ({{currentOrder.customer.email}})</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-5">
+          <span>Položky:</span>
+        </div>
+        <div class="col-md-7">
+          <div *ngIf="currentOrder.items?.length">
+            <div *ngFor="let item of currentOrder.items; let i = index">
+              <span class="font-weight-bold">{{i+1}}) {{item.name}}</span>
+              <ul>
+                <li>
+                  <span class="min-width-100 d-inline-block">Počet kusů:</span>
+                  <span class="font-weight-bold">{{item.count}}</span>
+                </li>
+                <li>
+                  <span class="min-width-100 d-inline-block">Cena za kus:</span>
+                  <span class="font-weight-bold">{{item.cost}} Kč</span>
+                </li>
+                <li>
+                  <span class="min-width-100 d-inline-block">Cena celkem:</span>
+                  <span class="font-weight-bold">{{item.cost * item.count}} Kč</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New material order -->
+    <div *ngIf="dialogConfig.type === 'newMatOrder'" class="px-3">
+      <div class="row">
+        <div class="col-md-4">
+          <span>Položky(suroviny):</span>
+        </div>
+        <div class="col-md-8">
+          <div *ngIf="!currentMatOrder.materials || !currentMatOrder.materials.length">
+            <span class="font-weight-bold">Žádné položky</span>
+          </div>
+          <div *ngIf="currentMatOrder.materials?.length">
+            <div *ngFor="let material of currentMatOrder.materials; let i = index">
+              <span class="font-weight-bold">{{i+1}}) {{material.name}}</span>
+              <ul>
+                <li>
+                  <span class="min-width-100 d-inline-block">Počet kg:</span>
+                  <span class="font-weight-bold">{{material.amount}}</span>
+                </li>
+                <li>
+                  <span class="min-width-100 d-inline-block">Cena za kg:</span>
+                  <span class="font-weight-bold">{{material.cost}} Kč</span>
+                </li>
+                <li>
+                  <span class="min-width-100 d-inline-block">Cena celkem:</span>
+                  <span class="font-weight-bold">{{material.cost * material.amount}} Kč</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer d-flex justify-content-center">
+    <button type="button" class="btn py-2 mr-3 {{dialogConfig.buttonClass}}" (click)="onDialogConfirm(modal, dialogConfig.type)">
+      {{dialogConfig.confirmButton}}
+    </button>
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">
+      Zrušit
+    </button>
+  </div>
+</ng-template>

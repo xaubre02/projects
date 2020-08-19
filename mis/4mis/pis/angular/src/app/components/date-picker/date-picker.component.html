@@ -1,0 +1,18 @@
+<div class="input-group">
+  <input class="form-control"
+   placeholder="dd.mm.rrrr"
+   ngbDatepicker
+   #calendar="ngModel"
+   [(ngModel)]="date"
+   [minDate]="minDate"
+   [maxDate]="maxDate"
+   [startDate]="startDate"
+   [markDisabled]="disableWeekend ? isDisabled : false"
+   #datePicker="ngbDatepicker"
+   [ngClass]="{'is-invalid': submitted && (!isValid || (tomorrowValidation && !isTomorrowOrLater)) }">
+  <div class="input-group-append">
+    <button class="btn btn-secondary" (click)="datePicker.toggle()" type="button">
+    <i class="far fa-calendar-alt text-light my-auto"></i>
+    </button>
+  </div>
+</div>

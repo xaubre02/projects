@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN""http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!-- saved from url=(0067)https://www.fit.vutbr.cz/study/courses/PIS/private/cviceni/doc.html -->
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Projekt PIS</title>
+    <style type="text/css">
+    	table { border-collapse: collapse; }
+    	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
+    	dt { font-weight: bold; margin-top: 0.5em; }
+    </style>
+</head>
+<body>
+
+<!-- Zkontrolujte prosím nastavení kódování v hlavičce dokumentu podle použitého editoru -->
+
+<!-- Nahraďte prosím názvem tématu -->
+<h1>Tým 5</h1>
+
+<!-- Editujte jména a maily autorů a jejich činnost -->
+<dl>
+	<dt>Autoři</dt>
+	<dd>První autor
+	    <a href="mailto:xambro15@stud.fit.vutbr.cz">xambro15@stud.fit.vutbr.cz</a> -
+		uživatelské rozhraní - objednávky pečiva, objednávky surovin, výrobní plán, eshopu, správa rolí uživatelů
+	</dd>
+	<dd>Druhý autor
+	    <a href="mailto:xaubre02@stud.fit.vutbr.cz">xaubre02@stud.fit.vutbr.cz</a> -
+		uživatelské rozhraní - suroviny, pečivo, sklad surovin, sklad pečiva, eshop
+	</dd>
+	<dd>Třetí autor
+	    <a href="mailto:xbedna62@stud.fit.vutbr.cz">xbedna62@stud.fit.vutbr.cz</a> -
+		backend aplikace - autorizace uživatelů, role uživatelů, správa surovin, pečiva, skladu surovin, skladu pečiva, objednávek surovin
+	</dd>
+	<dd>Čtvrtý autor
+	    <a href="mailto:xfiser14@stud.fit.vutbr.cz">xfiser14@stud.fit.vutbr.cz</a> -
+		backend aplikace - správa objednávek pečiva, vyrobních plánů
+	</dd>
+	</dd>
+</dl>
+
+<!-- uživatelské účty -->
+<h2>Uživatelé systému pro testování</h2>
+<table>
+<tbody><tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
+<tr><td>manager1@bakery.cz</td><td>bakery</td><td>Manažer</td></tr>
+<tr><td>pastrystoreman1@bakery.cz</td><td>bakery</td><td>Výdejce</td></tr>
+<tr><td>materialstoreman1@bakery.cz</td><td>bakery</td><td>Skladník</td></tr>
+<tr><td>baker1@bakery.cz</td><td>bakery</td><td>Pekař</td></tr>
+<tr><td>customer1@bakery.cz</td><td>bakery</td><td>Zákazník</td></tr>
+<!--
+<tr><td>manager2@bakery.cz</td><td>bakery</td><td>Manažer</td></tr>
+<tr><td>manager2@bakery.cz</td><td>bakery</td><td>Manažer</td></tr>
+<tr><td>pastrystoreman2@bakery.cz</td><td>bakery</td><td>Výdejce</td></tr>
+<tr><td>materialstoreman2@bakery.cz</td><td>bakery</td><td>Skladník</td></tr>
+<tr><td>baker2@bakery.cz</td><td>bakery</td><td>Pekař</td></tr>
+<tr><td>baker3@bakery.cz</td><td>bakery</td><td>Pekař</td></tr>
+<tr><td>baker4@bakery.cz</td><td>bakery</td><td>Pekař</td></tr>
+<tr><td>customer2@bakery.cz</td><td>bakery</td><td>Zákazník</td></tr>
+<tr><td>customer3@bakery.cz</td><td>bakery</td><td>Zákazník</td></tr>
+<tr><td>customer4@bakery.cz</td><td>bakery</td><td>Zákazník</td></tr>
+<tr><td>customer5@bakery.cz</td><td>bakery</td><td>Zákazník</td></tr>
+<tr><td>customer6@bakery.cz</td><td>bakery</td><td>Zákazník</td></tr>
+-->
+</tbody></table>
+
+<h2>Postup instalace</h2>
+<ol>
+  <li>Inicializace databáze pomocí skriptu <code>bakery.sql</code></li>
+  <li>Inicializace Payara Serveru, připojení serveru k databázi a spuštění aplikace <code>pis.bakery</code> na serveru</li>
+  <li>Stažení všech modulů vyžadovaných front endem aplikace (Angular) pomocí příkazu <code>npm install</code> a následné spuštění front endu pomocí příkazu <code>ng serve</code> (vše ve složce <code>angular</code>)</li>
+</ol>
+
+<!-- vyžadované knihovny třetích stran i s verzemi, které byly použity pro testování -->
+<h2>Vyžadované knihovny</h2>
+<p>java-jwt 3.10.0 - https://mvnrepository.com/artifact/com.auth0/java-jwt</p>
+
+</body>
+</html>

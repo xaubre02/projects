@@ -1,0 +1,14 @@
+
+  <div class="number-spinner input-group align-items-center">
+    <span class="mx-2">
+      <button type="button" class="p-0 btn shadow-none" (click)="decrement()">
+        <i class="far fa-minus-square"></i>
+      </button>
+    </span>
+    <input type="text" [(ngModel)]="value" (keypress)="numberOnly($event)" onPaste="return false" class="p-0 form-control text-center rounded" required [ngClass]="{'text-danger': reachedLimit()}"/>
+    <span class="mx-2">
+      <button type="button" class="p-0 btn shadow-none" (click)="increment()">
+        <i class="far fa-plus-square"></i>
+      </button>
+    </span>
+  </div>

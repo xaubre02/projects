@@ -1,0 +1,55 @@
+.list-item {
+  min-height: 42px;
+}
+
+.list-item:not(.disabled):hover {
+  color: black;
+  opacity: 1;
+  border-radius: 10px;
+  -webkit-box-shadow: 0 4px 8px 0 rgba(0,0,0,0.15) !important;
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.15) !important;
+}
+
+.list-item:hover .btn-item {
+  opacity: 1;
+}
+
+.category {
+  font-weight: 300;
+  font-size: 14px;
+}
+
+h5 {
+  color: inherit;
+}
+
+input {
+  width: auto;
+}
+
+.label {
+  width: 80px !important;
+}
+
+.w130px {
+  width: 130px !important;
+}
+
+select {
+  height: auto;
+}
+
+a:active {
+	background-color: inherit;
+}
+
+.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.count-label {
+  width: 30px !important;
+  font-weight: 300;
+  font-size: 13px;
+}

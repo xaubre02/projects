@@ -1,0 +1,34 @@
+.role {
+  font-weight: 300;
+  font-size: 14px;
+}
+
+select {
+  height: auto;
+}
+
+a:active {
+	background-color: inherit;
+}
+
+.desc-label {
+  width: 90px !important;
+  margin: auto 8px auto 0;
+}
+
+#birth-date {
+  display: inline-block;
+  min-width: 171px !important;
+  width: auto !important;
+}
+
+.birth-num {
+  width: 70px !important;
+  font-weight: 600;
+}
+
+.supplement {
+  width: auto !important;
+  min-width: 64px !important;
+  max-width: 84px !important;
+}

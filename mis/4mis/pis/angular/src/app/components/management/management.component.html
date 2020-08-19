@@ -1,0 +1,209 @@
+<div *ngIf="!userManager" class="row pt-4">
+  <h4>Nejste oprávněni zobrazit tuto stránku</h4>
+</div>
+
+<div *ngIf="userManager" class="row pt-4">
+  <div class="col-lg-3">
+    <div class="sticky-top">
+      <app-side-menu #sideMenu [title]="'Možnosti'" [ignoreStorage]='true' [storageKey]="'managementMenu'">
+        <div body>
+          <button class="{{sideMenu.buttonClass}}" (click)="sideMenu.setIndex(0)" [ngClass]="{'active': sideMenu.index === 0}"><i class="icon fas fa-list-ul"></i>Přehled zaměstnanců</button>
+          <button class="{{sideMenu.buttonClass}}" (click)="sideMenu.setIndex(1)" [ngClass]="{'active': sideMenu.index === 1}"><i class="icon fas fa-list-ul"></i>Přehled zákazníků</button>
+          <button class="{{sideMenu.buttonClass}}" (click)="openDialog(dialog, 'newUser')"><i class="icon fas fa-user-plus"></i>Přidat uživatele</button>
+        </div>
+      </app-side-menu>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <app-main-content *ngIf="sideMenu.index === 0"
+      [noContent]="!itemList.length" 
+      [noContentText]="'Nejsou dostupní žádní zaměstnanci'"  
+      [loading]="loadingItems && !itemList.length">
+      <div header class="px-3 d-flex justify-content-between w-100">
+        <div class="">
+          <b class="d-block">Zaměstnanci</b>
+          <select [(ngModel)]="selectedRole" class="form-control">
+            <option value="-1" class="text-primary">všichni</option>
+            <option *ngFor="let role of roleList; let i = index" value="{{i}}">{{role}}</option>
+          </select>
+        </div>
+        <button class="btn btn-header btn-primary" (click)="openDialog(dialog, 'newUser')" *ngIf="sideMenu.index === 0">Nový uživatel</button>
+      </div>
+      <div body>
+        <div class="px-2" *ngIf="itemList.length">
+          <a class="role text-primary ml-2" (click)="accordion.expandAll()">Rozbalit vše</a>
+          <a class="role text-primary ml-2" (click)="accordion.collapseAll()">Zabalit vše</a>
+        </div>
+        <ngb-accordion #accordion [destroyOnHide]="false">
+          <ngb-panel *ngFor="let item of itemList; trackBy: trackByUser; let i = index; let last = last" [cardClass]="'accordion-class px-3 ' + (last ? '' : 'border-bottom')">
+            <ng-template ngbPanelHeader let-opened="opened">
+              <div class="d-flex align-items-center justify-content-between py-2">
+                <div class="d-flex align-items-center justify-content-between">
+                  <button ngbPanelToggle class="btn btn-link p-0 mr-2">
+                    <i class="fas fa-angle-{{opened ? 'down' : 'right'}}"></i>  
+                  </button>
+                  <div>
+                    <h6 class="m-0 text-dark font-weight-bold">{{item.name + ' ' + item.surname}}</h6>
+                    <h6 class="m-0 role" *ngIf="!opened">{{item.roleFormatted}}</h6>
+                  </div>
+                </div>
+                <div *ngIf="!sideMenu.index" class="d-flex justify-content-between h-100">
+                  <div class="dropdown my-auto">
+                    <button class="d-block btn-item btn btn-secondary" data-toggle="dropdown">Možnosti</button>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item  text-primary" (click)="openDialog(dialog, 'editUser', i, true)">
+                        <i class="icon fas fa-user-edit text-primary"></i>
+                        Upravit
+                      </a>
+                      <a class="dropdown-item text-danger">
+                        <i class="icon fas fa-times text-danger"></i>
+                        Odstranit
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+            <ng-template ngbPanelContent>
+              <div class="d-flex">
+                <span class="desc-label">Role: </span>
+                <span class="font-weight-bold">{{item.roleFormatted}}</span>
+              </div>
+              <div class="d-flex">
+                <span class="desc-label">Email: </span>
+                <span class="font-weight-bold">{{item.email}}</span>
+              </div>
+              <div class="d-flex">
+                <span class="desc-label">Narozen: </span>
+                <span class="font-weight-bold">{{item.bornCZ}}</span>
+              </div>
+            </ng-template>
+          </ngb-panel>
+        </ngb-accordion>
+      </div>
+    </app-main-content>
+    
+    <app-main-content *ngIf="sideMenu.index === 1"
+      [noContent]="!customerList.length" 
+      [noContentText]="'Nejsou dostupní žádní zákazníci'"  
+      [loading]="loadingItems && !customerList.length">
+      <div header class="px-3 d-flex justify-content-between w-100">
+        <b class="d-block">Zákazníci</b>
+        <button class="btn btn-header btn-primary" (click)="openDialog(dialog, 'newUser')">Nový uživatel</button>
+      </div>
+      <div body>
+        <div class="px-2" *ngIf="customerList.length">
+          <a class="role text-primary ml-2" (click)="accordion.expandAll()">Rozbalit vše</a>
+          <a class="role text-primary ml-2" (click)="accordion.collapseAll()">Zabalit vše</a>
+        </div>
+        <ngb-accordion #accordion [destroyOnHide]="false">
+          <ngb-panel *ngFor="let item of customerList; trackBy: trackByUser; let i = index; let last = last" 
+          [cardClass]="'accordion-class px-3 ' + (last ? '' : 'border-bottom')">
+            <ng-template ngbPanelHeader let-opened="opened">
+              <div class="d-flex align-items-center justify-content-between py-2">
+                <div class="d-flex align-items-center justify-content-between">
+                  <button ngbPanelToggle class="btn btn-link p-0 mr-2">
+                    <i class="fas fa-angle-{{opened ? 'down' : 'right'}}"></i>  
+                  </button>
+                  <div>
+                    <h6 class="m-0 text-dark font-weight-bold">{{item.name + ' ' + item.surname}}</h6>
+                    <h6 class="m-0 role" *ngIf="!opened">{{item.roleFormatted}}</h6>
+                  </div>
+                </div>
+                <div class="h-100">
+                  <a class="badge badge-pill badge-primary text-center" href="javascript:void(0)"
+                  ngbPopover="Pro úpravu údajů zákazníka kontaktuje administrátora databáze" container="body" placement="top">?</a>
+                </div>
+              </div>
+            </ng-template>
+            <ng-template ngbPanelContent>
+              <div class="d-flex">
+                <span class="desc-label">Role: </span>
+                <span class="font-weight-bold">{{item.roleFormatted}}</span>
+              </div>
+              <div class="d-flex">
+                <span class="desc-label">Email: </span>
+                <span class="font-weight-bold">{{item.email}}</span>
+              </div>
+              <div class="d-flex">
+                <span class="desc-label">Narozen: </span>
+                <span class="font-weight-bold">{{item.bornCZ}}</span>
+              </div>
+            </ng-template>
+          </ngb-panel>
+        </ngb-accordion>
+      </div>
+    </app-main-content>
+  </div>
+</div>
+
+<!-- Management modal dialog -->
+<ng-template #dialog let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-dark">{{dialogConfig.title}}</h4>
+    <button type="button" class="close" (click)="onDialogSubmit(modal, dialogConfig.type, true)"><span aria-hidden="false">&times;</span></button>
+  </div>
+  <div class="modal-body">
+	  <!-- New user -->
+    <div *ngIf="dialogConfig.type === 'newUser' || dialogConfig.type === 'editUser'" class="px-4">
+      <div class="d-flex mb-4">
+        <span class="label">Jméno</span>
+        <div>
+          <input type="text" placeholder="Jméno" [(ngModel)]="newUser.name" class="form-control" [ngClass]="{ 'is-invalid': submitted && newUser.name === '' }"/>
+          <span *ngIf="submitted && newUser.name === ''" class="d-block invalid-input">Zadejte jméno</span>
+        </div>
+      </div>
+      <div class="d-flex mb-4">
+        <span class="label">Příjmení</span>
+        <div>
+          <input type="text" placeholder="Příjmení" [(ngModel)]="newUser.surname" class="form-control" [ngClass]="{ 'is-invalid': submitted && newUser.surname === '' }"/>
+          <span *ngIf="submitted && newUser.surname === ''" class="d-block invalid-input">Zadejte příjmení</span>
+        </div>
+      </div>
+      <div class="d-flex mb-4">
+        <span class="label">E-mail</span>
+        <div>
+          <input type="text" placeholder="E-mail" [(ngModel)]="newUser.email" class="form-control" [ngClass]="{ 'is-invalid': submitted && newUser.email === '' }"/>
+          <span *ngIf="submitted && newUser.email === ''" class="d-block invalid-input">Zadejte e-mail</span>
+        </div>
+      </div>
+      <div class="d-flex mb-4">
+        <span class="label">Datum narození</span>
+        <div>
+          <app-date-picker #birthDate id="birth-date" [(date)]="newUser.birthDate" [submitted]="submitted"></app-date-picker>
+          <span *ngIf="submitted && !birthDate.isValid" class="d-block invalid-input">Zadejte platné datum narození</span>
+        </div>
+      </div>
+      <div class="d-flex mb-4">
+        <span class="label">Role/pozice</span>
+        <select [(ngModel)]="newUser.selectedRole" class="form-control">
+          <option [selected]="newUser.selectedRole === i" *ngFor="let role of roleList; let i = index" value="{{i}}">{{role}}</option>
+        </select>
+      </div>
+      <div *ngIf="dialogConfig.type === 'newUser'" class="d-flex mb-4">
+        <span class="label">Heslo</span>
+        <div>
+          <input type="password" placeholder="Heslo" [(ngModel)]="newUser.password" class="form-control" [ngClass]="{ 'is-invalid': submitted && newUser.password.length < 6 }"/>
+          <span *ngIf="submitted && newUser.password.length < 6" class="d-block invalid-input">Heslo musí obsahovat alespon 6 znaků</span>
+        </div>
+      </div>
+      <div *ngIf="dialogConfig.type === 'newUser'" class="d-flex">
+        <span class="label">Zopakovat heslo</span>
+        <div>
+          <input type="password" placeholder="Heslo" [(ngModel)]="newUser.passwordRepeat" class="form-control" [ngClass]="{ 'is-invalid': submitted && (newUser.passwordRepeat === '' || !passCheck) }"/>
+          <span *ngIf="submitted && newUser.passwordRepeat === ''" class="d-block invalid-input">Zopakujte heslo pro kontrolu</span>
+          <span *ngIf="submitted && newUser.passwordRepeat !== '' && !passCheck" class="d-block invalid-input">Zadaná hesla se neshodují</span>
+        </div>
+      </div>
+
+      <!-- required info -->
+      <span class="font-italic small float-right mt-3">* všechna pole jsou povinná</span>
+	  </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" [disabled]="false" class="btn col-3 rounded py-2 m-auto {{dialogConfig.buttonClass}}" (click)="onDialogSubmit(modal, dialogConfig.type)">
+      <span class="text-white">{{dialogConfig.buttonText}}</span>
+    </button>
+  </div>
+</ng-template>

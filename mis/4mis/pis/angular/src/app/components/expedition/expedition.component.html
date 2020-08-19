@@ -1,0 +1,280 @@
+<div *ngIf="userIsAuthorized" class="row pt-4">
+  <div class="col-lg-3">
+    <div class="sticky-top">
+      <app-side-menu #sideMenu [title]="'Možnosti'" [ignoreStorage]='true' [storageKey]="'expeditionMenu'">
+        <div body>
+          <button class="{{sideMenu.buttonClass}}" (click)="removeSelection(sideMenu.setIndex(0))" [ngClass]="{'active': sideMenu.index === 0}">
+            <i class="icon fas fa-list-ul"></i>Přehled pečiva
+          </button>
+          <button class="{{sideMenu.buttonClass}}" (click)="removeSelection(sideMenu.setIndex(1))" [ngClass]="{'active': sideMenu.index === 1}">
+            <i class="icon fas fa-list-ul"></i>Přehled kategorií
+          </button>
+          <button *ngIf="userManager || userPastryStoreman || userMaterialStoreman" class="{{sideMenu.buttonClass}}" [routerLink]="['/orders']">
+            <i class="icon fas fa-list-ul"></i>Přehled objednávek
+          </button>
+          <button *ngIf="userManager || userPastryStoreman" class="{{sideMenu.buttonClass}}" 
+          (click)="removeSelection(sideMenu.setIndex(2))" [ngClass]="{'active': sideMenu.index === 2}">
+            <i class="icon fas fa-sign-in-alt"></i>Naskladnit pečivo
+          </button>
+          <button *ngIf="userManager || userPastryStoreman" class="{{sideMenu.buttonClass}}" 
+          (click)="removeSelection(sideMenu.setIndex(3))" [ngClass]="{'active': sideMenu.index === 3}">
+            <i class="icon fas fa-sign-out-alt"></i>Vyskladnit pečivo
+          </button>
+          <button *ngIf="userManager" class="{{sideMenu.buttonClass}}" (click)="openDialog(dialog, 'newPastry')">
+            <i class="icon fas fa-plus"></i>Přidat pečivo
+          </button>
+          <button *ngIf="userManager" class="{{sideMenu.buttonClass}}" (click)="openDialog(dialog, 'newCategory')">
+            <i class="icon fas fa-plus"></i>Přidat kategorii
+          </button>
+        </div>
+      </app-side-menu>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <app-main-content *ngIf="sideMenu.index === 1"
+      [noContent]="!categoryList.length" 
+      [noContentText]="'Nejsou dostupné žádné kategorie'"  
+      [loading]="loadingCategories && !categoryList.length">
+      <div header class="px-3 d-flex justify-content-between w-100">
+        <b>{{categoryList.length ? 'Kategorie' : ''}}</b>
+        <button *ngIf="userManager" class="btn btn-header btn-primary" (click)="openDialog(dialog, 'newCategory')">
+          Nová kategorie
+        </button>
+      </div>
+      <div body>
+        <div class="row m-0" *ngFor="let category of categoryList; trackBy: trackByPastryCategory; let i = index; let last = last">
+          <div class="list-item px-3 w-100 d-flex justify-content-between" [ngClass]="{ 'border-bottom' : !last }">
+            <h5 class="my-auto">{{category.name}}</h5>
+            <div *ngIf="userManager" class="dropdown my-auto">
+              <button class="d-block btn-item btn btn-secondary" data-toggle="dropdown">Možnosti</button>
+              <div class="dropdown-menu">
+                <a class="dropdown-item  text-primary" (click)="openDialog(dialog, 'editCategory', i)">
+                  <i class="icon fas fa-cog text-primary"></i>
+                  Upravit
+                </a>
+                <a class="dropdown-item text-danger" (click)="openDialog(confirmDialog, 'deleteCategory', i)">
+                  <i class="icon fas fa-times text-danger"></i>
+                  Odstranit
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </app-main-content>
+    <app-main-content *ngIf="sideMenu.index !== 1"
+      #mainContent 
+      [noContent]="!itemList.length" 
+      [noContentText]="'Není dostupné žádné pečivo'" 
+      [footer]="(sideMenu.index === 2 || (sideMenu.index === 3 && !storageEmpty())) && itemList.length" 
+      [loading]="loadingItems && !itemList.length"
+      [bgColor]="sideMenu.index === 2 ? 'green' : sideMenu.index === 3 ? 'red' : ''">
+      <div header class="px-3 d-flex justify-content-between w-100">
+        <div class="">
+          <b class="d-block">Pečivo</b>
+          <select [(ngModel)]="selectedCategory" class="form-control">
+            <option value="-1" class="text-primary">vše</option>
+            <option *ngFor="let cat of categoryList" value="{{cat.categoryId}}">{{cat.name}}</option>
+          </select>
+        </div>
+        <button *ngIf="userManager" class="btn btn-header btn-primary" (click)="openDialog(dialog, 'newPastry')">
+          Nové pečivo
+        </button>
+      </div>
+      <div body *ngIf="!sideMenu.index">
+        <div class="px-2" *ngIf="itemList.length">
+          <a class="category text-primary ml-2" (click)="accordion.expandAll()">Rozbalit vše</a>
+          <a class="category text-primary ml-2" (click)="accordion.collapseAll()">Zabalit vše</a>
+        </div>
+        <ngb-accordion #accordion [destroyOnHide]="false">
+          <ngb-panel *ngFor="let item of itemList; trackBy: trackByPastry; let i = index; let last = last" [cardClass]="'accordion-class px-3 ' + (last ? '' : 'border-bottom')">
+            <ng-template ngbPanelHeader let-opened="opened">
+              <div class="d-flex align-items-center justify-content-between py-2">
+                <div class="d-flex align-items-center justify-content-between">
+                  <button ngbPanelToggle class="btn btn-link p-0 mr-2">
+                    <i class="fas fa-angle-{{opened ? 'down' : 'right'}}"></i>  
+                  </button>
+                  <div>
+                    <h6 class="m-0 text-dark font-weight-bold">{{item.name}}</h6>
+                    <h6 class="m-0 category">{{item.category.name}}</h6>
+                  </div>
+                </div>
+                <div *ngIf="!sideMenu.index" class="d-flex justify-content-between h-100">
+                  <span *ngIf="loadingAmount && !item.gotAmount" class="my-auto font-weight-bold mr-4 text-muted spinner-border spinner-border-sm"></span>
+                  <div *ngIf="item.gotAmount" class="my-auto font-weight-bold mr-4" [ngClass]="{'text-dark': item.amount, 'text-danger': !item.amount}">
+                    {{item.amount ? item.amount : 0}}
+                    <div class="count-label d-inline-block" [ngClass]="{'text-dark': item.amount, 'text-danger': !item.amount}">{{' ' + item.countLabel}}</div>
+                  </div>
+                  <div *ngIf="userManager || userPastryStoreman" class="dropdown my-auto">
+                    <button class="d-block btn-item btn btn-secondary" data-toggle="dropdown">Možnosti</button>
+                    <div class="dropdown-menu">
+                      <a *ngIf="userManager || userPastryStoreman" class="dropdown-item text-primary" (click)="openDialog(dialog, 'enter', i)">
+                        <i class="icon fas fa-sign-in-alt text-primary"></i>
+                        Naskladnit
+                      </a>
+                      <a *ngIf="userManager || userPastryStoreman" class="dropdown-item text-primary" (click)="openDialog(dialog, 'withdraw', i)" [ngClass]="{'text-muted disabled': !item.amount}">
+                        <i class="icon fas fa-sign-out-alt text-primary" [ngClass]="{'text-muted disabled': !item.amount}"></i>
+                        Vyskladnit
+                      </a>
+                      <div *ngIf="userManager" class="dropdown-divider"></div>
+                      <a *ngIf="userManager" class="dropdown-item  text-primary" (click)="openDialog(dialog, 'editPastry', i)">
+                        <i class="icon fas fa-cog text-primary"></i>
+                        Upravit
+                      </a>
+                      <a *ngIf="userManager" class="dropdown-item text-danger" (click)="openDialog(confirmDialog, 'deletePastry', i)">
+                        <i class="icon fas fa-times text-danger"></i>
+                        Odstranit
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+            <ng-template ngbPanelContent>
+              <div>
+                Cena: <span class="font-weight-bold">{{item.cost | number:'1.2-2'}} Kč</span>
+              </div>
+              <div>
+                <span>Suroviny pro výrobu: </span>
+                <ul>
+                  <li *ngIf="!item.materials.length" class="text-success">
+                    nejsou potřeba žádné suroviny
+                  </li>
+                  <li *ngFor="let material of item.materials">
+                    <span class="font-weight-bold">{{material.name + ': ' + material.amount + ' Kg'}}</span>
+                  </li>
+                </ul>
+              </div>
+            </ng-template>
+          </ngb-panel>
+        </ngb-accordion>
+      </div>
+      <div body *ngIf="sideMenu.index">
+        <div class="row m-0" *ngFor="let item of itemList; trackBy: trackByPastry; let i = index; let last = last">
+          <div class="list-item px-3 w-100 d-flex justify-content-between" [ngClass]="{ 'border-bottom' : !last, 'disabled': sideMenu.index === 3 && !item.amount }">
+            <div class="my-auto py-2">
+              <h6 class="m-0 text-dark font-weight-bold">{{item.name}}</h6>
+              <h6 class="m-0 category">{{item.category.name}}</h6>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span *ngIf="loadingAmount && !item.gotAmount" class="my-auto font-weight-bold mr-4 text-muted spinner-border spinner-border-sm"></span>
+              <span *ngIf="item.gotAmount" class="my-auto mx-3" [ngClass]="{'text-danger': !item.amount}">({{(item.amount ? item.amount : 0) + ' ' + item.countLabel }})</span>
+              <app-number-spinner [(value)]="item.storageChange" [maxValue]="sideMenu.index === 3 ? item.amount : undefined" *ngFor="let r of reset" class="m-auto"
+              [ngClass]="{ 'disabled': sideMenu.index === 3 && !item.amount }"></app-number-spinner>
+              <a class="my-auto ml-1 text-primary" (click)="selectMaxAmount(i)" *ngIf="sideMenu.index === 3">(max)</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div footer class="{{mainContent.footerClass}}">
+        <button class="btn btn-link text-secondary text-decoration-none" (click)="removeSelection()">Zrušit</button>
+        <button class="btn btn-link text-danger text-decoration-none p-0 mr-3" (click)="selectAllMaxAmount()" *ngIf="sideMenu.index === 3">Vyskladnit vše</button>
+        <button class="btn btn-success shadow-none col-2" *ngIf="sideMenu.index === 2" (click)="storeItems()" [disabled]="!anySelected()">Naskladnit</button>
+        <button class="btn btn-danger shadow-none col-2" *ngIf="sideMenu.index === 3" (click)="pickItems()" [disabled]="!anySelected()">Vyskladnit</button>
+      </div>
+    </app-main-content>
+  </div>
+</div>
+
+<!-- Expedition modal dialog -->
+<ng-template #dialog let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-dark">{{dialogConfig.title}}</h4>
+    <button type="button" class="close" (click)="onDialogSubmit(modal, dialogConfig.type, true)"><span aria-hidden="false">&times;</span></button>
+  </div>
+  <div class="modal-body">
+    <!-- New item, updating items -->
+    <div *ngIf="dialogConfig.type === 'newCategory' || dialogConfig.type === 'editCategory'" class="m-2 d-flex justify-content-center">
+      <span class="label w130px">Název&nbsp;kategorie</span>
+      <div>
+        <input type="text" placeholder="Název kategorie" class="form-control" [(ngModel)]="newCategoryName" [ngClass]="{ 'is-invalid': submitted && newCategoryName === '' }"/>
+        <span *ngIf="submitted && newCategoryName === ''" class="d-block invalid-input">Zadejte název kategorie</span>
+      </div>
+    </div>
+    <!-- New pastry, update pastry -->
+    <div *ngIf="dialogConfig.type === 'newPastry' || dialogConfig.type === 'editPastry'" class="px-4">
+      <div class="d-flex mb-4">
+        <span class="label">Název</span>
+        <div>
+          <input type="text" placeholder="Název pečiva" [(ngModel)]="newPastry.name" class="form-control" [ngClass]="{ 'is-invalid': submitted && newPastry.name === '' }"/>
+          <span *ngIf="submitted && newPastry.name === ''" class="d-block invalid-input">Zadejte název pečiva</span>
+        </div>
+      </div>
+      <div class="d-flex mb-4">
+        <span class="label">Kategorie</span>
+        <select [(ngModel)]="newPastry.category.categoryId" class="form-control" style="height: 32px;">
+          <option *ngFor="let cat of categoryList; let first = first" selected value="{{cat.categoryId}}">{{cat.name}}</option>
+        </select>
+      </div>
+      <div class="d-flex mb-4">
+        <span class="label">Cena</span>
+        <div>
+          <div class="d-flex">
+            <app-number-spinner [(value)]="newPastry.cost" [initValue]="newPastry.cost" class="m-0"></app-number-spinner>
+            <span class="my-auto">Kč</span>
+          </div>
+          <span *ngIf="submitted && newPastry.cost === 0" class="d-block invalid-input">Zadejte cenu pečiva</span>
+        </div>
+      </div>
+      <div class="d-flex">
+        <span class="label my-1">Suroviny</span>
+        <div class="w-100">
+          <i class="my-1 text-danger" *ngIf="!materialList.length">Nejsou k dispozici žádné suroviny</i>
+          <div *ngIf="materialList.length">
+            <div class="d-flex justify-content-between mb-1" *ngFor="let material of newPastry.materials; let i = index">
+              <select [(ngModel)]="material.materialId" class="form-control mr-1" *ngIf="material.materialId === -1">
+                <option *ngFor="let mat of availableMaterials; let first = first" value="{{mat.materialId}}">{{mat.name}}</option>
+              </select>
+              <span class="my-auto text-dark font-weight-bold" *ngIf="material.materialId !== -1">{{getMaterialNameById(material.materialId)}}</span>
+              <div class="d-flex">
+                <app-number-spinner [(value)]="material.amount" [initValue]="material.amount" class="m-0"></app-number-spinner>
+                <span class="my-auto mr-2">Kg</span>
+                <button class="btn btn-link p-0 my-auto text-danger font-weight-bold" (click)="newPastryRemoveMaterial(i)">
+                  &times; 
+                </button>
+              </div>
+            </div>
+            <button class="btn btn-success btn-header my-1" (click)="newPastryAddMaterial()" *ngIf="availableMaterials.length && newPastry.materials.length < materialList.length">Přidat surovinu</button>
+          </div>
+          <span *ngIf="submitted && newPastry.materials.length === 0" class="d-block invalid-input">Zvolte suroviny potřebné pro výrobu</span>
+          <span *ngIf="submitted && newPastry.materials.length && !newPastry.gotMaterial()" class="d-block invalid-input">Zadejte množství zvolených surovin</span>
+        </div>
+      </div>
+    </div>
+    <!-- Item amount change -->
+    <div *ngIf="dialogConfig.type === 'enter' || dialogConfig.type === 'withdraw'" class="m-2 d-flex justify-content-center align-items-center">
+      <span class="font-weight-bold mr-2">Množství</span>
+      <app-number-spinner #amount [(value)]="clickedItem.storageChange" [maxValue]="dialogConfig.type === 'withdraw' ? clickedItem.amount : undefined" class="m-0"></app-number-spinner>
+      <a class="my-auto ml-1 text-primary" (click)="selectMaxAmount()" *ngIf="dialogConfig.type === 'withdraw'">(max)</a>
+    </div>
+    
+    <!-- required info -->
+    <span class="font-italic small float-right mt-3">* všechna pole jsou povinná</span>
+  </div>
+  <div class="modal-footer">
+    <button type="button" [disabled]="(dialogConfig.type === 'enter' || dialogConfig.type === 'withdraw') && !clickedItem.storageChange" class="btn col-3 rounded m-auto {{dialogConfig.buttonClass}}" (click)="onDialogSubmit(modal, dialogConfig.type)">
+      <span class="text-white">{{dialogConfig.buttonText}}</span>
+    </button>
+  </div>
+</ng-template>
+
+<!-- Confirmation dialog -->
+<ng-template #confirmDialog let-modal>
+  <div class="modal-header">
+	<h4 class="modal-title font-weight-bold text-danger">
+    <i class="my-auto mx-1 fas fa-exclamation-triangle text-danger"></i>
+    Odstranit {{dialogConfig.title}}
+	</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body text-dark font-weight-bold">
+    Opravdu si přejete odstranit {{dialogConfig.buttonText}}?
+  </div>
+  <div class="modal-footer d-flex justify-content-center">
+    <button type="button" class="btn btn-dark mx-3 col-3" (click)="modal.dismiss()">Zrušit</button>
+    <button type="button" class="btn btn-danger mx-3 col-3" (click)="deleteItem(modal, dialogConfig.type)">Odstranit</button>
+  </div>
+</ng-template>

@@ -1,0 +1,9 @@
+<div class="card shadow w-100 mb-3">
+  <div class="card-header font-weight-bold">{{title}}</div>
+  <div class="card-body">
+    <ng-content select="[body]"></ng-content>
+  </div>
+  <div class="card-footer" *ngIf="footer">
+    <ng-content select="[footer]"></ng-content>
+  </div>
+</div>

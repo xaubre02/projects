@@ -1,0 +1,110 @@
+<div class="row pt-4">
+  <app-side-menu class="col-lg-3" #sideMenu [title]="'Můj účet'" [ignoreStorage]='true' [storageKey]="'profileMenu'">
+    <div body>
+	  <button class="{{sideMenu.buttonClass}}" (click)="sideMenu.setIndex(0)" [ngClass]="{'active': sideMenu.index === 0}">
+      <i class="icon fas fa-address-book"></i>Uživatelský profil
+    </button>
+    <button *ngIf="userCustomer" class="{{sideMenu.buttonClass}}" [routerLink]="['/eshop/orders']">
+      <i class="icon fas fa-cubes"></i>Moje objednávky
+    </button>
+	  <button class="{{sideMenu.buttonClass}}" (click)="openDialog(dialog)">
+      <i class="icon fas fa-user-edit"></i>Upravit profil
+    </button>
+    </div>
+  </app-side-menu>
+
+  <app-main-content #mainContent class="col-lg-9" *ngIf="sideMenu.index === 0" [noContent]="false" [footer]="true">
+	  <div header class="px-3 d-flex justify-content-between w-100">
+      <div>
+        <b class="d-block">Informace</b>
+      </div>
+    </div>
+    <div body class="p-3">
+      <div class="d-flex">
+        <span class="desc-label">Jméno: </span>
+        <span class="font-weight-bold">{{currentUser.name}}</span>
+      </div>
+      <div class="d-flex mb-2">
+        <span class="desc-label">Příjmení: </span>
+        <span class="font-weight-bold">{{currentUser.surname}}</span>
+      </div>
+      <div class="d-flex">
+        <span class="desc-label">Role: </span>
+        <span class="font-weight-bold">{{currentUser.roleFormatted}}</span>
+      </div>
+      <div class="d-flex">
+        <span class="desc-label">Email: </span>
+        <span class="font-weight-bold">{{currentUser.email}}</span>
+      </div>
+      <div class="d-flex">
+        <span class="desc-label">Narozen: </span>
+        <span class="font-weight-bold">{{currentUser.bornCZ}}</span>
+      </div>
+    </div>
+    <div footer class="{{mainContent.footerClass}}">
+      <button class="btn btn-header btn-primary" (click)="openDialog(dialog)" *ngIf="sideMenu.index === 0">Upravit profil</button>
+    </div>
+  </app-main-content>
+</div>
+
+<!-- Storage modal dialog -->
+<ng-template #dialog let-modal>
+  <div class="modal-header">
+	<i class="icon fas fa-user-edit h5"></i>
+    <h4 class="modal-title text-dark pl-2">Upravit uživatelský profil</h4>
+    <button type="button" class="close" (click)="modal.close()"><span aria-hidden="false">&times;</span></button>
+  </div>
+  <div class="modal-body">
+	  <div class="d-flex mb-4">
+      <span class="label">Jméno</span>
+      <div>
+        <input type="text" placeholder="Jméno" [(ngModel)]="editedUser.name" class="form-control" [ngClass]="{ 'is-invalid': submitted && editedUser.name === '' }"/>
+        <span *ngIf="submitted && editedUser.name === ''" class="d-block invalid-input">Zadejte jméno</span>
+      </div>
+    </div>
+    <div class="d-flex mb-4">
+      <span class="label">Příjmení</span>
+      <div>
+        <input type="text" placeholder="Příjmení" [(ngModel)]="editedUser.surname" class="form-control" [ngClass]="{ 'is-invalid': submitted && editedUser.surname === '' }"/>
+        <span *ngIf="submitted && editedUser.surname === ''" class="d-block invalid-input">Zadejte příjmení</span>
+      </div>
+    </div>
+    <div class="d-flex mb-4">
+      <span class="label">E-mail</span>
+      <div>
+        <input type="text" placeholder="E-mail" [(ngModel)]="editedUser.email" class="form-control" [ngClass]="{ 'is-invalid': submitted && editedUser.email === '' }"/>
+        <span *ngIf="submitted && editedUser.email === ''" class="d-block invalid-input">Zadejte e-mail</span>
+      </div>
+    </div>
+    <div class="d-flex mb-4">
+      <span class="label">Datum narození</span>
+      <div>
+        <app-date-picker #birthDate id="birth-date" [(date)]="editedUser.birthDate" [submitted]="submitted"></app-date-picker>
+        <span *ngIf="submitted && !birthDate.isValid" class="d-block invalid-input">Zadejte platné datum narození</span>
+      </div>
+    </div>
+    <div class="d-flex mb-4">
+      <span class="label">Heslo</span>
+      <div>
+        <input type="password" placeholder="Heslo" [(ngModel)]="editedUser.password" class="form-control" [ngClass]="{ 'is-invalid': submitted && editedUser.password.length < 6 }"/>
+        <span *ngIf="submitted && editedUser.password.length < 6" class="d-block invalid-input">Heslo musí obsahovat alespon 6 znaků</span>
+      </div>
+    </div>
+    <div class="d-flex">
+      <span class="label">Zopakovat heslo</span>
+      <div>
+        <input type="password" placeholder="Heslo" [(ngModel)]="editedUser.passwordRepeat" class="form-control" [ngClass]="{ 'is-invalid': submitted && (editedUser.passwordRepeat === '' || !passCheck) }"/>
+        <span *ngIf="submitted && editedUser.passwordRepeat === ''" class="d-block invalid-input">Zopakujte heslo pro kontrolu</span>
+        <span *ngIf="submitted && editedUser.passwordRepeat !== '' && !passCheck" class="d-block invalid-input">Zadaná hesla se neshodují</span>
+      </div>
+    </div>
+
+    <!-- required info -->
+    <span class="font-italic small float-right mt-3">* všechna pole jsou povinná</span>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn col-3 rounded m-auto btn-primary" (click)="onDialogSubmit(modal)">
+      <span class="text-white">Upravit</span>
+    </button>
+  </div>
+</ng-template>

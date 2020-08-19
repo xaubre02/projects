@@ -1,0 +1,34 @@
+<!-- Footer -->
+<footer *ngIf="(eshopPage && !allowEshop) || homePage" class="page-footer">
+  <div class="container-fluid text-center text-sm-left p-4 footer-body bg-dark">
+    <div class="row container mx-auto">
+      <div class="col-lg-4 text-center">
+        <h5 class="text-white">Pekárna AABF</h5>
+        <p>Máte nějaké otázky? Kontaktujte nás.</p>
+      </div>
+
+      <div class="col-lg-4 text-center mb-3">
+        <h5>
+          <a class="place" href="https://mapy.cz/zakladni?x=16.5727029&y=49.2140892&z=17&source=addr&id=8923438" target="_blank">
+            <i class="fas fa-map-marker-alt fa-footer-size"></i> Sídlo
+          </a>
+        </h5>
+        <span>Horova 1660/51</span><br>
+        <span>616 00, Brno-Žabovřesky</span><br>
+        <span>okres Brno-město</span><br>
+        <span>Jihomoravský kraj, Česko</span>
+      </div>
+
+      <div class="col-lg-4 text-center">
+        <div class="mb-3">
+          <h5><i class="fas fa-phone-square fa-footer-size"></i> Telefon</h5>
+          <span class="contact">+420 123 456 789</span>
+        </div>
+        <div>
+          <h5><i class="fas fa-envelope-square fa-footer-size"></i> Email</h5>
+          <a class="contact" href="mailto:truhlarstvizitajiri@seznam.cz">info@bakery.cz</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>

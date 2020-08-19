@@ -1,0 +1,16 @@
+.img-max-height {
+    height: 9.5rem;
+    max-height: 9.5rem;
+}
+@media (max-width: 992px) {
+    .img-max-height {
+        height: 12rem;
+        max-height: 12rem;
+    }
+}
+@media (max-width: 768px) {
+    .img-max-height {
+        height: 16rem;
+        max-height: 16rem;
+    }
+}

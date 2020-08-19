@@ -1,0 +1,18 @@
+.row {
+  height: 100vh!important;
+}
+
+form {
+	width: 400px;
+	border-radius: 14px 14px 14px 14px;
+	-webkit-box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
+	box-shadow: 0 30px 60px 0 rgba(0,0,0,0.3);
+	background-color: white;
+}
+
+input {
+	height: 50px;
+	font-size: 12pt;
+	-webkit-box-shadow: 0 2px 8px 0 rgba(0,0,0,0.2);
+	box-shadow: 0px 2px 8px 0px rgba(0,0,0,0.2);
+}

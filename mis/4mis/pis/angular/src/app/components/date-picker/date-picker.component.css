@@ -1,0 +1,16 @@
+input {
+  width: 20px !important;
+  -webkit-box-shadow: 0 0 0 0 rgba(0,0,0,0) !important;
+  box-shadow: 0 0 0 0 rgba(0,0,0,0) !important;
+}
+
+.input-group {
+  min-width: 155px !important;
+  max-width: 175px !important;
+  -webkit-box-shadow: 2px 2px 8px 0 rgba(0,0,0,0.2);
+  box-shadow: 2px 2px 8px 0 rgba(0,0,0,0.2);
+}
+
+button i {
+  font-size: 20px !important;
+}

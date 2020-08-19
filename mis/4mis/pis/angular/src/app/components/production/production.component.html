@@ -1,0 +1,616 @@
+<div *ngIf="!userIsAuthorized" class="row pt-4">
+  <h4>Nejste oprávněni zobrazit tuto stránku</h4>
+</div>
+
+<div *ngIf="userIsAuthorized" class="row pt-4">
+  <div class="col-lg-3">
+    <div class="sticky-top">
+      <app-side-menu #sideMenu [title]="'Možnosti'" [ignoreStorage]='true' [storageKey]="'ordersMenu'">
+        <div body>
+          <button class="{{sideMenu.buttonClass}}" (click)="sideMenu.setIndex(0)" [ngClass]="{'active': sideMenu.index === 0}">
+            <i class="icon fas fa-list-ul"></i>Výrobní plány
+          </button>
+          <button class="{{sideMenu.buttonClass}}" (click)="sideMenu.setIndex(1)" [ngClass]="{'active': sideMenu.index === 1}">
+            <i class="icon fas fa-list-ul"></i>Dnešní plán
+          </button>
+          <button *ngIf="userManager" class="{{sideMenu.buttonClass}}" (click)="openProposalPlanDialog(dialogProposal)">
+            <i class="icon fas fa-plus"></i>Vytvořit návrh výrobního plánu
+          </button>
+          <button *ngIf="userManager" class="{{sideMenu.buttonClass}}" (click)="openNewPlanDialog(dialogNewPlan)">
+            <i class="icon fas fa-plus"></i>Vytvořit výrobní plán ručně
+          </button>
+        </div>
+      </app-side-menu>
+    </div>
+  </div>
+
+  <div class="col-lg-9">
+    <app-main-content *ngIf="sideMenu.index === 0"
+      [noContent]="!productionPlanList.length" 
+      [noContentText]="'Nejsou dostupné žádné výrobní plány'"  
+      [loading]="loading">
+      <div header class="px-3 d-flex justify-content-between w-100">
+        <b class="d-block">Výrobní plány</b>
+        <button *ngIf="userManager" class="btn btn-header btn-primary" (click)="openProposalPlanDialog(dialogProposal)">Navrhnout plán</button>
+      </div>
+      <div body>
+        <div class="px-2" *ngIf="productionPlanList.length">
+          <a class="status text-primary ml-2" (click)="accordion.expandAll()">Rozbalit vše</a>
+          <a class="status text-primary ml-2" (click)="accordion.collapseAll()">Zabalit vše</a>
+        </div>
+        <ngb-accordion #accordion [destroyOnHide]="false">
+          <ngb-panel *ngFor="let plan of productionPlanList; trackBy: trackByPlan; let i = index; let last = last" 
+          [cardClass]="'accordion-class px-3 ' + (last ? '' : 'border-bottom')">
+            <ng-template ngbPanelHeader let-opened="opened">
+              <div class="d-flex align-items-center justify-content-between py-2">
+                <div class="d-flex align-items-center justify-content-between">
+                  <button ngbPanelToggle class="btn btn-link p-0 mr-2">
+                    <i class="fas fa-angle-{{opened ? 'down' : 'right'}}"></i>  
+                  </button>
+                  <div>
+                    <h6 class="m-0 text-dark font-weight-bold">Výrobní plán {{plan.planId}} {{!plan.accepted ? ' (pouze návrh)' : ''}}</h6>
+                    <h6 class="m-0 state">{{plan.productionDateFormattedCZ}}</h6>
+                  </div>
+                </div>
+                <div *ngIf="userManager && plan.isTodayOrLater" class="d-flex justify-content-between h-100">
+                  <i *ngIf="plan.notEnoughMaterials" class="fas fa-exclamation-circle fa-lg text-danger mr-3"
+                  ngbTooltip="Na skladě zřejmě není dostatek surovin pro tento výrobní plán" container="body"></i>
+
+                  <div class="dropdown my-auto">
+                    <button class="d-block btn-item btn btn-secondary" data-toggle="dropdown">Možnosti</button>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item text-primary" (click)="openEditPlanDialog(dialogEditPlan, i)">
+                        <i class="icon fas fa-cog text-primary"></i>
+                        Upravit
+                      </a>
+                    </div>
+                  </div>
+                </div>
+                <div *ngIf="userManager && !plan.isTodayOrLater" class="d-flex justify-content-between h-100">
+                  <span>Nelze upravit</span>
+                </div>
+              </div>
+            </ng-template>
+            <ng-template ngbPanelContent>
+              <div class="row">
+                <div class="col-md-4">
+                  <span>Datum:</span>
+                </div>
+                <div class="col-md-8">
+                  <span *ngIf="!plan.productionDate" class="font-weight-bold">Datum zatím nebylo určeno!</span>
+                  <span *ngIf="plan.productionDate" class="font-weight-bold">{{plan.productionDateFormattedCZ}}</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <span>Pečivo:</span>
+                </div>
+                <div class="col-md-8">
+                  <div *ngIf="!plan.items || !plan.items.length">
+                    <span class="font-weight-bold">Žádné položky</span>
+                  </div>
+                  <div *ngIf="plan.items?.length">
+                    <div *ngFor="let item of plan.items; let i = index">
+                      <span class="font-weight-bold">{{i+1}}) {{item.name}}</span>
+                      <ul class="mb-1">
+                        <li>
+                          <span class="min-width-100 d-inline-block">Počet kusů:</span>
+                          <span class="font-weight-bold">{{item.count}}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4">
+                  <span>Suroviny:</span>
+                </div>
+                <div class="col-md-8">
+                  <div *ngIf="!plan.materials || !plan.materials.length">
+                    <span class="font-weight-bold">Žádné položky</span>
+                  </div>
+                  <div *ngIf="plan.materials?.length">
+                    <div *ngFor="let material of plan.materials; let i = index" class="mb-1">
+                      <div class="font-weight-bold">{{i+1}}) {{material.name}} ({{material.amount | number:'1.2-2'}} kg)</div>
+                      <div *ngIf="!material.isEnough && plan.isTodayOrLater" class="ml-2 text-danger">
+                        * ve skladu aktuálně chybí {{material.diff | number:'1.2-2'}} kg
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-template>
+          </ngb-panel>
+        </ngb-accordion>
+      </div>
+    </app-main-content>
+
+    <app-main-content *ngIf="sideMenu.index === 1"
+      [noContent]="!todayPlan" 
+      [noContentText]="'Nebyl nalezen výrobní plán pro dnešní den'"  
+      [loading]="loading">
+      <div header class="px-3 d-flex justify-content-between w-100">
+        <b class="d-block">Výrobní plán pro dnešní den</b>
+        <button *ngIf="userManager" class="btn btn-header btn-primary" (click)="openEditTodayPlanDialog(dialogEditPlan)">Upravit plán</button>
+      </div>
+      <div body>
+        <div *ngIf="todayPlan" class="row">
+          <div class="col-md-3">
+            <span>ID plánu:</span>
+          </div>
+          <div class="col-md-9">
+            <span class="font-weight-bold">{{todayPlan.planId}}</span>
+          </div>
+        </div>
+        <div *ngIf="todayPlan" class="row">
+          <div class="col-md-3">
+            <span>Datum:</span>
+          </div>
+          <div class="col-md-9">
+            <span *ngIf="!todayPlan.productionDate" class="font-weight-bold">Datum zatím nebylo určeno!</span>
+            <span *ngIf="todayPlan.productionDate" class="font-weight-bold">{{todayPlan.productionDateFormattedCZ}}</span>
+          </div>
+        </div>
+        <div *ngIf="todayPlan" class="row">
+          <div class="col-md-3">
+            <span>Pečivo:</span>
+          </div>
+          <div class="col-md-9">
+            <div *ngIf="!todayPlan.items || !todayPlan.items.length">
+              <span class="font-weight-bold">Žádné položky</span>
+            </div>
+            <div *ngIf="todayPlan.items?.length">
+              <div *ngFor="let item of todayPlan.items; let i = index">
+                <span class="font-weight-bold">{{i+1}}) {{item.name}}</span>
+                <ul class="mb-1">
+                  <li>
+                    <span class="min-width-100 d-inline-block">Počet kusů:</span>
+                    <span class="font-weight-bold">{{item.count}}</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="todayPlan" class="row">
+          <div class="col-md-4">
+            <span>Suroviny:</span>
+          </div>
+          <div class="col-md-8">
+            <div *ngIf="!todayPlan.materials || !todayPlan.materials.length">
+              <span class="font-weight-bold">Žádné položky</span>
+            </div>
+            <div *ngIf="todayPlan.materials?.length">
+              <div *ngFor="let material of todayPlan.materials; let i = index" class="mb-1">
+                <div class="font-weight-bold">{{i+1}}) {{material.name}} ({{material.amount | number:'1.2-2'}} kg)</div>
+                <div *ngIf="!material.isEnough && todayPlan.isTodayOrLater" class="ml-2 text-danger">
+                  * ve skladu aktuálně chybí {{material.diff | number:'1.2-2'}} kg
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </app-main-content>
+  </div>
+</div>
+
+
+<!-- MODAL dialogs -->
+<!-- Propose production plan modal dialog -->
+<ng-template #dialogProposal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-dark">Vytvořit návrh výrobního plánu</h4>
+    <button type="button" class="close" (click)="closeProposalPlan(modal)">
+      <span aria-hidden="false">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="px-3">
+      <!-- Production date, min tomorrow -->
+      <div *ngIf="!loadingProposal" class="mt-3">
+        <div class="d-flex">
+          <span class="label text-nowrap">Datum plánu&nbsp;
+            <a class="badge badge-pill badge-primary text-center" href="javascript:void(0)"
+            [ngbPopover]="productionDatePopover" container="body" placement="bottom">?</a>
+            <ng-template #productionDatePopover>
+              Datum, pro něhož bude vytvořen návrh výrobního plánu.
+              Toto datum nemůže být zadáno pro minulost ani pro dnešní den.
+              Návrh bude proveden na základě objednávek, které mají být vyzvednuty následující den po zvoleném datu.
+            </ng-template>
+          </span>
+          <div>
+            <app-date-picker #productionDate 
+            [(date)]="proposalPlan.productionDateObject" 
+            [submitted]="submitted"
+            [tomorrowValidation]="true"
+            [startDate]="proposalPlan.minDate" 
+            [minDate]="proposalPlan.minDate" 
+            [maxDate]="proposalPlan.maxDate">
+            </app-date-picker>
+          </div>
+        </div>
+        <div *ngIf="submitted && !productionDate.isTomorrowOrLater" class="d-flex">
+          <span class="width-170 font-weight-bold">&nbsp;</span>
+          <div>
+            <span class="d-block invalid-input">Zadejte prosím platné datum.</span>
+            <span class="d-block invalid-input">Nejdříve {{proposalPlan.tomorrow | date: 'dd.MM.yyyy'}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="loadingProposal" class="w-100 text-center">
+        <div class="spinner-wrapper py-3">
+          <div class="spinner-border text-primary" style="width:3rem; height:3rem;" role="status">
+            <span class="sr-only"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- required info -->
+    <span class="font-italic small float-right mt-3">* všechna pole jsou povinná</span>
+  </div>
+
+  <div class="modal-footer">
+    <div class="d-flex justify-content-center w-100">
+      <button type="button" class="btn btn-success rounded mr-3" (click)="submitProposalPlan(modal, dialogEditPlan)">
+        <span class="text-white">Vytvořit návrh</span>
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+
+<!-- Update production plan modal dialog -->
+<ng-template #dialogEditPlan let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-dark">Upravit výrobní plán</h4>
+    <button type="button" class="close" (click)="closeEditPlan(modal)">
+      <span aria-hidden="false">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="px-3">
+      <!-- Production date, min tomorrow -->
+      <div class="mt-3">
+        <div class="d-flex">
+          <span class="width-170 font-weight-bold text-nowrap">Datum plánu&nbsp;
+            <a class="badge badge-pill badge-primary text-center" href="javascript:void(0)"
+            [ngbPopover]="productionDatePopover" container="body" placement="bottom">?</a>
+            <ng-template #productionDatePopover>
+              Toto datum nemůže být zadáno pro minulost ani pro datum, pro které výrobní plán již existuje.
+            </ng-template>
+          </span>
+          <div>
+            <app-date-picker #productionDate 
+            [(date)]="editPlan.productionDateObject" 
+            [submitted]="submitted"
+            [startDate]="editPlan.minDateToday" 
+            [minDate]="editPlan.minDateToday" 
+            [maxDate]="editPlan.maxDate">
+            </app-date-picker>
+          </div>
+        </div>
+        <div *ngIf="submitted && !productionDate.isValid" class="d-flex">
+          <span class="width-170 font-weight-bold">&nbsp;</span>
+          <div>
+            <span class="d-block invalid-input">Zadejte prosím platné datum.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- New item button -->
+      <div class="d-flex mt-3">
+        <div class="width-170 font-weight-bold my-1">Pečivo</div>
+        <button *ngIf="availableEditPlanPastry.length && editPlan.items.length < pastryList.length" 
+        class="btn btn-success btn-header my-1" (click)="editPlanAddPastry()">
+          Přidat pečivo
+        </button>
+      </div>
+      <!-- Items list managing -->
+      <div class="d-flex mt-2">
+        <i *ngIf="!pastryList.length" class="my-1 text-danger">Žádné pečivo není k dispozici</i>
+        <div *ngIf="pastryList.length" class="w-100">
+          <div *ngFor="let pastry of editPlan.items; let i = index" class="mb-2 pt-2 border-top">
+            <div class="d-flex justify-content-between mb-1">
+              <div class="width-170 mr-2">
+                <select *ngIf="pastry.pastryId === -1" class="form-control width-170 mr-1" 
+                [(ngModel)]="pastry.pastryId" (ngModelChange)="selectEditPlanItem(pastry.pastryId)">
+                  <option [ngValue]="-1">Zvolte pečivo</option>
+                  <option *ngFor="let avaiPastry of availableEditPlanPastry" [ngValue]="avaiPastry.pastryId">
+                    {{avaiPastry.name}}
+                  </option>
+                </select>
+                <div *ngIf="pastry.pastryId !== -1" class="my-auto font-weight-bold width-170">
+                  <span>{{(i + 1) + ')'}}&nbsp;</span>
+                  <span>{{pastry.name}}</span>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between w-100">
+                <div class="d-flex">
+                  <app-number-spinner [(value)]="pastry.count" [initValue]="pastry.count" class="m-0">
+                  </app-number-spinner>
+                  <span class="my-auto mr-2">Ks</span>
+                </div>
+                
+                <button class="btn btn-link p-0 my-auto" (click)="editPlanRemovePastry(i)" 
+                ngbTooltip="Odstranit položku" container="body">
+                  <i class="fas fa-times-circle text-danger"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="text-center">
+            <span *ngIf="submitted && editPlan.items.length === 0" class="d-block invalid-input">
+              Zvolte položky(pečivo) výrobního plánu
+            </span>
+            <span *ngIf="submitted && editPlan.items.length && !editPlan.gotItems" class="d-block invalid-input w-100">
+              Zadejte množství zvoleného pečiva
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- possible info about missing materials -->
+      <div *ngIf="editPlan.notEnoughMaterials" class="mt-3">
+        <div>
+          <span class="font-weight-bold">Chybející suroviny:</span>
+        </div>
+        <div *ngFor="let material of editPlan.materials" class="mb-1">
+          <div *ngIf="!material.isEnough" class="text-danger">
+            <strong class="text-danger">{{material.name}}</strong> - ve skladu aktuálně chybí {{material.diff | number:'1.2-2'}} kg
+          </div>
+        </div>
+      </div>
+      
+      <div *ngIf="!editPlan.accepted" class="mt-3">
+        <h6>Tento plán je zatím ve fáze návrhu.</h6>
+        <h6>Pokud ho chcete schválit, klikněte na tlačítko Pokračovat.</h6>
+      </div>
+
+      <!-- required info -->
+      <span class="font-italic small float-right mt-3">* všechna pole jsou povinná</span>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <div class="d-flex justify-content-center w-100">
+      <button type="button" class="btn btn-success rounded mr-3" (click)="submitEditPlan(modal, confirmEditPlanDialog)">
+        <span class="text-white">Pokračovat</span>
+      </button>
+      <button type="button" class="btn btn-outline-secondary rounded" (click)="clearEditPlan()">
+        <span>Vyčistit</span>
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Confirmation updating dialog -->
+<ng-template #confirmEditPlanDialog let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-dark">Potvrzení výrobního plánu</h4>
+    <button type="button" class="close" (click)="modal.dismiss()">
+      <span aria-hidden="false">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="px-3">
+      <div class="row">
+        <div class="col-md-4">
+          <span>Datum plánu:</span>
+        </div>
+        <div class="col-md-8">
+          <span *ngIf="!editPlan.productionDate" class="font-weight-bold">Datum zatím nebylo určeno!</span>
+          <span *ngIf="editPlan.productionDate" class="font-weight-bold">{{editPlan.productionDateFormattedCZ}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <span>Pečivo:</span>
+        </div>
+        <div class="col-md-8">
+          <div *ngIf="!editPlan.items || !editPlan.items.length">
+            <span class="font-weight-bold">Žádné položky</span>
+          </div>
+          <div *ngIf="editPlan.items?.length">
+            <div *ngFor="let item of editPlan.items; let i = index">
+              <span class="font-weight-bold">{{i+1}}) {{item.name}}</span>
+              <ul class="mb-1">
+                <li>
+                  <span class="min-width-100 d-inline-block">Počet kusů:</span>
+                  <span class="font-weight-bold">{{item.count}}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!editPlan.accepted" class="row mt-3">
+        <h6>Tento plán je zatím ve fáze návrhu.</h6>
+        <h6>Uložením změn bude výrobní plán schválen.</h6>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer d-flex justify-content-center">
+    <button type="button" class="btn btn-success mr-3" (click)="confirmEditPlan(modal)">
+      Uložit plán
+    </button>
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">
+      Zrušit
+    </button>
+  </div>
+</ng-template>
+
+
+<!-- Manual production plan creating modal dialog -->
+<ng-template #dialogNewPlan let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-dark">Vytvořit výrobní plán</h4>
+    <button type="button" class="close" (click)="closeNewPlan(modal)">
+      <span aria-hidden="false">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="px-3">
+      <!-- Production date, min tomorrow -->
+      <div class="mt-3">
+        <div class="d-flex">
+          <span class="width-170 font-weight-bold text-nowrap">Datum plánu&nbsp;
+            <a class="badge badge-pill badge-primary text-center" href="javascript:void(0)"
+            [ngbPopover]="productionDatePopover" container="body" placement="bottom">?</a>
+            <ng-template #productionDatePopover>
+              Toto datum nemůže být zadáno pro minulost ani pro dnešní den.
+            </ng-template>
+          </span>
+          <div>
+            <app-date-picker #productionDate 
+            [(date)]="newPlan.productionDateObject" 
+            [submitted]="submitted"
+            [tomorrowValidation]="true"
+            [startDate]="newPlan.minDate" 
+            [minDate]="newPlan.minDate" 
+            [maxDate]="newPlan.maxDate">
+            </app-date-picker>
+          </div>
+        </div>
+        <div *ngIf="submitted && !productionDate.isTomorrowOrLater" class="d-flex">
+          <span class="width-170 font-weight-bold">&nbsp;</span>
+          <div>
+            <span class="d-block invalid-input">Zadejte prosím platné datum.</span>
+            <span class="d-block invalid-input">Nejdříve {{newPlan.tomorrow | date: 'dd.MM.yyyy'}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- New item button -->
+      <div class="d-flex mt-3">
+        <div class="width-170 font-weight-bold my-1">Pečivo</div>
+        <button *ngIf="availableNewPlanPastry.length && newPlan.items.length < pastryList.length" 
+        class="btn btn-success btn-header my-1" (click)="newPlanAddPastry()">
+          Přidat pečivo
+        </button>
+      </div>
+      <!-- Items list managing -->
+      <div class="d-flex mt-2">
+        <i *ngIf="!pastryList.length" class="my-1 text-danger">Žádné pečivo není k dispozici</i>
+        <div *ngIf="pastryList.length" class="w-100">
+          <div *ngFor="let pastry of newPlan.items; let i = index" class="mb-2 pt-2 border-top">
+            <div class="d-flex justify-content-between mb-1">
+              
+              <div class="width-170 mr-2">
+                <select *ngIf="pastry.pastryId === -1" class="form-control width-170 mr-1" 
+                [(ngModel)]="pastry.pastryId" (ngModelChange)="selectNewPlanItem(pastry.pastryId)">
+                  <option [ngValue]="-1">Zvolte pečivo</option>
+                  <option *ngFor="let avaiPastry of availableNewPlanPastry" [ngValue]="avaiPastry.pastryId">
+                    {{avaiPastry.name}}
+                  </option>
+                </select>
+                <div *ngIf="pastry.pastryId !== -1" class="my-auto font-weight-bold width-170">
+                  <span>{{(i + 1) + ')'}}&nbsp;</span>
+                  <span>{{pastry.name}}</span>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between w-100">
+                <div class="d-flex">
+                  <app-number-spinner [(value)]="pastry.count" [initValue]="pastry.count" class="m-0">
+                  </app-number-spinner>
+                  <span class="my-auto mr-2">Ks</span>
+                </div>
+                
+                <button class="btn btn-link p-0 my-auto" (click)="newPlanRemovePastry(i)" 
+                ngbTooltip="Odstranit položku" container="body">
+                  <i class="fas fa-times-circle text-danger"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="text-center">
+            <span *ngIf="submitted && newPlan.items.length === 0" class="d-block invalid-input">
+              Zvolte položky(pečivo) výrobního plánu
+            </span>
+            <span *ngIf="submitted && newPlan.items.length && !newPlan.gotItems" class="d-block invalid-input w-100">
+              Zadejte množství zvoleného pečiva
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- required info -->
+      <span class="font-italic small float-right mt-3">* všechna pole jsou povinná</span>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <div class="d-flex justify-content-center w-100">
+      <button type="button" class="btn btn-success rounded mr-3" (click)="submitNewPlan(modal, confirmNewPlanDialog)">
+        <span class="text-white">Vytvořit návrh</span>
+      </button>
+      <button type="button" class="btn btn-outline-secondary rounded" (click)="clearNewPlan()">
+        <span>Vyčistit</span>
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- Confirmation creation dialog -->
+<ng-template #confirmNewPlanDialog let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title text-dark">Potvrzení výrobního plánu</h4>
+    <button type="button" class="close" (click)="modal.dismiss()">
+      <span aria-hidden="false">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="px-3">
+      <div class="row">
+        <div class="col-md-4">
+          <span>Datum plánu:</span>
+        </div>
+        <div class="col-md-8">
+          <span *ngIf="!newPlan.productionDate" class="font-weight-bold">Datum zatím nebylo určeno!</span>
+          <span *ngIf="newPlan.productionDate" class="font-weight-bold">{{newPlan.productionDateFormattedCZ}}</span>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4">
+          <span>Pečivo:</span>
+        </div>
+        <div class="col-md-8">
+          <div *ngIf="!newPlan.items || !newPlan.items.length">
+            <span class="font-weight-bold">Žádné položky</span>
+          </div>
+          <div *ngIf="newPlan.items?.length">
+            <div *ngFor="let item of newPlan.items; let i = index">
+              <span class="font-weight-bold">{{i+1}}) {{item.name}}</span>
+              <ul class="mb-1">
+                <li>
+                  <span class="min-width-100 d-inline-block">Počet kusů:</span>
+                  <span class="font-weight-bold">{{item.count}}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer d-flex justify-content-center">
+    <button type="button" class="btn btn-success mr-3" (click)="confirmNewPlan(modal)">
+      Vytvořit plán
+    </button>
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">
+      Zrušit
+    </button>
+  </div>
+</ng-template>
